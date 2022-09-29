@@ -273,7 +273,7 @@ TextureImporter:
       213: -8800213606716764623
     second: T_LoadingIcon_SpriteSheet_89
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -294,6 +294,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -332,6 +333,7 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 0
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -347,6 +349,30 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -2260,6 +2286,97 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      T_LoadingIcon_SpriteSheet_48: -2863651730627634235
+      T_LoadingIcon_SpriteSheet_77: -4604729184749725412
+      T_LoadingIcon_SpriteSheet_44: 806223501790629297
+      T_LoadingIcon_SpriteSheet_59: -5424392519473359113
+      T_LoadingIcon_SpriteSheet_84: -2306179770916522261
+      T_LoadingIcon_SpriteSheet_3: -7526665497191707355
+      T_LoadingIcon_SpriteSheet_29: -3099189465316615449
+      T_LoadingIcon_SpriteSheet_82: -1465617775883193934
+      T_LoadingIcon_SpriteSheet_28: -7287513905070294030
+      T_LoadingIcon_SpriteSheet_41: 1142186450727334177
+      T_LoadingIcon_SpriteSheet_50: -5208443809225161054
+      T_LoadingIcon_SpriteSheet_21: 6023952540153821418
+      T_LoadingIcon_SpriteSheet_66: -3080583735439998698
+      T_LoadingIcon_SpriteSheet_34: -7856138272228427946
+      T_LoadingIcon_SpriteSheet_54: 5366120962869587694
+      T_LoadingIcon_SpriteSheet_62: 1498388108754655816
+      T_LoadingIcon_SpriteSheet_88: -5883856371614323713
+      T_LoadingIcon_SpriteSheet_11: 814226715985934060
+      T_LoadingIcon_SpriteSheet_55: 3179400901828949555
+      T_LoadingIcon_SpriteSheet_72: -6732372242370528861
+      T_LoadingIcon_SpriteSheet_7: 216815788312450993
+      T_LoadingIcon_SpriteSheet_45: 2330196412246569541
+      T_LoadingIcon_SpriteSheet_57: -6935331542927286826
+      T_LoadingIcon_SpriteSheet_37: -3511451740462633175
+      T_LoadingIcon_SpriteSheet_76: -2861918640440049307
+      T_LoadingIcon_SpriteSheet_78: -8112589572385162924
+      T_LoadingIcon_SpriteSheet_26: 4295502719275931312
+      T_LoadingIcon_SpriteSheet_16: 214186633665233540
+      T_LoadingIcon_SpriteSheet_64: 7155600639189799790
+      T_LoadingIcon_SpriteSheet_32: -8826797969650873575
+      T_LoadingIcon_SpriteSheet_51: 361488591227358143
+      T_LoadingIcon_SpriteSheet_68: 4873060312490331600
+      T_LoadingIcon_SpriteSheet_5: -6493697096653755055
+      T_LoadingIcon_SpriteSheet_10: -5855124285737600021
+      T_LoadingIcon_SpriteSheet_53: -548954828897626507
+      T_LoadingIcon_SpriteSheet_63: -147144448703439728
+      T_LoadingIcon_SpriteSheet_47: -2899169531465838149
+      T_LoadingIcon_SpriteSheet_81: -860636212689417052
+      T_LoadingIcon_SpriteSheet_6: 3165348621200415635
+      T_LoadingIcon_SpriteSheet_15: -6526089651497408234
+      T_LoadingIcon_SpriteSheet_13: 4812216990625713555
+      T_LoadingIcon_SpriteSheet_33: -7162914553100448509
+      T_LoadingIcon_SpriteSheet_46: -623676268232351403
+      T_LoadingIcon_SpriteSheet_38: 9188427250558682944
+      T_LoadingIcon_SpriteSheet_89: -8800213606716764623
+      T_LoadingIcon_SpriteSheet_80: -3663759776964440513
+      T_LoadingIcon_SpriteSheet_58: -5200622511933253953
+      T_LoadingIcon_SpriteSheet_9: 2306756174992783587
+      T_LoadingIcon_SpriteSheet_83: -3117990805661124320
+      T_LoadingIcon_SpriteSheet_20: -316547963210170352
+      T_LoadingIcon_SpriteSheet_65: -8486693620003688301
+      T_LoadingIcon_SpriteSheet_73: 8389052656485839083
+      T_LoadingIcon_SpriteSheet_67: -2937297269920419511
+      T_LoadingIcon_SpriteSheet_70: 8101802707591017712
+      T_LoadingIcon_SpriteSheet_71: 5212226082232385247
+      T_LoadingIcon_SpriteSheet_2: -2550416446192002152
+      T_LoadingIcon_SpriteSheet_0: -8583815681720943508
+      T_LoadingIcon_SpriteSheet_22: -4957061864432740858
+      T_LoadingIcon_SpriteSheet_25: -2975005023190805173
+      T_LoadingIcon_SpriteSheet_36: -901424164341411430
+      T_LoadingIcon_SpriteSheet_35: -168356228096604402
+      T_LoadingIcon_SpriteSheet_23: 3107550796397342686
+      T_LoadingIcon_SpriteSheet_40: 5048395288848986106
+      T_LoadingIcon_SpriteSheet_8: -5360234325491891657
+      T_LoadingIcon_SpriteSheet_87: 5575376292677882510
+      T_LoadingIcon_SpriteSheet_18: -5254981007479058021
+      T_LoadingIcon_SpriteSheet_27: 3380358154069700135
+      T_LoadingIcon_SpriteSheet_60: -3804949543863858341
+      T_LoadingIcon_SpriteSheet_52: 3261151037601488808
+      T_LoadingIcon_SpriteSheet_79: 483182620118822244
+      T_LoadingIcon_SpriteSheet_85: 858776336478401200
+      T_LoadingIcon_SpriteSheet_61: -5607930961020473811
+      T_LoadingIcon_SpriteSheet_19: 4793895282366468857
+      T_LoadingIcon_SpriteSheet_12: 4498163857179781263
+      T_LoadingIcon_SpriteSheet_1: 9167264411951890301
+      T_LoadingIcon_SpriteSheet_69: -876210471759849637
+      T_LoadingIcon_SpriteSheet_30: -1301346954785840145
+      T_LoadingIcon_SpriteSheet_49: 628428310621368562
+      T_LoadingIcon_SpriteSheet_74: 1172092333769653619
+      T_LoadingIcon_SpriteSheet_14: -8534175772208080593
+      T_LoadingIcon_SpriteSheet_17: 2582393251421198919
+      T_LoadingIcon_SpriteSheet_42: 3287536356141847209
+      T_LoadingIcon_SpriteSheet_4: 4558991274990252155
+      T_LoadingIcon_SpriteSheet_31: 3073114988190841959
+      T_LoadingIcon_SpriteSheet_56: 773398264037261915
+      T_LoadingIcon_SpriteSheet_86: 3178862717109795412
+      T_LoadingIcon_SpriteSheet_43: 8808047112006175335
+      T_LoadingIcon_SpriteSheet_39: -4168661293050635400
+      T_LoadingIcon_SpriteSheet_75: -8699411296454667945
+      T_LoadingIcon_SpriteSheet_24: -4885976327427366415
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
