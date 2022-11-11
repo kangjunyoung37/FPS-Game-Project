@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b15febc689b01a4e91b68556be704c7, type: 3}
+  m_Name: SO_Feel_Item
+  m_EditorClassIdentifier: 
+  standing:
+    offset: {fileID: 11400000, guid: 397ee418e858b504e92ecde51c719b26, type: 2}
+    swayData: {fileID: 11400000, guid: 9bbd31b2c12edb347a8684ecedd711e1, type: 2}
+    jumpingCurves: {fileID: 11400000, guid: 57dd41b1b45ec974c93a8052b0c59f5c, type: 2}
+    fallingCurves: {fileID: 11400000, guid: 1f2cdc5241688514ba24e826fe0769ea, type: 2}
+    landingCurves: {fileID: 11400000, guid: fdc36dc7f0ba8ec4aba25a0414235c1a, type: 2}
+  crouching:
+    offset: {fileID: 11400000, guid: 6485a6b2d9d52fa42ae5b90091ba13a3, type: 2}
+    swayData: {fileID: 11400000, guid: 9bbd31b2c12edb347a8684ecedd711e1, type: 2}
+    jumpingCurves: {fileID: 11400000, guid: 57dd41b1b45ec974c93a8052b0c59f5c, type: 2}
+    fallingCurves: {fileID: 11400000, guid: 1f2cdc5241688514ba24e826fe0769ea, type: 2}
+    landingCurves: {fileID: 11400000, guid: fdc36dc7f0ba8ec4aba25a0414235c1a, type: 2}
+  aiming:
+    offset: {fileID: 11400000, guid: 01a3af08e20f1564d8c2620c5e0f16dd, type: 2}
+    swayData: {fileID: 11400000, guid: eea0df8ccf3e98145b1969394c41b327, type: 2}
+    jumpingCurves: {fileID: 11400000, guid: 57dd41b1b45ec974c93a8052b0c59f5c, type: 2}
+    fallingCurves: {fileID: 11400000, guid: 1f2cdc5241688514ba24e826fe0769ea, type: 2}
+    landingCurves: {fileID: 11400000, guid: fdc36dc7f0ba8ec4aba25a0414235c1a, type: 2}
+  running:
+    offset: {fileID: 11400000, guid: 8f29cef781f7aed4ea3d713dbab22bd3, type: 2}
+    swayData: {fileID: 11400000, guid: 9bbd31b2c12edb347a8684ecedd711e1, type: 2}
+    jumpingCurves: {fileID: 11400000, guid: 57dd41b1b45ec974c93a8052b0c59f5c, type: 2}
+    fallingCurves: {fileID: 11400000, guid: 1f2cdc5241688514ba24e826fe0769ea, type: 2}
+    landingCurves: {fileID: 11400000, guid: fdc36dc7f0ba8ec4aba25a0414235c1a, type: 2}

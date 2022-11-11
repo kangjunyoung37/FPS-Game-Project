@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d59716992711c449915846832f07646, type: 3}
+  m_Name: SO_SD_Aiming
+  m_EditorClassIdentifier: 
+  look: {fileID: 11400000, guid: 20aab85d107f2634282d9d269d30b348, type: 2}
+  movement: {fileID: 11400000, guid: 104a3270ffcab484db81ca39bfdea73a, type: 2}
+  springSettings:
+    damping: 16
+    stiffness: 165
+    mass: 1
+    speed: 1
