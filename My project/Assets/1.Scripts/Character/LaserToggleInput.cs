@@ -18,6 +18,13 @@ public class LaserToggleInput : MonoBehaviour
     [SerializeField, NotNull]
     private InventoryBehaviour inventoryBehaviour;
 
+    [Tooltip("캐릭터전용 오디오 소스")]
+    [SerializeField, NotNull]
+    private AudioSource audioSorce;
+
+    [Tooltip("오디오 클립")]
+    [SerializeField, NotNull]
+    private AudioClip audioClip;
     #endregion
 
     #region FIEDLS
@@ -41,6 +48,10 @@ public class LaserToggleInput : MonoBehaviour
 
     #region UNITY
 
+    private void Awake()
+    {
+        audioSorce.clip = audioClip;      
+    }
 
     private void Update()
     {
@@ -103,6 +114,7 @@ public class LaserToggleInput : MonoBehaviour
         {
             case { phase: InputActionPhase.Performed }:
                 Toggle();
+
                 break;
         }
     }
@@ -113,6 +125,7 @@ public class LaserToggleInput : MonoBehaviour
     private void Toggle()
     {
         laserBehaviour.Toggle();
+        audioSorce.Play();
     }
     #endregion
 }
