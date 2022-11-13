@@ -12,6 +12,12 @@ public class Movement : MovementBehaviour
 {
     #region FIELDS SERIALIZED
 
+    [Title(label:"FIELD")]
+
+    [Tooltip("TP캐릭터의 애니메이터 컨트롤러")]
+    [SerializeField , NotNull]
+    private Animator TPAnimatorController;
+
     [Title(label: "Acceleration")]
 
     [Tooltip("캐릭터의 속도가 얼마나 빠르게 증가하는지")]
@@ -112,6 +118,7 @@ public class Movement : MovementBehaviour
     [SerializeField]
     private float rigidbodyPushForce = 1.0f;
 
+   
 
     #endregion
 
@@ -158,6 +165,8 @@ public class Movement : MovementBehaviour
     /// </summary>
     private float lastJumpTime;
 
+   
+
     #endregion
 
     #region UNITY FUNCTIONS
@@ -194,7 +203,8 @@ public class Movement : MovementBehaviour
 
         wasGrounded = isGrounded;
 
-    }
+        TPAnimatorController.SetBool("Jumping", jumping);
+  }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -229,17 +239,22 @@ public class Movement : MovementBehaviour
 
         else
         {
-            if (playerCharacter.IsAiming())
-                desiredDirection *= speedAiming;
-
+            if (crouching)
+                desiredDirection *= speedCrouching;
             else
-            {
-                //걷는 속도를 곱합니다.
-                desiredDirection *= speedWalking;
-                //양옆으로 가는 배율값을 곱합니다. 옆으로 이동하는 느낌을 더 자연스럽게 할 수 있습니다.
-                desiredDirection.x *= walkingMultiplierSideways;
-                //인풋값이 0보다 크다면 앞으로 아니면 뒤로
-                desiredDirection.z *= (frameInput.y > 0 ? walkingMultiplierForward : walkingMultiplierBackwards);
+            {   
+                if (playerCharacter.IsAiming())
+                    desiredDirection *= speedAiming;
+
+                else
+                {
+                    //걷는 속도를 곱합니다.
+                    desiredDirection *= speedWalking;
+                    //양옆으로 가는 배율값을 곱합니다. 옆으로 이동하는 느낌을 더 자연스럽게 할 수 있습니다.
+                    desiredDirection.x *= walkingMultiplierSideways;
+                    //인풋값이 0보다 크다면 앞으로 아니면 뒤로
+                    desiredDirection.z *= (frameInput.y > 0 ? walkingMultiplierForward : walkingMultiplierBackwards);
+                }
             }
         }
         //월드 방향벡터로 변환
