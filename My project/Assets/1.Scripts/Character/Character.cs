@@ -1,3 +1,4 @@
+using InfimaGames.LowPolyShooterPack;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// 주요 캐릭터의 구성요소
 /// </summary>
-[RequireComponent(typeof(CharacterKinematics))]
+[RequireComponent(typeof(CharacterKinematicss))]
 public class Character : CharacterBehaviour
 {
     #region FIELDS SERIALIZED
@@ -17,6 +18,10 @@ public class Character : CharacterBehaviour
     [SerializeField]
     private LowerWeapon lowerWeapon;
 
+    [Tooltip("캐릭터의 movement 컴포넌트")]
+    [SerializeField]
+    private MovementBehaviour movementBehaviour;
+    
     [Title(label: "Inventory")]
 
     [Tooltip("게임이 시작될 때 장착될 무기 index")]
@@ -84,8 +89,14 @@ public class Character : CharacterBehaviour
     private float aimingSpeedMultiplier = 1.0f;
 
     [Title(label:"Character Animator")]
+
+    [Tooltip("FP캐릭터의 애니메이터")]
     [SerializeField]
     private Animator characterAnimator;
+
+    [Tooltip("TP캐릭터의 애니메이터")]
+    [SerializeField]
+    private Animator TPcharacterAnimator;
 
     [Title(label: "Field Of View")]
 
@@ -120,6 +131,16 @@ public class Character : CharacterBehaviour
     [Tooltip("true인 경우 aiming input이 입력되고 있는 동안 활성화 됩니다.")]
     [SerializeField]
     private bool holdToAim = true;
+
+    [Title(label: "Drop Magazine")]
+
+    [Tooltip("캐릭터가 가지고 있는 무기의 탄창")]
+    [SerializeField]
+    private Transform magazineTransform;
+
+    [Tooltip("탄창 프리펩")]
+    [SerializeField]
+    private GameObject prefabMagazine;
 
     #endregion
 
@@ -159,16 +180,26 @@ public class Character : CharacterBehaviour
     /// Holster Layer 인덱스, holster 애니메이션을 재생하는데 유용합니다.
     /// </summary>
     private int layerHolster;
-
     /// <summary>
     /// Actions Layer 인덱스, 재장전같은 action을 재생하는데 유용합니다.
     /// </summary>
     private int layerActions;
 
     /// <summary>
-    /// 이동관련 컴포넌트
+    /// TP캐릭터의 레이어 인덱스 발사 애니메이션 같은 것을 재생하는데 유용합니다.
     /// </summary>
-    private MovementBehaviour movementBehaviour;
+    private int TPlayerOverlay;
+
+    /// <summary>
+    /// TP캐릭터의 레이어 인덱스, holster 애니메이션을 재생하는데 유용합니다.
+    /// </summary>
+    private int TPlayerHolster;
+
+    /// <summary>
+    /// TP캐릭터의 레이어 인덱스, 재장전 같은 action을 재생하는데 유용합니다.
+    /// </summary>
+    private int TPlayerActions; 
+ 
 
     /// <summary>
     /// 현재 장착된 무기
@@ -275,6 +306,16 @@ public class Character : CharacterBehaviour
     /// </summary>
     private int shotsFired;
 
+    /// <summary>
+    /// 탄창의 MeshFilter
+    /// </summary>
+    private MeshFilter meshFilter;
+
+    /// <summary>
+    /// 탄창의 MeshRender
+    /// </summary>
+    private MeshRenderer meshRenderer;
+
     #endregion
 
     #region UNITY
@@ -291,8 +332,12 @@ public class Character : CharacterBehaviour
         #endregion
 
         //캐싱
-        movementBehaviour = GetComponent<MovementBehaviour>();
+        //movementBehaviour = GetComponent<MovementBehaviour>();
 
+        //캐싱
+        meshFilter = magazineTransform.GetComponent<MeshFilter>();
+        meshRenderer = magazineTransform.GetComponent<MeshRenderer>();
+        
         //인벤토리 초기화
         inventory.Init(weaponIndexEquippedAtStart);
 
@@ -313,6 +358,9 @@ public class Character : CharacterBehaviour
         layerHolster = characterAnimator.GetLayerIndex("Layer Holster");
         layerActions = characterAnimator.GetLayerIndex("Layer Actions");
         layerOverlay = characterAnimator.GetLayerIndex("Layer Overlay");
+        TPlayerHolster = TPcharacterAnimator.GetLayerIndex("Layer Holster");
+        TPlayerActions = TPcharacterAnimator.GetLayerIndex("Layer Actions");
+        TPlayerOverlay = TPcharacterAnimator.GetLayerIndex("Layer Overlay");
     }
 
     protected override void Update()
@@ -347,6 +395,7 @@ public class Character : CharacterBehaviour
                 shotsFired = 0;
             }
         }
+   
         //애니메이터 업데이트
         UpdateAnimator();
 
@@ -482,6 +531,23 @@ public class Character : CharacterBehaviour
     /// </summary>
     public override bool isHoldingButtonFire() => holdingButtonFire;
 
+    public override void DropMagazine(bool drop = true)
+    {
+        magazineTransform.gameObject.SetActive(!drop);
+
+        if (!drop)
+            return;
+
+        //새로운 탄창 생성
+        GameObject spawnedMagazine = Instantiate(prefabMagazine, magazineTransform.position, magazineTransform.rotation);
+
+        spawnedMagazine.GetComponent<MeshRenderer>().sharedMaterials = meshRenderer.sharedMaterials;
+
+        spawnedMagazine.GetComponent<MeshFilter>().sharedMesh = meshFilter.sharedMesh;
+
+        Destroy(spawnedMagazine, 5.0f);
+    }
+
     #endregion
 
     #region METHODS
@@ -518,7 +584,7 @@ public class Character : CharacterBehaviour
         //캐릭터가 이동하는 애니메이션을 얼마나 적용해야하는지 
         float movementValue = Mathf.Clamp01(Mathf.Abs(axisMovement.x) + Mathf.Abs(axisMovement.y));
         characterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
-
+        TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
         //조준하는 스피드
         characterAnimator.SetFloat(AHashes.AimingSpeedMultiplier, aimingSpeedMultiplier);
 
@@ -527,12 +593,14 @@ public class Character : CharacterBehaviour
 
         //수평 움직임 
         characterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
-
+        TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
         //수직 움직임
         characterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
 
         //조준값을 보간을 이용하여 업데이트
         characterAnimator.SetFloat(AHashes.AimingAlpha, Convert.ToSingle(aiming), dampTimeAiming, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.AimingAlpha, Convert.ToSingle(aiming), dampTimeAiming, Time.deltaTime);
 
         //이동 재생 속도를 설정합니다.
         const string playRateLocomotionBool = "Play Rate Locomotion";
@@ -545,15 +613,20 @@ public class Character : CharacterBehaviour
         characterAnimator.SetFloat(AHashes.PlayRateLocomotionSideways, movementBehaviour.GetMultiplierSideways(), 0.2f, Time.deltaTime);
         characterAnimator.SetFloat(AHashes.PlayRateLocomotionBackwards, movementBehaviour.GetMultiplierBackwards(), 0.2f, Time.deltaTime);
 
+        TPcharacterAnimator.SetFloat(AHashes.PlayRateLocomotionForward, movementBehaviour.GetMultiplierForward(), 0.2f, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.PlayRateLocomotionSideways, movementBehaviour.GetMultiplierSideways(), 0.2f, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.PlayRateLocomotionBackwards, movementBehaviour.GetMultiplierBackwards(), 0.2f, Time.deltaTime);
         #endregion
 
         //조준 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Aim, aiming);
+        TPcharacterAnimator.SetBool(AHashes.Aim, aiming);
         //달리기 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Running, running);
+        TPcharacterAnimator.SetBool(AHashes.Running, running);
         //웅크리기 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
-
+        TPcharacterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
     }
 
     /// <summary>
@@ -565,6 +638,7 @@ public class Character : CharacterBehaviour
         inspecting = true;
         //재생
         characterAnimator.CrossFade("Inspect", 0.0f, layerActions, 0);
+        
     }
 
     /// <summary>
@@ -583,6 +657,7 @@ public class Character : CharacterBehaviour
         //발사 애니메이션 재생
         const string stateName = "Fire";
         characterAnimator.CrossFade(stateName, 0.05f, layerOverlay, 0);
+        TPcharacterAnimator.CrossFade(stateName, 0.05f, TPlayerOverlay, 0);
 
         //탄약이 있는 경우 볼트 액션 애니메이션을 재생합니다.
         if (equippedWeapon.IsBoltAction() && equippedWeapon.HasAmmunition())
@@ -602,10 +677,11 @@ public class Character : CharacterBehaviour
         string stateName = equippedWeapon.HasCycledReload() ? "Reload Open" : (equippedWeapon.HasAmmunition() ? "Reload" : "Reload Empty");
         //플레이
         characterAnimator.Play(stateName, layerActions, 0.0f);
-
+        TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
         #endregion
 
         characterAnimator.SetBool(AHashes.Reloading, reloading = true);
+        TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
 
         equippedWeapon.Reload();
     }
@@ -640,7 +716,7 @@ public class Character : CharacterBehaviour
         SetHolstered(false);
 
         characterAnimator.Play("Unholster", layerHolster, 0);
-
+        TPcharacterAnimator.Play("Unholster", TPlayerHolster, 0);
         //새로운 장비 장착
         inventory.Equip(index);
 
@@ -679,6 +755,7 @@ public class Character : CharacterBehaviour
         lastShotTime = Time.time;
         //재생하기
         characterAnimator.CrossFade("Fire Empty", 0.05f, layerOverlay, 0);
+        TPcharacterAnimator.CrossFade("Fire Empty", 0.05f, layerOverlay, 0);
     }
 
     /// <summary>
@@ -703,6 +780,9 @@ public class Character : CharacterBehaviour
         //애니메이션 재생
         characterAnimator.CrossFade("Grenade Throw", 0.15f, characterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         characterAnimator.CrossFade("Grenade Throw", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
+        TPcharacterAnimator.CrossFade("Grenade Throw", 0.15f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
+        TPcharacterAnimator.CrossFade("Grenade Throw", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
+
 
     }
 
@@ -716,7 +796,9 @@ public class Character : CharacterBehaviour
         
         //애니메이션 재생
         characterAnimator.CrossFade("Knife Attack", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
-        characterAnimator.CrossFade("Knife Attack", 0.05f, characterAnimator.GetLayerIndex("Layer Actions arm Right"), 0.0f);
+        characterAnimator.CrossFade("Knife Attack", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
+        TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
+        TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
 
     }
     /// <summary>
@@ -727,6 +809,7 @@ public class Character : CharacterBehaviour
     {
         //상태 업데이트
         characterAnimator.SetBool(AHashes.Bolt, bolting = value);
+        TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
     }
 
     /// <summary>
@@ -738,6 +821,7 @@ public class Character : CharacterBehaviour
 
         const string boolName = "Holstered";
         characterAnimator.SetBool(boolName, holstered);
+        TPcharacterAnimator.SetBool(boolName, holstered);
     }
     #endregion
 
