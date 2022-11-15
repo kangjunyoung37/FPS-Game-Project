@@ -17,6 +17,12 @@ public class LeaningInput : MonoBehaviour
     [SerializeField, NotNull]
     private Animator characterAnimater;
 
+    
+    [SerializeField]
+    private Transform spineTransform;
+
+    [SerializeField]
+    private Transform LenaingTransform;
     #endregion
 
     #region FIELDS
@@ -31,9 +37,19 @@ public class LeaningInput : MonoBehaviour
     /// </summary>
     private bool isLeaning;
 
+
     #endregion
 
     #region METHODS
+
+    private void LateUpdate()
+    {
+       
+        Quaternion leaning = Quaternion.Euler(spineTransform.transform.localRotation.x, -LenaingTransform.eulerAngles.z * 2.0f , spineTransform.transform.localRotation.z);
+        spineTransform.transform.localRotation = leaning;
+        Debug.Log($"{leaningInput}");
+        
+    }
 
     private void Update()
     {
@@ -42,7 +58,10 @@ public class LeaningInput : MonoBehaviour
         
         characterAnimater.SetFloat(AHashes.LeaningInput, leaningInput);
         characterAnimater.SetBool(AHashes.Leaning, isLeaning);
+
+
     }
+
 
     public void Lean(InputAction.CallbackContext context)
     {
@@ -57,6 +76,8 @@ public class LeaningInput : MonoBehaviour
         }
 
         leaningInput = context.ReadValue<float>();
+
+
 
     }
 
