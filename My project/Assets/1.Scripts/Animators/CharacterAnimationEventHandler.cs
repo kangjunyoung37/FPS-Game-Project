@@ -137,5 +137,11 @@ public class CharacterAnimationEventHandler : MonoBehaviour
             playerCharacter.SetSlideBack(back);
     }
 
+    private void OnDropMagazine(int drop = 0)
+    {
+        if (playerCharacter != null)
+            playerCharacter.DropMagazine(drop == 0);
+    }
+
     #endregion
 }
