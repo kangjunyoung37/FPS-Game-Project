@@ -37,7 +37,7 @@ public class LeaningInput : MonoBehaviour
     /// </summary>
     private bool isLeaning;
 
-
+    private float leaningnum = 0.0f;
     #endregion
 
     #region METHODS
@@ -45,10 +45,23 @@ public class LeaningInput : MonoBehaviour
     private void LateUpdate()
     {
        
-        Quaternion leaning = Quaternion.Euler(spineTransform.transform.localRotation.x, -LenaingTransform.eulerAngles.z * 2.0f , spineTransform.transform.localRotation.z);
+        if(leaningInput == 1.0f)
+        {
+            leaningnum = Mathf.Lerp(leaningnum, 30.0f, Time.deltaTime * 20f);
+        }
+        else if(leaningInput == -1.0f)
+        {
+            leaningnum = Mathf.Lerp(leaningnum, -35.0f, Time.deltaTime * 20f);
+        }
+        else
+        {
+            leaningnum = Mathf.Lerp(leaningnum, 0.0f, Time.deltaTime * 20f);
+        }
+
+        Quaternion leaning = Quaternion.Euler(spineTransform.transform.localRotation.x, leaningnum, spineTransform.transform.localRotation.z);
         spineTransform.transform.localRotation = leaning;
-        Debug.Log($"{leaningInput}");
         
+   
     }
 
     private void Update()
