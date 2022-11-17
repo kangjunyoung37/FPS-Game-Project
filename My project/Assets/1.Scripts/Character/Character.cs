@@ -1,4 +1,5 @@
 using InfimaGames.LowPolyShooterPack;
+using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -316,6 +317,8 @@ public class Character : CharacterBehaviour
     /// </summary>
     private MeshRenderer meshRenderer;
 
+    private AimIK aimik;
+   
     #endregion
 
     #region UNITY
@@ -337,7 +340,7 @@ public class Character : CharacterBehaviour
         //캐싱
         meshFilter = magazineTransform.GetComponent<MeshFilter>();
         meshRenderer = magazineTransform.GetComponent<MeshRenderer>();
-        
+        aimik = TPcharacterAnimator.transform.GetComponent<AimIK>();
         //인벤토리 초기화
         inventory.Init(weaponIndexEquippedAtStart);
 
@@ -367,7 +370,16 @@ public class Character : CharacterBehaviour
     {
         aiming = holdingButtonAim && CanAim();
         running = holdingButtonRun && CanRun();
-
+        if(aimik == null)
+        {
+            Debug.LogError("에러");
+        }
+        else
+        {
+            IKSolver solver = aimik.GetIKSolver();
+            
+        }
+        
         switch(aiming)
         {
             //시작
@@ -638,7 +650,7 @@ public class Character : CharacterBehaviour
         inspecting = true;
         //재생
         characterAnimator.CrossFade("Inspect", 0.0f, layerActions, 0);
-        
+        TPcharacterAnimator.CrossFade("Inspect", 0.0f, TPlayerActions, 0);
     }
 
     /// <summary>
