@@ -1,9 +1,11 @@
 using InfimaGames.LowPolyShooterPack;
+using InfimaGames.LowPolyShooterPack.Interface;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.TextCore.Text;
 
 /// <summary>
 /// 주요 캐릭터의 구성요소
@@ -318,7 +320,13 @@ public class Character : CharacterBehaviour
     private MeshRenderer meshRenderer;
 
     private AimIK aimik;
-   
+
+    private Vector3 CharacterForward;
+
+    [NonSerialized]
+    public bool ishostering = false;
+
+    private TPWeapon TPEquipWeapon;
     #endregion
 
     #region UNITY
@@ -343,7 +351,7 @@ public class Character : CharacterBehaviour
         aimik = TPcharacterAnimator.transform.GetComponent<AimIK>();
         //인벤토리 초기화
         inventory.Init(weaponIndexEquippedAtStart);
-
+        
         //새로 고치기
         RefreshWeaponSetup();
 
@@ -376,6 +384,7 @@ public class Character : CharacterBehaviour
         }
         else
         {
+            
             IKSolver solver = aimik.GetIKSolver();
             
         }
@@ -427,6 +436,38 @@ public class Character : CharacterBehaviour
 
         wasAiming = aiming;
 
+    }
+    protected override void LateUpdate()
+    {
+       
+        if (reloading || inspecting || ishostering || meleeing || throwingGrenade )
+        {
+            
+            CharacterForward = aimik.solver.transform.InverseTransformDirection(transform.forward);
+            float x = aimik.solver.axis.x;
+            float y = aimik.solver.axis.y;
+            float z = aimik.solver.axis.z;
+
+            x = Mathf.Lerp(x, CharacterForward.x, Time.deltaTime * 15);
+            y = Mathf.Lerp(y, CharacterForward.y, Time.deltaTime * 15);
+            z = Mathf.Lerp(z, CharacterForward.z, Time.deltaTime * 15);
+       
+            aimik.solver.axis = new Vector3(x, y, z);
+        }
+        else if (aimik.solver.axis == new Vector3(0.0f, 0.0f, 1f))
+            return;
+        else
+        {
+
+            float x = aimik.solver.axis.x;
+            float y = aimik.solver.axis.y;
+            float z = aimik.solver.axis.z;
+
+            x = Mathf.Lerp(x, 0.0f, Time.deltaTime * 8.0f);
+            y = Mathf.Lerp(y, 0.0f, Time.deltaTime * 8.0f);
+            z = Mathf.Lerp(z, 1.0f, Time.deltaTime * 8.0f);
+            aimik.solver.axis = new Vector3(x, y, z);
+        }
     }
     #endregion
 
@@ -665,7 +706,12 @@ public class Character : CharacterBehaviour
         lastShotTime = Time.time;
         //조준하는 경우 스코프의 확산 배율도 전달해야 합니다.
         equippedWeapon.Fire(aiming ? equippedWeaponScope.GetMultiplierSpread() : 1.0f);
-
+        //TP발사 애니메이션 재생
+        TPEquipWeapon.Fire();
+        if(equippedWeapon.GetAmmunitionCurrent() == 0)
+        {
+            TPEquipWeapon.SetSlideBack(1);
+        }
         //발사 애니메이션 재생
         const string stateName = "Fire";
         characterAnimator.CrossFade(stateName, 0.05f, layerOverlay, 0);
@@ -696,6 +742,7 @@ public class Character : CharacterBehaviour
         TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
 
         equippedWeapon.Reload();
+        TPEquipWeapon.Reload(stateName);
     }
 
     /// <summary>
@@ -716,8 +763,9 @@ public class Character : CharacterBehaviour
     /// <param name="index">장착될 인벤토리 인덱스</param>
     private IEnumerator Equip(int index = 0)
     {
+        ishostering = true;
         //만약 holster가 아니면 holster를 합니다.만약 이미 준비가 되어 있다면 기다릴 필요가 없습니다.
-        if(!holstered)
+        if (!holstered)
         {
             SetHolstered(holstering = true);
 
@@ -728,7 +776,7 @@ public class Character : CharacterBehaviour
         SetHolstered(false);
 
         characterAnimator.Play("Unholster", layerHolster, 0);
-        TPcharacterAnimator.Play("Unholster", TPlayerHolster, 0);
+        //TPcharacterAnimator.Play("Unholster", TPlayerHolster, 0);
         //새로운 장비 장착
         inventory.Equip(index);
 
@@ -743,6 +791,8 @@ public class Character : CharacterBehaviour
     {
         //장착된 무기가 없다면 return
         if ((equippedWeapon = inventory.GetEquipped()) == null)
+            return;
+        if ((TPEquipWeapon = inventory.EquipTPWeapon()) == null)
             return;
         //애니메이터 컨트롤러를 업데이트합니다.
         characterAnimator.runtimeAnimatorController = equippedWeapon.GetAnimatorController();
@@ -1004,6 +1054,9 @@ public class Character : CharacterBehaviour
 
         //검사중이면
         if (inspecting)
+            return false;
+
+        if (IsCrouching())
             return false;
 
         return true;
@@ -1481,6 +1534,8 @@ public class Character : CharacterBehaviour
     {
         if(equippedWeapon != null)
             equippedWeapon.SetSlideBack(back);
+        if (TPEquipWeapon != null)
+            TPEquipWeapon.SetSlideBack(back);
     }
 
     /// <summary>
