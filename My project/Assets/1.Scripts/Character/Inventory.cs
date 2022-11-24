@@ -5,13 +5,26 @@ using UnityEngine;
 
 public class Inventory : InventoryBehaviour
 {
-    #region FIELDS
+
+    #region Serialized
+
+    [SerializeField]
+    private Transform TPWeaponInven;  
+
+    #endregion
     
+    #region FIELDS
+
     /// <summary>
     /// 무기 배열, 이 오브젝트의 자식 배열을 순서대로 가져옵니다.
     /// </summary>
     private WeaponBehaviour[] weapons;
 
+    /// <summary>
+    /// TP무기 배열, 이 오브젝트의 자식 배여을 순서대로 가져옵니다.
+    /// </summary>
+    private TPWeapon[] TPweapons;
+   
     /// <summary>
     /// 현재 장착된 WeaponBehaviour
     /// </summary>
@@ -22,6 +35,7 @@ public class Inventory : InventoryBehaviour
     /// </summary>
     private int equippedIndex = -1;
 
+    private TPWeapon TPequipeedWeapon;
     #endregion
 
     #region METHODS
@@ -29,11 +43,16 @@ public class Inventory : InventoryBehaviour
     public override void Init(int equippedAtStart = 0)
     {
         weapons = GetComponentsInChildren<WeaponBehaviour>(true);
-
+        TPweapons = TPWeaponInven.GetComponentsInChildren<TPWeapon>(true);
         foreach(WeaponBehaviour weapon in weapons)
         {
             weapon.gameObject.SetActive(false);
         }
+        foreach(TPWeapon weapon in TPweapons)
+        {
+            weapon.gameObject.SetActive(false);
+        }
+
         Equip(equippedAtStart);
     }
 
@@ -53,22 +72,27 @@ public class Inventory : InventoryBehaviour
 
         //현재 장착하고 있는 무기가 있으면 비활성화 합니다.
         if (equipped != null)
+        {
             equipped.gameObject.SetActive(false);
+            TPequipeedWeapon.gameObject.SetActive(false);
+        }
+            
+            
         
         //인덱스 업데이트
         equippedIndex = index;
         //장착된 무기를 업데이트 합니다.
         equipped = weapons[equippedIndex];
+        TPequipeedWeapon = TPweapons[equippedIndex];
         //새롭게 장착된 무기를 활성화 합니다.
         equipped.gameObject.SetActive(true);
-
+        TPequipeedWeapon.gameObject.SetActive(true);
         return equipped;
     }
 
-
     #endregion
 
-    #region GETTERS
+        #region GETTERS
 
     public override int GetLastIndex()
     {
@@ -91,7 +115,7 @@ public class Inventory : InventoryBehaviour
 
     public override WeaponBehaviour GetEquipped() => equipped;
     public override int GetEquippedIndex() => equippedIndex;
-
+    public override TPWeapon EquipTPWeapon() => TPequipeedWeapon;
 
     #endregion
 }
