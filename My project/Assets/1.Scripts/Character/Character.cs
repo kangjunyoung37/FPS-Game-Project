@@ -442,7 +442,7 @@ public class Character : CharacterBehaviour
        
         if (reloading || inspecting || ishostering || meleeing || throwingGrenade )
         {
-            
+
             CharacterForward = aimik.solver.transform.InverseTransformDirection(transform.forward);
             float x = aimik.solver.axis.x;
             float y = aimik.solver.axis.y;
@@ -621,8 +621,9 @@ public class Character : CharacterBehaviour
             {
                 //캐릭터 애니메이터 업데이트
                 characterAnimator.SetBool(boolNameReloading, false);
-
+                TPcharacterAnimator.SetBool(boolNameReloading, false);
                 equippedWeapon.GetAnimator().SetBool(boolNameReloading, false);
+                TPEquipWeapon.GetAnimator().SetBool(boolNameReloading, false);
             }
 
         }
@@ -796,7 +797,9 @@ public class Character : CharacterBehaviour
             return;
         //애니메이터 컨트롤러를 업데이트합니다.
         characterAnimator.runtimeAnimatorController = equippedWeapon.GetAnimatorController();
-
+        TPcharacterAnimator.runtimeAnimatorController = TPEquipWeapon.Controller;
+        aimik.solver.transform = TPEquipWeapon.transform.GetChild(2);
+        
         //부착물 매니저를 가져옵니다
         weaponAttachmentManager = equippedWeapon.GetAttachmentManager();
         if (weaponAttachmentManager == null)
@@ -872,6 +875,7 @@ public class Character : CharacterBehaviour
         //상태 업데이트
         characterAnimator.SetBool(AHashes.Bolt, bolting = value);
         TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
+        
     }
 
     /// <summary>
