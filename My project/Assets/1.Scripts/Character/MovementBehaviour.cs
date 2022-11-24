@@ -86,7 +86,7 @@ public abstract class MovementBehaviour : MonoBehaviour
     /// <summary>
     /// 캐릭터 웅크리기
     /// </summary>
-    public abstract void Crouch(bool crouching);
+    public abstract void Crouch(bool newcrouching);
 
     /// <summary>
     /// 
