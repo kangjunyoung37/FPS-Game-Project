@@ -25,6 +25,11 @@ public abstract class InventoryBehaviour : MonoBehaviour
     public abstract WeaponBehaviour GetEquipped();
 
     /// <summary>
+    /// 현재 장착하고 있는 TP무기의 TPWeapon을 리턴합니다.
+    /// </summary>
+    public abstract TPWeapon EquipTPWeapon();
+    
+    /// <summary>
     /// 현재 장착하고 있는 무기의 인덱스를 리턴합니다.
     /// </summary>
     public abstract int GetEquippedIndex();
