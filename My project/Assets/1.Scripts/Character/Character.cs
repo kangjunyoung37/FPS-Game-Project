@@ -4,6 +4,7 @@ using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TextCore.Text;
@@ -370,6 +371,8 @@ public class Character : CharacterBehaviour
     /// 카메라 조정
     /// </summary>
     private CameraLook CL;
+
+    private float movementValue;
     #endregion
 
     #region UNITY
@@ -473,8 +476,8 @@ public class Character : CharacterBehaviour
             {
                 if (Time.time - lastShotTime > 60.0f / equippedWeapon.GetRateOfFire())
                 {
-                    PV.RPC("Fire", RpcTarget.All);
-                    //Fire();
+                    //PV.RPC("Fire", RpcTarget.All);
+                    Fire();
                 }
 
             }
@@ -485,7 +488,7 @@ public class Character : CharacterBehaviour
                 shotsFired = 0;
             }
         }
-   
+
         //애니메이터 업데이트
         UpdateAnimator();
 
@@ -504,6 +507,9 @@ public class Character : CharacterBehaviour
         cameraDepth.fieldOfView = Mathf.Lerp(fieldOfViewWeapon, fieldOfViewWeapon * equippedWeapon.GetFieldOfViewMutiplierAimWeapon(), aimingAlpha);
 
         wasAiming = aiming;
+
+        PV.RPC("PVJumping", RpcTarget.All);
+        PV.RPC("PVAnimatorUpdate", RpcTarget.All);
 
     }
     protected override void LateUpdate()
@@ -706,9 +712,9 @@ public class Character : CharacterBehaviour
         characterAnimator.SetFloat(AHashes.LeaningForward, leaningValue, 0.5f, Time.deltaTime);
 
         //캐릭터가 이동하는 애니메이션을 얼마나 적용해야하는지 
-        float movementValue = Mathf.Clamp01(Mathf.Abs(axisMovement.x) + Mathf.Abs(axisMovement.y));
+        movementValue = Mathf.Clamp01(Mathf.Abs(axisMovement.x) + Mathf.Abs(axisMovement.y));
         characterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
-        TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
+        //TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
         //조준하는 스피드
         characterAnimator.SetFloat(AHashes.AimingSpeedMultiplier, aimingSpeedMultiplier);
 
@@ -717,10 +723,10 @@ public class Character : CharacterBehaviour
 
         //수평 움직임 
         characterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
-        TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
+        //TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
         //수직 움직임
         characterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
-        TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
+        //TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
 
         //조준값을 보간을 이용하여 업데이트
         characterAnimator.SetFloat(AHashes.AimingAlpha, Convert.ToSingle(aiming), dampTimeAiming, Time.deltaTime);
@@ -753,9 +759,19 @@ public class Character : CharacterBehaviour
         TPcharacterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
     }
 
+    [PunRPC]
+    private void PVAnimatorUpdate()
+    {
+
+        TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
+        TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
+    }
+
     /// <summary>
     /// 검사하기
     /// </summary>
+    [PunRPC]
     private void Inspect()
     {
         //상태
@@ -768,7 +784,6 @@ public class Character : CharacterBehaviour
     /// <summary>
     /// 발사하기
     /// </summary>
-    [PunRPC]
     private void Fire()
     {
         //발사되는 총알의 양을 늘립니다.반동을 적용하므로 최신 상태로 유지해야합니다.
@@ -787,7 +802,8 @@ public class Character : CharacterBehaviour
         //발사 애니메이션 재생
         const string stateName = "Fire";
         characterAnimator.CrossFade(stateName, 0.05f, layerOverlay, 0);
-        TPcharacterAnimator.CrossFade(stateName, 0.05f, TPlayerOverlay, 0);
+        //FireAnimation();
+        PV.RPC("FireAnimation", RpcTarget.All);
 
         //탄약이 있는 경우 볼트 액션 애니메이션을 재생합니다.
         if (equippedWeapon.IsBoltAction() && equippedWeapon.HasAmmunition())
@@ -796,7 +812,11 @@ public class Character : CharacterBehaviour
         if (!equippedWeapon.HasAmmunition() && equippedWeapon.GetAutomaticallyReloadOnEmpty())
             StartCoroutine(nameof(TryReloadAutomatic));
     }
-    
+    [PunRPC]
+    private void FireAnimation()
+    {
+        TPcharacterAnimator.CrossFade("Fire", 0.05f, TPlayerOverlay, 0);
+    }
     /// <summary>
     /// 재장전 애니메이션 재생하기
     /// </summary>
@@ -1278,7 +1298,7 @@ public class Character : CharacterBehaviour
         switch(context)
         {
             case { phase: InputActionPhase.Performed }:
-                Inspect();
+                PV.RPC("Inspect",RpcTarget.All);
                 break;
         }
     }
@@ -1633,6 +1653,8 @@ public class Character : CharacterBehaviour
         {
             stream.SendNext(transform.position);
             stream.SendNext(transform.rotation);
+            stream.SendNext(axisMovement);
+            stream.SendNext(movementValue);
         }
         else
         {
@@ -1642,9 +1664,15 @@ public class Character : CharacterBehaviour
                 transform.position = syncPos;
             }
             syncRot = (Quaternion)stream.ReceiveNext();
+            axisMovement = (Vector2)stream.ReceiveNext();
+            movementValue = (float)stream.ReceiveNext();
         }
 
         CL.OnPhotonSerializeView(stream, info);
+        movementBehaviour.OnPhotonSerializeView(stream, info);
+
+
+
     }
 
     #endregion
