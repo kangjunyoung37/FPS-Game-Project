@@ -1,6 +1,7 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UIElements;
@@ -211,8 +212,15 @@ public class Movement : MovementBehaviour
 
         wasGrounded = isGrounded;
 
+        //TPAnimatorController.SetBool("Jumping", jumping);
+        
+    }
+
+    [PunRPC]
+    public override void PVJumping()
+    {
         TPAnimatorController.SetBool("Jumping", jumping);
-  }
+    }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -430,6 +438,22 @@ public class Movement : MovementBehaviour
     /// </summary>
     /// <returns></returns>
     public override bool IsGrounded() => controller.isGrounded;
+
+
+    public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(jumping);
+         
+        }
+        else
+        {
+            jumping = (bool)stream.ReceiveNext();
+        }
+
+
+    }
 
     #endregion
 
