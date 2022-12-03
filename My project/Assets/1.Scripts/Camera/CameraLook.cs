@@ -57,7 +57,7 @@ public class CameraLook : MonoBehaviourPunCallbacks
     /// </summary>
     private Vector2 frameInput;
 
-    private Vector2 PVframeInput;
+    private Quaternion YRotation;
 
     #endregion
 
@@ -70,24 +70,31 @@ public class CameraLook : MonoBehaviourPunCallbacks
     #region UNITY
     private void Start()
     {
+
         //playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
         rotationCharacter = playerCharacter.transform.localRotation;
         
         //카메라 초기 로케이션
         rotationCamera = lotateTransform.transform.localRotation;
 
+
+
     }
 
-   
+
     private void LateUpdate()
     {
         if (!PV.IsMine)
         {
-            Debug.Log(PVframeInput);
+
+            Quaternion localRotation = lotateTransform.transform.localRotation;
+            localRotation = Quaternion.Slerp(localRotation, YRotation, Time.deltaTime * 12.5f);
+            lotateTransform.transform.localRotation = localRotation;
             return;
+
         }
         //프레임 입력 
-       
+
         frameInput = playerCharacter.isCursorLocked() ? playerCharacter.GetInputLook() : default;
         //감도
         frameInput *= sensitivity;
@@ -156,11 +163,11 @@ public class CameraLook : MonoBehaviourPunCallbacks
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(frameInput);
+            stream.SendNext(rotationCamera);
         }
         else
         {
-            PVframeInput = (Vector2)stream.ReceiveNext();
+            YRotation = (Quaternion)stream.ReceiveNext();
 
         }
     }
