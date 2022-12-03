@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -99,5 +100,8 @@ public abstract class MovementBehaviour : MonoBehaviour
     /// </summary>
     public abstract void TryToggleCrouch();
 
+    public abstract void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info);
+
+    public abstract void PVJumping();
     #endregion
 }
