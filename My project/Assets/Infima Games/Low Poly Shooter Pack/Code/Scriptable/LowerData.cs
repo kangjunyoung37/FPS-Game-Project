@@ -5,8 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// LowerData. Contains all the information needed by a character to lower its weapon with some nice
-    /// motion, and nice offsets.
+    /// 캐릭터가 모션과 오프셋으로 무기를 내리는 데 필요한 정보를 포함합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_Lower_Name", menuName = "Infima Games/Low Poly Shooter Pack/Lower Data", order = 0)]
     public class LowerData : ScriptableObject
@@ -33,17 +32,17 @@ namespace InfimaGames.LowPolyShooterPack
 
         [Title(label: "Interpolation")]
 
-        [Tooltip("Interpolation settings.")]
+        [Tooltip("보간 설정")]
         [SerializeField]
         private SpringSettings interpolation = SpringSettings.Default();
 
         [Title(label: "Offsets")]
 
-        [Tooltip("Location offset applied in the lowered state.")]
+        [Tooltip("무기를 내린 상태에서 적용된 위치 오프셋")]
         [SerializeField]
         private Vector3 locationOffset;
 
-        [Tooltip("Rotation offset applied in the lowered state.")]
+        [Tooltip("무기를 내린 상태에서 적용된 로케이션 오프셋")]
         [SerializeField]
         private Vector3 rotationOffset;
 

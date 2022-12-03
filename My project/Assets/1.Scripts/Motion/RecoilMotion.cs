@@ -104,11 +104,11 @@ public class RecoilMotion : Motion
 
             }
 
-            if(recoilCurves.RotationsCurves.Length == 3)
+            if(recoilCurves.RotationCurves.Length == 3)
             {
-                recoilRotation.x = recoilCurves.RotationsCurves[0].Evaluate(shotsFired);
-                recoilRotation.y = recoilCurves.RotationsCurves[1].Evaluate(shotsFired);
-                recoilRotation.z = recoilCurves.RotationsCurves[2].Evaluate(shotsFired);
+                recoilRotation.x = recoilCurves.RotationCurves[0].Evaluate(shotsFired);
+                recoilRotation.y = recoilCurves.RotationCurves[1].Evaluate(shotsFired);
+                recoilRotation.z = recoilCurves.RotationCurves[2].Evaluate(shotsFired);
 
             }
 

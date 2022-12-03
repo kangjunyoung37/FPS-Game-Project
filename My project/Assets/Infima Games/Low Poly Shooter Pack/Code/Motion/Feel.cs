@@ -5,7 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// Feel. This object contains basically all of the data relating to how weapons feel according to procedural motions.
+    /// Feel. 이 객체는 기본적으로 절차적 동작에 따라 무기가 어떻게 느끼는지에 관한 모든 데이터를 포함합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_Feel", menuName = "Infima Games/Low Poly Shooter Pack/Feel", order = 0)]
     public class Feel : ScriptableObject
@@ -67,21 +67,21 @@ namespace InfimaGames.LowPolyShooterPack
         public FeelState GetState(Animator characterAnimator)
         {
             //Running.
-            if (characterAnimator.GetBool(AHashes.Running))
+            if (characterAnimator.GetBool(AHashess.Running))
                 return Running;
             else
             {
                 //Aiming.
-                if (characterAnimator.GetBool(AHashes.Aim))
+                if (characterAnimator.GetBool(AHashess.Aim))
                     return Aiming;
                 else
                 {
                     //Crouching.
-                    if (characterAnimator.GetBool(AHashes.Crouching))
+                    if (characterAnimator.GetBool(AHashess.Crouching))
                         return Crouching;
                     //Standing.
                     else
-                        return Standing;
+                        return Standing; 
                 }
             }
             

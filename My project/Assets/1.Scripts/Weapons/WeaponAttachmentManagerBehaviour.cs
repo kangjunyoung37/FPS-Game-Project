@@ -47,6 +47,52 @@ public abstract class WeaponAttachmentManagerBehaviour : MonoBehaviour
     /// 장착된 그립을 리턴합니다.
     /// </summary>
     public abstract GripBehaviour GetEquippedGrip();
+
+    /// <summary>
+    /// 총구 인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedMuzzleIndex();
+    
+    /// <summary>
+    /// 총 스코프 인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedScopeIndex();
+
+    /// <summary>
+    /// 레이저 인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedLaserIndex();
+    
+    /// <summary>
+    /// 그립 인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedGripIndex();
+
+    /// <summary>
+    /// 모든 그립 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPGripsOff();
+
+    /// <summary>
+    /// 모든 스코프 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPScopesOff();
+
+    /// <summary>
+    /// 모든 총구 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPMuzzlesOff();
+
+    /// <summary>
+    /// 모든 레이저 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPLasersOff();
+
+    /// <summary>
+    /// 모든 탄창 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPMagazinesOff();
+
     #endregion
 }
 

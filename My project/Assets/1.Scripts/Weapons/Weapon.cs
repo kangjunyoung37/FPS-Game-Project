@@ -132,6 +132,11 @@ public class Weapon : WeaponBehaviour
     [SerializeField]
     private AudioClip audioClipBoltAction;
 
+    [Title(label:"Weapon Renderer")]
+
+    [Tooltip("무기 Renderer")]
+    [SerializeField]
+    private Renderer WeaponRenderer;
     #endregion
 
     #region FIELDS
@@ -178,6 +183,7 @@ public class Weapon : WeaponBehaviour
     /// </summary>
     private GripBehaviour gripBehaviour;
 
+
     #endregion
 
 
@@ -203,6 +209,8 @@ public class Weapon : WeaponBehaviour
         animator = GetComponent<Animator>();
         attachMentManager = GetComponent<WeaponAttachmentManagerBehaviour>();
         gameModeService = ServiceLocator.Current.Get<IGameModeService>();
+        //characterBehaviour = gameModeService.GetPlayerCharacter();
+        characterBehaviour = transform.parent.GetComponent<Inventory>().GetCharacterBehaviour();
         playerCamera = characterBehaviour.GetCameraWold().transform;
 
     }
@@ -214,7 +222,6 @@ public class Weapon : WeaponBehaviour
         muzzleBehaviour = attachMentManager.GetEquippedMuzzle();
         laserBehaviour = attachMentManager.GetEquippedLaser();
         gripBehaviour = attachMentManager.GetEquippedGrip();
-
         ammunitionCurrent = magazineBehaviour.GetAmmunitionTotal();
 
     }
@@ -230,8 +237,7 @@ public class Weapon : WeaponBehaviour
         if (scopeBehaviour != null)
             return scopeBehaviour.GetFieldOfViewMutiplierAim();
 
-        Debug.LogError("Weapon has no scope equipped");
-
+        //Debug.LogError("Weapon has no scope equipped");
         return 1.0f;
     }
 
@@ -243,8 +249,8 @@ public class Weapon : WeaponBehaviour
     {
         if (scopeBehaviour != null)
             return scopeBehaviour.GetFieldOfViewMutiplierAimWeapon();
-        
-        Debug.LogError("Weapon has no scope equipped");
+
+        //Debug.LogError("Weapon has no scope equipped");
 
         return 1.0f;
     }
@@ -317,7 +323,7 @@ public class Weapon : WeaponBehaviour
         animator.SetBool(boolName, true);
         
         //재장전 사운드 클립 재생
-        ServiceLocator.Current.Get<IAudioManagerService>().PlayOneShot(HasAmmunition() ? audioClipReload : audioClipReloadEmpty, new AudioSettings(1.0f, 0.0f, false));
+        ServiceLocator.Current.Get<IAudioManagerService>().PlayOneShot(HasAmmunition() ? audioClipReload : audioClipReloadEmpty, new AudioSettings(1.0f, 0.0f, true));
         
         //재장전 애니메이션 재생
         animator.Play(cycledReload ? "Reload Open" : (HasAmmunition() ? "Reload" : "Reload Empty"), 0, 0.0f);
@@ -378,10 +384,22 @@ public class Weapon : WeaponBehaviour
 
     //탄피 생성
     public override void EjectCasing()
-    {
-        
+    {        
+
         if(prefabCasing != null && socketEjection != null)
             Instantiate(prefabCasing, socketEjection.position, socketEjection.rotation);
+    }
+
+    public override void FPWPOff()
+    {
+
+        attachMentManager.FPGripsOff();
+        attachMentManager.FPScopesOff();
+        attachMentManager.FPMuzzlesOff();
+        attachMentManager.FPLasersOff();
+        attachMentManager.FPMagazinesOff();
+        WeaponRenderer.enabled = false;
+        
     }
 
     #endregion

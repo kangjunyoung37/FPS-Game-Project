@@ -8,11 +8,16 @@ public class Inventory : InventoryBehaviour
 
     #region Serialized
 
+    [Title("TP Inventory")]
     [SerializeField]
-    private Transform TPWeaponInven;  
+    private Transform TPWeaponInven;
+
+    [Title("Character Behaviour")]
+    [SerializeField]
+    private CharacterBehaviour characterBehaviour;
 
     #endregion
-    
+
     #region FIELDS
 
     /// <summary>
@@ -35,7 +40,18 @@ public class Inventory : InventoryBehaviour
     /// </summary>
     private int equippedIndex = -1;
 
+    /// <summary>
+    /// 현재 장착중인 TP 무기
+    /// </summary>
     private TPWeapon TPequipeedWeapon;
+
+    /// <summary>
+    /// CharacterBehaviour
+    /// </summary>
+
+
+
+
     #endregion
 
     #region METHODS
@@ -44,6 +60,7 @@ public class Inventory : InventoryBehaviour
     {
         weapons = GetComponentsInChildren<WeaponBehaviour>(true);
         TPweapons = TPWeaponInven.GetComponentsInChildren<TPWeapon>(true);
+
         foreach(WeaponBehaviour weapon in weapons)
         {
             weapon.gameObject.SetActive(false);
@@ -116,6 +133,7 @@ public class Inventory : InventoryBehaviour
     public override WeaponBehaviour GetEquipped() => equipped;
     public override int GetEquippedIndex() => equippedIndex;
     public override TPWeapon EquipTPWeapon() => TPequipeedWeapon;
+    public CharacterBehaviour GetCharacterBehaviour() => characterBehaviour;
 
     #endregion
 }

@@ -47,5 +47,10 @@ public abstract class MuzzleBehaviour : MonoBehaviour
     /// 모든 총구 효과를 재생시킵니다.
     /// </summary>
     public abstract void Effect();
+
+    /// <summary>
+    /// 총구 랜더러를 끕니다.
+    /// </summary>
+    public abstract void FPMuzzleOff();
     #endregion
 }

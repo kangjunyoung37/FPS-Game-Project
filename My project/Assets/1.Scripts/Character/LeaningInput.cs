@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,11 +14,10 @@ public class LeaningInput : MonoBehaviour
     [SerializeField, NotNull]
     private CharacterBehaviour characterBehaviour;
 
-    [Tooltip("캐릭터으 애니메이터 컴포넌트")]
+    [Tooltip("캐릭터의 애니메이터 컴포넌트")]
     [SerializeField, NotNull]
     private Animator characterAnimater;
 
-    
     [SerializeField]
     private Transform spineTransform;
 
@@ -38,9 +38,17 @@ public class LeaningInput : MonoBehaviour
     private bool isLeaning;
 
     private float leaningnum = 0.0f;
+
+    private PhotonView PV;
+
     #endregion
 
     #region METHODS
+    
+    private void Awake()
+    {
+        PV = characterBehaviour.transform.GetComponent<PhotonView>();   
+    }
 
     private void LateUpdate()
     {
@@ -80,7 +88,7 @@ public class LeaningInput : MonoBehaviour
     {
 
         //커서가 잠겨있지 않다면
-        if(!characterBehaviour.isCursorLocked())
+        if(!characterBehaviour.isCursorLocked() || !PV.IsMine)
         {
             //기울기를 0으로 유지
             leaningInput = 0.0f;

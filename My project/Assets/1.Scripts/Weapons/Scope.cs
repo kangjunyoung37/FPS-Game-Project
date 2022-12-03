@@ -55,6 +55,13 @@ public class Scope : ScopeBehaviour
     [Tooltip("조준하지 않을때 스코프를 막는 Material")]
     [SerializeField]
     private Material materialHiddnen;
+
+    [Title(label: "Renderer")]
+
+    [Tooltip("스코프 랜더러")]
+    [SerializeField]
+    private Renderer ScopeRender;
+
     #endregion
 
     #region FIELDS
@@ -129,6 +136,11 @@ public class Scope : ScopeBehaviour
         materials[materialIndex] = materialHiddnen;
         meshRenderer.materials = materials;
 
+    }
+
+    public override void FPScopeRenOff()
+    {
+        ScopeRender.enabled = false;
     }
     #endregion
 }

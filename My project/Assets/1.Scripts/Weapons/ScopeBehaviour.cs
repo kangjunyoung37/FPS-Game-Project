@@ -58,5 +58,10 @@ public abstract class ScopeBehaviour : MonoBehaviour
     /// 스코프를 사용하는 캐릭터가 스코프 조준을 해제할 때 호출됩니다.
     /// </summary>
     public abstract void OnAimStop();
+
+    /// <summary>
+    /// 스코프 랜더러를 끕니다.
+    /// </summary>
+    public abstract void FPScopeRenOff();
     #endregion
 }

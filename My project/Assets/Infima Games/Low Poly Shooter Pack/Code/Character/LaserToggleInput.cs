@@ -71,9 +71,9 @@ namespace InfimaGames.LowPolyShooterPack
                 return;
             
             //Get current aiming value.
-            bool aiming = animator.GetBool(AHashes.Aim);
+            bool aiming = animator.GetBool(AHashess.Aim);
             //Get the current running value.
-            bool running = animator.GetBool(AHashes.Running);
+            bool running = animator.GetBool(AHashess.Running);
             
             //If the character just started aiming.
             if (aiming && !wasAiming)

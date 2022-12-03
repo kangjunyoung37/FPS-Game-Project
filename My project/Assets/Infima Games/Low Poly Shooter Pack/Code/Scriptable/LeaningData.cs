@@ -5,8 +5,8 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// LeaningData. Contains all data related to the player character leaning, and having the camera and equipped item
-    /// act on it too.
+    /// 기울기 데이터
+    /// 플레이어가 기울어지면서 카메라와 무기 또한 기울어지게 작동하게 하는 것과 관련된 데이터들 
     /// </summary>
     [CreateAssetMenu(fileName = "SO_Leaning_Name", menuName = "Infima Games/Low Poly Shooter Pack/Leaning Data", order = 0)]
     public class LeaningData : ScriptableObject
@@ -15,21 +15,21 @@ namespace InfimaGames.LowPolyShooterPack
         
         [Title(label: "Item Curves")]
         
-        [Tooltip("Animation curves played on the item when leaning while the character is aiming.")]
+        [Tooltip("캐릭터가 조준하는 동안 기울일 때 아이템에서 재생되는 애니메이션 곡선.")]
         [SerializeField, InLineEditor]
         private ACurves itemAiming;
         
-        [Tooltip("Animation curves played on the item when leaning while the character is standing.")]
+        [Tooltip("캐릭터가 서 있는 동안 기울일 때 아이템에서 재생되는 애니메이션 곡선")]
         [SerializeField, InLineEditor]
         private ACurves itemStanding;
 
         [Title(label: "Camera Curves")]
         
-        [Tooltip("Animation curves played on the camera when leaning while the character is aiming.")]
-        [SerializeField, InLineEditor]
-        
+        [Tooltip("캐릭터가 조준하는 동안 기울일 때 카메라에서 재생되는 애니메이션 곡선")]
+        [SerializeField, InLineEditor]  
         private ACurves cameraAiming;
-        [Tooltip("Animation curves played on the camera when leaning while the character is standing.")]
+
+        [Tooltip("캐릭터가 서 있는 동안 기울일 때 카메라에서 재생되는 애니메이션 곡선")]
         [SerializeField, InLineEditor]
         private ACurves cameraStanding;
         
@@ -38,7 +38,7 @@ namespace InfimaGames.LowPolyShooterPack
         #region FUNCTIONS
 
         /// <summary>
-        /// Returns the curves for the requested MotionType.
+        /// 요청한 모션 유형에 대한 곡선을 반환합니다.
         /// </summary>
         public ACurves GetCurves(MotionType motionType, bool aiming = false)
         {

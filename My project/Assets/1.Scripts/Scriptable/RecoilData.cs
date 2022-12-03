@@ -24,7 +24,7 @@ public class RecoilData : ScriptableObject
     /// <summary>
     /// AimingStateMultiplier
     /// </summary>
-    public float AimingStateMultiplier => AimingStateMultiplier;
+    public float AimingStateMultiplier => aimingStateMultiplier;
 
     /// <summary>
     /// Aiming Curves

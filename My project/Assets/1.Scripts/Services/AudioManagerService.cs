@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class AudioManagerService : MonoBehaviour , IAudioManagerService
 {
@@ -82,7 +83,7 @@ public class AudioManagerService : MonoBehaviour , IAudioManagerService
 
     public void PlayOneShotDelayed(AudioClip clip, AudioSettings settings = default, float delay = 1.0f)
     {
-        StartCoroutine(nameof(PlayOneShotDelayed), new OneShotCoroutine(clip, settings, delay));
+        StartCoroutine(nameof(PlayOneShotAfterDelay), new OneShotCoroutine(clip, settings, delay));
     }
     #endregion
 }

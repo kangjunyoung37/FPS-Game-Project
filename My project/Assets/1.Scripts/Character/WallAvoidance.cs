@@ -52,7 +52,7 @@ public class WallAvoidance : MonoBehaviour
         if (playerCamera == null)
         {
             //
-            Debug.LogError($" playerCamera가 {playerCamera} 입니다");
+            //Debug.LogError($" playerCamera가 {playerCamera} 입니다");
 
             return;
         }

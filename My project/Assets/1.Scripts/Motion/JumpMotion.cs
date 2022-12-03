@@ -60,6 +60,7 @@ public class JumpMotion : Motion
         }
 
         Feel feel = feelManager.Preset.GetFeel(motionType);
+
         if(feel == null)
         {
             Debug.LogError($"{this.gameObject}에 feel이 {feel}입니다");
@@ -96,7 +97,7 @@ public class JumpMotion : Motion
                         maxCurveLength = curve.length;
                 });
 
-                jumpingCurves.RotationsCurves.ForEach(curve =>
+                jumpingCurves.RotationCurves.ForEach(curve =>
                 {
                     if (curve.length > maxCurveLength)
                         maxCurveLength = curve.length;
@@ -123,7 +124,7 @@ public class JumpMotion : Motion
             //위치 곡선 적용
             location += playedCurves.LocationCurves.EvaluateCurves(airTime);
             //회전 곡선 적용
-            rotation += playedCurves.RotationsCurves.EvaluateCurves(airTime);
+            rotation += playedCurves.RotationCurves.EvaluateCurves(airTime);
         }
 
         //Spring 위치 값 업데이트

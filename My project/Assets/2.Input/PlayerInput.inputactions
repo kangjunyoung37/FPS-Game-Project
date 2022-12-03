@@ -211,6 +211,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "LeaningLeft",
+                    "type": "Button",
+                    "id": "3c011f36-c68d-4f6e-895b-d1f3a0a14ed8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -554,6 +563,17 @@
                     "action": "Leaning",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "5ebc59f4-ebd2-466a-91dc-114419af927a",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeaningLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

@@ -13,6 +13,7 @@ public class CharacterAnimationEventHandler : MonoBehaviour
     /// 캐릭터 컴포넌트
     /// </summary>
     private CharacterBehaviour playerCharacter;
+    private Character Character;
 
     #endregion
 
@@ -21,8 +22,11 @@ public class CharacterAnimationEventHandler : MonoBehaviour
     private void Awake()
     {
         //캐릭터 Behaviour 컴포넌트 가져오기
-        playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
-
+        //playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+        playerCharacter = transform.gameObject.GetComponentInParent<CharacterBehaviour>();
+        
+        Character = playerCharacter.GetComponent<Character>();
+        
     }
 
     #endregion
@@ -141,6 +145,11 @@ public class CharacterAnimationEventHandler : MonoBehaviour
     {
         if (playerCharacter != null)
             playerCharacter.DropMagazine(drop == 0);
+    }
+
+    private void isgofalse()
+    {
+        Character.ishostering = false;
     }
 
     #endregion

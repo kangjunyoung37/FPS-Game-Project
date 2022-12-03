@@ -6,7 +6,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// FeelState. Contains information on different things that happen in a single state.
+    /// FeelState. 단일 상태에서 발생하는 다양한 일에 대한 정보를 포함합니다.
     /// </summary>
     [Serializable]
     public struct FeelState

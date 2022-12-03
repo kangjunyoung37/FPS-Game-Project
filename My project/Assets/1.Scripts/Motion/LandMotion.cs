@@ -85,7 +85,7 @@ public class LandMotion : Motion
         //위치 곡선 적용하기
         location += playedCurves.LocationCurves.EvaluateCurves(evaluateTime);
         //회전 곡선 적용하기
-        rotation += playedCurves.RotationsCurves.EvaluateCurves(evaluateTime);
+        rotation += playedCurves.RotationCurves.EvaluateCurves(evaluateTime);
 
         //스프링에 위치 적용하기
         springLocation.UpdateEndValue(location);

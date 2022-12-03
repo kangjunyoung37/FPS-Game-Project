@@ -5,8 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// Recoil Data. Used when playing recoil motions to have all the needed information
-    /// for that.
+    /// 반동 동작을 재생할 때 필요한 모든 정보를 가지고 있다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_Recoil", menuName = "Infima Games/Low Poly Shooter Pack/Recoil Data", order = 0)]
     public class RecoilData : ScriptableObject
@@ -37,7 +36,7 @@ namespace InfimaGames.LowPolyShooterPack
 
         [Title(label: "Standing State")]
         
-        [Tooltip("Value to multiply the standingState location/rotation values by.")]
+        [Tooltip("StandingState 위치/회전 값에 곱하는 값입니다.")]
         [Range(0.0f, 1.0f)]
         [SerializeField]
         private float standingStateMultiplier = 1.0f;
@@ -48,7 +47,7 @@ namespace InfimaGames.LowPolyShooterPack
 
         [Title(label: "Aiming State")]
 
-        [Tooltip("Value to multiply the aimingState location/rotation values by.")]
+        [Tooltip("aimingState 위치/회전 값에 를 곱하는 값입니다.")]
         [Range(0.0f, 1.0f)]
         [SerializeField]
         private float aimingStateMultiplier = 1.0f;

@@ -23,7 +23,7 @@ public class LowerData : ScriptableObject
     /// <summary>
     /// 로테이션 오프셋
     /// </summary>
-    public Vector3 RotationOffset => RotationOffset;
+    public Vector3 RotationOffset => rotationOffset;
 
     #endregion
 

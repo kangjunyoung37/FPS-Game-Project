@@ -80,7 +80,7 @@ namespace InfimaGames.LowPolyShooterPack
             if (movementBehaviour.IsGrounded() && movementBehaviour.GetVelocity().sqrMagnitude > minVelocityMagnitude)
             {
                 //Select the correct audio clip to play.
-                audioSource.clip = characterAnimator.GetBool(AHashes.Running) ? audioClipRunning : audioClipWalking;
+                audioSource.clip = characterAnimator.GetBool(AHashess.Running) ? audioClipRunning : audioClipWalking;
                 //Play it!
                 if (!audioSource.isPlaying)
                     audioSource.Play();

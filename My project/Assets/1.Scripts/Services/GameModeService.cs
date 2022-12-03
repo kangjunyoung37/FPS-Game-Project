@@ -12,6 +12,7 @@ public class GameModeService : IGameModeService
 
     public CharacterBehaviour GetPlayerCharacter()
     {
+
         if(playerCharacter == null)
         {
             playerCharacter = Object.FindObjectOfType<CharacterBehaviour>();

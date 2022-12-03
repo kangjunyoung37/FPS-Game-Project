@@ -127,6 +127,11 @@ public abstract class WeaponBehaviour : MonoBehaviour
     /// 마지막 사격 이후 무기가 재장전이 시작될 때까지의 지연 시간을 리턴합니다.
     /// </summary>
     public abstract float GetAutomaticallyReloadOnEmptyDelay();
+    
+    /// <summary>
+    /// 에임하는 동안에 재장전 할 수 있는지
+    /// </summary>
+    public abstract bool CanReloadAimed();
 
     /// <summary>
     /// 탄약이 FULL인 상태일 때 재장전을 할 수 있는지를 리턴합니다.
@@ -156,7 +161,7 @@ public abstract class WeaponBehaviour : MonoBehaviour
     /// <summary>
     /// 무기 부착물 매니저 컴포넌트를 리턴합니다 
     /// </summary>
-    //public abstract WeaponAttachmentManagerBehaviour GetAttachmentManager();
+    public abstract WeaponAttachmentManagerBehaviour GetAttachmentManager();
     #endregion
 
     #region METHODS
@@ -188,5 +193,11 @@ public abstract class WeaponBehaviour : MonoBehaviour
     /// 무기에서 탄피를 꺼냅니다. 일반적으로 애니메이션 이벤트에서 호출되지만 어디에서나 호출할 수 있습니다.
     /// </summary>
     public abstract void EjectCasing();
+
+    /// <summary>
+    /// 무기 Renderer끄기
+    /// </summary>
+    public abstract void FPWPOff();
+
     #endregion
 }

@@ -111,6 +111,8 @@ public class Spring
         for(var i = 0; i < steps; i++)
         {
             float dt = Mathf.Abs(i - (steps - 1)) < 0.01f ? deltaTime - i * _stepSize : _stepSize;
+            
+            x += v * dt + a * (dt * dt * 0.5f);
             var _a = (-k * (x - (end + heldForce.Force)) + -c * v) / m;
             v += (a + _a) * (dt * 0.5f);
             a = _a;

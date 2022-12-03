@@ -80,7 +80,7 @@ public class LowerWeapon : MonoBehaviour
             if (animationData.GetLowerData() == null)
                 lowerd = false;
         }
-
+        
         characterAnimator.SetBool(AHashes.Lowered, lowerd);
 
     }

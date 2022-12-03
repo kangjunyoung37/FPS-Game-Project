@@ -73,7 +73,11 @@ public class FootstepPlayer : MonoBehaviour
 
     }
 
+    #region GETTERS
 
+    public Transform GetTransform => movementBehaviour.transform;
+
+    #endregion
 
 
     #endregion

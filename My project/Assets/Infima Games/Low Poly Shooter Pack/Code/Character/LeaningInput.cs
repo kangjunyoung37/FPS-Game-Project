@@ -48,9 +48,9 @@ namespace InfimaGames.LowPolyShooterPack
             isLeaning = (leaningInput != 0.0f);
             
             //Update AHashes.LeaningInput Float.
-            characterAnimator.SetFloat(AHashes.LeaningInput, leaningInput);
+            characterAnimator.SetFloat(AHashess.LeaningInput, leaningInput);
             //Update AHashes.Leaning Bool.
-            characterAnimator.SetBool(AHashes.Leaning, isLeaning);
+            characterAnimator.SetBool(AHashess.Leaning, isLeaning);
         }
 
         /// <summary>

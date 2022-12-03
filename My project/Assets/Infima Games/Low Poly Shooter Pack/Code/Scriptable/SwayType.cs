@@ -5,7 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// SwayType. Holds information on horizontal, vertical SwayDirection values for SwayMotion components to use.
+    /// SwayMotion이 사용할 수평, 수직 SwayDirection 값에 대한 정보를 보유합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_ST_Default", menuName = "Infima Games/Low Poly Shooter Pack/Sway Type")]
     public class SwayType : ScriptableObject
@@ -27,13 +27,13 @@ namespace InfimaGames.LowPolyShooterPack
         
         [Title(label: "Horizontal")]
         
-        [Tooltip("Horizontal Sway.")]
+        [Tooltip("수평 Sway.")]
         [SerializeField]
         private SwayDirection horizontal;
 
         [Title(label: "Vertical")]
         
-        [Tooltip("Vertical Sway.")]
+        [Tooltip("수직 Sway.")]
         [SerializeField]
         private SwayDirection vertical;
         

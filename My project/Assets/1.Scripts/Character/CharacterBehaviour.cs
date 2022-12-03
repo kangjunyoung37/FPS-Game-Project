@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon;
+using Photon.Pun;
 
-public abstract class CharacterBehaviour : MonoBehaviour
+public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObservable
 {
+
     #region UNITY
     protected virtual void Awake(){}
     protected virtual void Start() {}
@@ -34,7 +37,7 @@ public abstract class CharacterBehaviour : MonoBehaviour
     public abstract Camera GetCameraDepth();
 
     //인벤토리 구성요소에 대한 참조를 리턴
-    //public abstract InventoryBehaviour GetInventory();
+    public abstract InventoryBehaviour GetInventory();
 
     /// <summary>
     /// 폭탄의 남은 양을 반환
@@ -180,6 +183,16 @@ public abstract class CharacterBehaviour : MonoBehaviour
     /// 칼 Active 활성화
     /// </summary>
     public abstract void SetActiveKnife(int active);
+
+    /// <summary>
+    /// 탄창 떨어트리기
+    /// </summary>
+    public abstract void DropMagazine(bool drop);
+
+    public abstract void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info);
+
+
+
     #endregion ANIMATION
 
 

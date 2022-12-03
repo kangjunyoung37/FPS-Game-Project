@@ -52,6 +52,15 @@ public class Laser : LaserBehaviour
     [SerializeField]
     private float beamMaxDistance = 500.0f;
 
+    [Title(label: "Renderer")]
+
+    [Tooltip("레이저 렌더러")]
+    [SerializeField]
+    private Renderer LaserRender;
+
+    //[Tooltip("플래쉬 라이트 렌더러")]
+    //[SerializeField]
+    private Light FlashRightLenderer;
     #endregion
     #region FIELDS
 
@@ -59,6 +68,13 @@ public class Laser : LaserBehaviour
     /// 빔의 부모 오브젝트
     /// </summary>
     private Transform beamParent;
+
+    /// <summary>
+    /// 빔의 Renderer
+    /// </summary>
+    private Renderer beam;
+
+
     #endregion
 
     #region GETTERS
@@ -79,10 +95,6 @@ public class Laser : LaserBehaviour
         //재적용
         Reapply();
 
-        if(toggleClip != null)
-        {
-
-        }
     }
     public override void Reapply()
     {
@@ -98,14 +110,28 @@ public class Laser : LaserBehaviour
             laserTransform.gameObject.SetActive(false);
         }
     }
+
+    public override void FPLaserOff()
+    {
+        LaserRender.enabled = false;
+
+        if (beam != null)
+            beam.enabled = false;
+
+    }
+
     #endregion
 
     #region UNITY
+
     private void Awake()
     {
         if (laserTransform == null)
             return;
         beamParent = laserTransform.parent;
+        beam = laserTransform.GetComponent<Renderer>();
+        FlashRightLenderer = laserTransform.GetComponent<Light>();
+
     }
     private void Update()
     {

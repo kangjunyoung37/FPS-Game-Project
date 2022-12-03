@@ -140,4 +140,6 @@ public static class AHashes
     /// Hashed "Play Rate Locomotion Backwards".
     /// </summary>
     public static readonly int PlayRateLocomotionBackwards = Animator.StringToHash("Play Rate Locomotion Backwards");
+
+    public static readonly int Test = Animator.StringToHash("Test");
 }

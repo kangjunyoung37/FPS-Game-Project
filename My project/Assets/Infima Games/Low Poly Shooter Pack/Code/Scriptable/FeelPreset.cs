@@ -5,7 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// FeelPreset. Holds all the Feel objects needed to create an overall feel for the game.
+    /// 게임의 전체적인 느낌을 만드는 데 필요한 모든 Feel 개체를 보유합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_Feel_Preset", menuName = "Infima Games/Low Poly Shooter Pack/Feel Preset", order = 0)]
     public class FeelPreset : ScriptableObject

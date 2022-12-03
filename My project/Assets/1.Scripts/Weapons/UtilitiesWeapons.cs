@@ -17,8 +17,13 @@ public static class UtilitiesWeapons
         }
         //모든 오브젝트 비활성화
         array.ForrEach(obj => obj.gameObject.SetActive(false));
+
+        if (!array.IsValidIndex(index))
+            return null;
+        
         //원하는 오브젝트 활성화
         T behaviour = array[index];
+
         if(behaviour != null)
             behaviour.gameObject.SetActive(true);
 

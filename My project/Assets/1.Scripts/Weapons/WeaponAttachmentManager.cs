@@ -93,7 +93,7 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     /// <summary>
     /// 장착된 스코프
     /// </summary>
-    private ScopeBehaviour scopeBehaviour;
+    private ScopeBehaviour scopeBehaviour ;
 
     /// <summary>
     /// 장착된 총구
@@ -120,9 +120,11 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
 
     protected override void Awake()
     {
+ 
         //랜덤 스코프라면
         if (scopeIndexRandom)
             scopeIndex = Random.Range(scopeIndexFirst, scopeArray.Length);
+
         //스코프 선택
         scopeBehaviour = scopeArray.SelectAndSetActive(scopeIndex);
 
@@ -130,7 +132,6 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
         if(scopeBehaviour == null)
         {
             scopeBehaviour = scopeDefaultBehaviour;
-
             scopeBehaviour.gameObject.SetActive(scopeDefaultShow);
         }
         //랜덤 총구
@@ -168,6 +169,57 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
 
     public override LaserBehaviour GetEquippedLaser() => laserBehaviour;
     public override GripBehaviour GetEquippedGrip() => gripBehaviour;
+    
+    public override int GetEquippedMuzzleIndex() => muzzleIndex;
+    public override int GetEquippedLaserIndex() => laserIndex;
+    public override int GetEquippedGripIndex() => gripIndex;
+    public override int GetEquippedScopeIndex() => scopeIndex;
+
+    #endregion
+
+    #region METHODS
+
+    public override void FPGripsOff()
+    {
+        for(int i = 0; i < gripArray.Length; i++)
+        {
+            gripArray[i].FPRenderOff();
+        }
+    }
+
+    public override void FPScopesOff()
+    {
+        for(int i = 0; i < scopeArray.Length;i++)
+        {
+            scopeArray[i].FPScopeRenOff();
+        }
+        scopeDefaultBehaviour.FPScopeRenOff();
+    }
+
+    public override void FPMuzzlesOff()
+    {
+        for(int i = 0; i < muzzleArray.Length; i++)
+        {
+            muzzleArray[i].FPMuzzleOff();
+        }
+    }
+
+    public override void FPLasersOff()
+    {
+        for(int i = 0; i < laserArray.Length; i++)
+        {
+            laserArray[i].FPLaserOff();
+        }
+    }
+
+    public override void FPMagazinesOff()
+    {
+        for(int i = 0; i < magazineArray.Length; i++)
+        {
+            magazineArray[i].FPMagazineOff();
+
+        }
+    }
 
     #endregion
 }

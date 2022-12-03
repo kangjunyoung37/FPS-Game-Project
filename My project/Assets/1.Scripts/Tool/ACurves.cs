@@ -13,7 +13,7 @@ public class ACurves : ScriptableObject
     public float LocationMultiplier => locationMutiplier;
 
     public SpringSettings RotationSpring => rotationSpring;
-    public AnimationCurve[] RotationsCurves => rotationCurves;
+    public AnimationCurve[] RotationCurves => rotationCurves;
     public float RotationMultiplier => rotationMutiplier;
 
     #endregion

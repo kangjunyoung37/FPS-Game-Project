@@ -83,9 +83,14 @@ public class LeaningMotion : Motion
         float leaning = characterAnimator.GetFloat(AHashes.LeaningInput);
 
         //위치 업데이트
-        springLocation.UpdateEndValue(leaningCurves.LocationCurves.EvaluateCurves(leaning));
-        //회전 업데이트
-        springRotation.UpdateEndValue(leaningCurves.RotationsCurves.EvaluateCurves(leaning));
+        springLocation.UpdateEndValue(leaningCurves.LocationCurves.EvaluateCurves(leaning) * leaningCurves.LocationMultiplier);
+        //값 확인
+        //Debug.Log($"{leaningCurves.LocationCurves.EvaluateCurves(leaning)}");
+        //회전 업데이트       
+        springRotation.UpdateEndValue(leaningCurves.RotationCurves.EvaluateCurves(leaning) * leaningCurves.RotationMultiplier);
+        //값 확인
+        //Debug.Log($"{leaningCurves.RotationCurves.EvaluateCurves(leaning)}");
+
     }
 
     #endregion

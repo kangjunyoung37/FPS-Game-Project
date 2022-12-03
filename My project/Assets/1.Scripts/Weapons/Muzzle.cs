@@ -42,8 +42,15 @@ public class Muzzle : MuzzleBehaviour
     [SerializeField]
     private Vector3 flashLightOffset;
 
+    [Title(label: "Renderer")]
+
+    [Tooltip("ÃÑ±¸ ·£´õ·¯")]
+    [SerializeField]
+    private Renderer MuzzleRender;
+
     #endregion
     #region FIELDS
+
     private ParticleSystem particles;
 
     private Light flashlight;
@@ -112,6 +119,11 @@ public class Muzzle : MuzzleBehaviour
     {
         yield return new WaitForSeconds(flashLightDuration);
         flashlight.enabled = false;
+    }
+
+    public override void FPMuzzleOff()
+    {
+        MuzzleRender.enabled = false;
     }
 
     #endregion

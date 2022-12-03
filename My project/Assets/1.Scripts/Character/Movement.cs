@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,8 @@ using UnityEngine.UIElements;
 /// </summary>
 public class Movement : MovementBehaviour
 {
+
+    
     #region FIELDS SERIALIZED
 
     [Title(label:"FIELD")]
@@ -165,7 +168,7 @@ public class Movement : MovementBehaviour
     /// </summary>
     private float lastJumpTime;
 
-   
+    private PhotonView PV;
 
     #endregion
 
@@ -173,19 +176,24 @@ public class Movement : MovementBehaviour
 
     protected override void Awake()
     {
-        playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+
+        controller = GetComponent<CharacterController>();
+        //playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+        playerCharacter = transform.GetComponent<CharacterBehaviour>();
+        PV = transform.GetComponent<PhotonView>();
     }
    
     //시작시 FPS 콘트롤러를 초기화합니다.
     protected override void Start()
     {
-        controller = GetComponent<CharacterController>();
 
         standingHeight = controller.height;
     }
 
     protected override void Update()
     {
+        if (!PV.IsMine)
+            return;
         //인벤토리에서 무기를 가져옴
         equippedWeapon = playerCharacter.GetInventory().GetEquipped();
         //이 프레임에 땅에 있었는지

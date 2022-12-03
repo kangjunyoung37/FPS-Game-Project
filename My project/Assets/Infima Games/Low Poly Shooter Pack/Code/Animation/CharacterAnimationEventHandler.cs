@@ -145,7 +145,10 @@ namespace InfimaGames.LowPolyShooterPack
 			if(playerCharacter != null)
 				playerCharacter.SetSlideBack(back);
 		}
+		private void isgofalse()
+		{
 
+		}
 		#endregion
 	}   
 }

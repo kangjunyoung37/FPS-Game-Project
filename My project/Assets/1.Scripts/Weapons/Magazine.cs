@@ -14,6 +14,10 @@ public class Magazine : MagazineBehaviour
     [Title(label: "Interface")]
     [SerializeField]
     private Sprite sprite;
+
+    [Title(label: "Renderer")]
+    [SerializeField]
+    private Renderer MagazineRender;
     #endregion
     #region GETTERS
     //ÃÑÅºÃ¢¼ö ¸®ÅÏ
@@ -22,5 +26,13 @@ public class Magazine : MagazineBehaviour
     //ÇØ´ç sprite ¸®ÅÏ
     public override Sprite GetSprite() => sprite;
 
+    #endregion
+
+    #region METHODS
+
+    public override void FPMagazineOff()
+    {
+        MagazineRender.enabled = false;
+    }
     #endregion
 }

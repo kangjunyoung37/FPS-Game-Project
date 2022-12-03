@@ -5,7 +5,7 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// ItemOffsets. Contains data on how an item should be offset in different states.
+    /// 여러 상태에서 아이템의 간격띄우기하는 방법에 대한 데이터를 포합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_IO_Default", menuName = "Infima Games/Low Poly Shooter Pack/Item Offsets", order = 0)]
     public class ItemOffsets : ScriptableObject
@@ -57,51 +57,51 @@ namespace InfimaGames.LowPolyShooterPack
         
         [Title(label: "Standing Offset")]
         
-        [Tooltip("Weapon bone location offset while standing.")]
+        [Tooltip("서 있는동안 무기 뼈대의 위치 오프셋")]
         [SerializeField]
         private Vector3 standingLocation;
         
-        [Tooltip("Weapon bone rotation offset while standing.")]
+        [Tooltip("서 있는동안 무기 뼈대의 로테이션 오프셋")]
         [SerializeField]
         private Vector3 standingRotation;
 
         [Title(label: "Aiming Offset")]
         
-        [Tooltip("Weapon bone location offset while aiming.")]
+        [Tooltip("조준하는 동안 무기 뼈대의 위치 오프셋")]
         [SerializeField]
         private Vector3 aimingLocation;
         
-        [Tooltip("Weapon bone rotation offset while aiming.")]
+        [Tooltip("조준하는 동안 무기 뼈대의 로테이션 오프셋")]
         [SerializeField]
         private Vector3 aimingRotation;
         
         [Title(label: "Running Offset")]
         
-        [Tooltip("Weapon bone location offset while running.")]
+        [Tooltip("달리고 있는 동안 무기 뼈대의 위치 오프셋")]
         [SerializeField]
         private Vector3 runningLocation;
         
-        [Tooltip("Weapon bone rotation offset while running.")]
+        [Tooltip("달리고 있는 동안 무기 뼈대의 로테이션 오프셋")]
         [SerializeField]
         private Vector3 runningRotation;
         
         [Title(label: "Crouching Offset")]
         
-        [Tooltip("Weapon bone location offset while crouching.")]
+        [Tooltip("웅크리고 있을 때 무기 뼈대의 위치 오프셋")]
         [SerializeField]
         private Vector3 crouchingLocation;
         
-        [Tooltip("Weapon bone rotation offset while crouching.")]
+        [Tooltip("웅크리고 있을 때 무기 뼈대의 로테이션 오프셋")]
         [SerializeField]
         private Vector3 crouchingRotation;
         
         [Title(label: "Action Offset")]
         
-        [Tooltip("Weapon bone location offset while performing an action (grenade, melee).")]
+        [Tooltip("수류탄을 던지거나 근접공격 행동을 취할 때의 무기 뼈대의 위치 오프셋.")]
         [SerializeField]
         private Vector3 actionLocation;
         
-        [Tooltip("Weapon bone rotation offset while performing an action (grenade, melee).")]
+        [Tooltip("수류탄을 던지거나 근접공격 행동을 취할 때 무기 뼈대의 로테이션 오프셋")]
         [SerializeField]
         private Vector3 actionRotation;
     }

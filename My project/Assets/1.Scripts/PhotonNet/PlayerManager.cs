@@ -26,6 +26,6 @@ public class PlayerManager : MonoBehaviour
        
         int z = Random.Range(0, 3);
 
-        PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "SK_FP_CH"), new Vector3(x,0.0f,z), Quaternion.identity);
+        PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PlayerCharacter Main"), new Vector3(x,0.0f,z), Quaternion.identity);
     }
 }

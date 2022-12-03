@@ -1,5 +1,6 @@
 using InfimaGames.LowPolyShooterPack;
 using InfimaGames.LowPolyShooterPack.Interface;
+using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
@@ -144,6 +145,16 @@ public class Character : CharacterBehaviour
     [Tooltip("탄창 프리펩")]
     [SerializeField]
     private GameObject prefabMagazine;
+
+    [Title(label:"Renderer Controller")]
+
+    [Tooltip("TP렌더러 컨트롤러")]
+    [SerializeField]
+    private TPRenController tPRenController;
+
+    [Tooltip("FP렌더러 컨트롤러")]
+    [SerializeField]
+    private FPRenController fPRenController;
 
     #endregion
 
@@ -319,14 +330,46 @@ public class Character : CharacterBehaviour
     /// </summary>
     private MeshRenderer meshRenderer;
 
+    /// <summary>
+    /// Aim ik
+    /// </summary>
     private AimIK aimik;
 
+    /// <summary>
+    /// 캐릭터의 앞 방향
+    /// </summary>
     private Vector3 CharacterForward;
 
+    /// <summary>
+    /// 무기를 꺼내는 중인지
+    /// </summary>
     [NonSerialized]
     public bool ishostering = false;
 
+    /// <summary>
+    /// TP장착 무기
+    /// </summary>
     private TPWeapon TPEquipWeapon;
+    
+    /// <summary>
+    /// PhotonView
+    /// </summary>
+    private PhotonView PV;
+
+    /// <summary>
+    /// 싱크 포지션
+    /// </summary>
+    private Vector3 syncPos;
+
+    /// <summary>
+    /// 싱크 로테이션
+    /// </summary>
+    private Quaternion syncRot;
+    
+    /// <summary>
+    /// 카메라 조정
+    /// </summary>
+    private CameraLook CL;
     #endregion
 
     #region UNITY
@@ -346,6 +389,8 @@ public class Character : CharacterBehaviour
         //movementBehaviour = GetComponent<MovementBehaviour>();
 
         //캐싱
+        PV = transform.GetComponent<PhotonView>();
+        CL = GetComponent<CameraLook>();
         meshFilter = magazineTransform.GetComponent<MeshFilter>();
         meshRenderer = magazineTransform.GetComponent<MeshRenderer>();
         aimik = TPcharacterAnimator.transform.GetComponent<AimIK>();
@@ -354,11 +399,25 @@ public class Character : CharacterBehaviour
         
         //새로 고치기
         RefreshWeaponSetup();
-
+        
     }
 
     protected override void Start()
     {
+
+        if (!PV.IsMine)
+        {
+            Destroy(cameraWorld.gameObject);
+            Destroy(cameraDepth.gameObject);
+            fPRenController.FPRenOff();
+            equippedWeapon.FPWPOff();
+        }
+        else
+        {
+            tPRenController.TPRenderOff();
+            TPEquipWeapon.TPWeaponOff();
+        }
+
         //수류탄 양 최대로 설정
         grenadeCount = grenadeTotal;
         //칼을 숨깁니다.
@@ -376,6 +435,13 @@ public class Character : CharacterBehaviour
 
     protected override void Update()
     {
+        if (!PV.IsMine)
+        {
+            transform.position = Vector3.Lerp(transform.position, syncPos, Time.deltaTime * 15f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, syncRot, Time.deltaTime * 15f);
+            return;
+        }
+            
         aiming = holdingButtonAim && CanAim();
         running = holdingButtonRun && CanRun();
         if(aimik == null)
@@ -384,9 +450,7 @@ public class Character : CharacterBehaviour
         }
         else
         {
-            
             IKSolver solver = aimik.GetIKSolver();
-            
         }
         
         switch(aiming)
@@ -401,13 +465,18 @@ public class Character : CharacterBehaviour
                 break;
 
         }
+
         //발사 버튼을 계속 누르고 있으면
         if(holdingButtonFire)
         {
             if(CanPlayAnimationFire() && equippedWeapon.HasAmmunition() && equippedWeapon.IsAutomatic())
             {
                 if (Time.time - lastShotTime > 60.0f / equippedWeapon.GetRateOfFire())
-                    Fire();
+                {
+                    PV.RPC("Fire", RpcTarget.All);
+                    //Fire();
+                }
+
             }
             else
             {
@@ -608,6 +677,7 @@ public class Character : CharacterBehaviour
     /// <summary>
     /// 애니메이터 업데이트하기
     /// </summary>
+    [PunRPC]
     private void UpdateAnimator()
     {
         #region Reload Stop
@@ -698,6 +768,7 @@ public class Character : CharacterBehaviour
     /// <summary>
     /// 발사하기
     /// </summary>
+    [PunRPC]
     private void Fire()
     {
         //발사되는 총알의 양을 늘립니다.반동을 적용하므로 최신 상태로 유지해야합니다.
@@ -1129,7 +1200,7 @@ public class Character : CharacterBehaviour
     public void OnTryFire(InputAction.CallbackContext context)
     {
         //커서가 잠겨있지 않다면
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context)
@@ -1177,7 +1248,7 @@ public class Character : CharacterBehaviour
     public void OnTryPlayReload(InputAction.CallbackContext context)
     {
         //커서가 잡겨있지 않다면 리턴
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         //재장전할 수 없다면 
@@ -1198,7 +1269,7 @@ public class Character : CharacterBehaviour
     public void OnTryInspect(InputAction.CallbackContext context)
     {
         //커서가 잠겨있지 않다면
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         if (!CanPlayAnimationInspect())
@@ -1217,7 +1288,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryAiming(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context.phase)
@@ -1243,7 +1314,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryHolster(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         if (!CanPlayAnimationHolster())
@@ -1277,7 +1348,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryThrowGrenade(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context.phase)
@@ -1297,7 +1368,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryMelee(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context.phase)
@@ -1316,7 +1387,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryRun(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context.phase)
@@ -1345,7 +1416,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryJump(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         switch(context.phase)
@@ -1362,7 +1433,7 @@ public class Character : CharacterBehaviour
     /// </summary>
     public void OnTryInventoryNext(InputAction.CallbackContext context)
     {
-        if (!cursorLocked)
+        if (!cursorLocked || !PV.IsMine)
             return;
 
         if (inventory == null)
@@ -1551,6 +1622,30 @@ public class Character : CharacterBehaviour
         knife.SetActive(active != 0);
     }
 
+
+    #endregion
+
+    #region PunCallBack
+
+    public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
+    {
+        if(stream.IsWriting)
+        {
+            stream.SendNext(transform.position);
+            stream.SendNext(transform.rotation);
+        }
+        else
+        {
+            syncPos = (Vector3)stream.ReceiveNext();
+            if(Vector3.Distance(transform.position, syncPos) > 5f)
+            {
+                transform.position = syncPos;
+            }
+            syncRot = (Quaternion)stream.ReceiveNext();
+        }
+
+        CL.OnPhotonSerializeView(stream, info);
+    }
 
     #endregion
 }

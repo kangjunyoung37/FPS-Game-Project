@@ -36,6 +36,9 @@ public abstract class LaserBehaviour : MonoBehaviour
     /// </summary>
     public abstract void Hide();
 
-
+    /// <summary>
+    /// 레이저 Renderer끄기
+    /// </summary>
+    public abstract void FPLaserOff();
     #endregion
 }

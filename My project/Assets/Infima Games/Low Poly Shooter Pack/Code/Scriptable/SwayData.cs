@@ -5,9 +5,8 @@ using UnityEngine;
 namespace InfimaGames.LowPolyShooterPack
 {
     /// <summary>
-    /// ScriptableObject containing a location and rotation curve, along with settings to interpolate
-    /// them using the Spring class.
-    /// Very helpful for lots of procedural motions that use curves.
+    /// 위치 및 회전 곡선을 포함하고 있으며 Spring 클래스를 사용하여 보간하는 설정을 포함하고 있습니다.
+    /// 곡선을 사용하는 절차적 motion에 사용합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "SO_SD_Default", menuName = "Infima Games/Low Poly Shooter Pack/Sway Data")]
     public class SwayData : ScriptableObject
@@ -47,7 +46,7 @@ namespace InfimaGames.LowPolyShooterPack
         
         [Title(label: "Spring Settings")]
         
-        [Tooltip("Spring Settings For Sway.")]
+        [Tooltip("Sway를 위한 SpringSettings")]
         [SerializeField]
         private SpringSettings springSettings = SpringSettings.Default();
         

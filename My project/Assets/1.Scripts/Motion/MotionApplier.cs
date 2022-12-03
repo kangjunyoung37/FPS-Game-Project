@@ -64,6 +64,10 @@ public class MotionApplier : MonoBehaviour
 
             //모션에 따라 로테이션 계산값을 받아와서 finalRotation에 넣기
             finalEulerAngles += motion.GetEulerAngles() * motion.Alpha;
+            //if(motion.GetComponent<LeaningMotion>() != null)
+            //{
+            //    Debug.Log($"finalLocation = {finalLocation} finalRotation = {finalEulerAngles}");
+            //}
 
         }));
 

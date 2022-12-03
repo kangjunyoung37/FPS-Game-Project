@@ -94,7 +94,7 @@ namespace InfimaGames.LowPolyShooterPack
             }
             
             //Update Animator Lowered.
-            characterAnimator.SetBool(AHashes.Lowered, lowered);
+            characterAnimator.SetBool(AHashess.Lowered, lowered);
         }
 
         #endregion

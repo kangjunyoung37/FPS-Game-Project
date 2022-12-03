@@ -12,10 +12,22 @@ public class Grip : GripBehaviour
     [SerializeField]
     private Sprite sprite;
 
+    [Title(label: "Renderer")]
+    [SerializeField]
+    private Renderer GripRender;
     #endregion
 
     #region GETTERS
+
     public override Sprite GetSprite() => sprite;
 
+    #endregion
+
+    #region METHODS
+
+    public override void FPRenderOff()
+    {
+        GripRender.enabled = false;
+    }
     #endregion
 }

@@ -39,7 +39,6 @@ public class CharacterKinematics : MonoBehaviour
 
     [Title(label: "Settings Arm Right")]
 
-    [Title(label: "Settings Arm Right")]
     [Tooltip("오른팔 IK대상이 무엇인지 결정합니다")]
     [SerializeField]
     private Transform armRightTarget;
