@@ -4,10 +4,9 @@ using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.TextCore.Text;
+
 
 /// <summary>
 /// 주요 캐릭터의 구성요소
@@ -683,7 +682,6 @@ public class Character : CharacterBehaviour
     /// <summary>
     /// 애니메이터 업데이트하기
     /// </summary>
-    [PunRPC]
     private void UpdateAnimator()
     {
         #region Reload Stop
@@ -766,6 +764,7 @@ public class Character : CharacterBehaviour
         TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
+        TPcharacterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
     }
 
     /// <summary>
@@ -817,6 +816,15 @@ public class Character : CharacterBehaviour
     {
         TPcharacterAnimator.CrossFade("Fire", 0.05f, TPlayerOverlay, 0);
     }
+
+    [PunRPC]
+    private void ReloadAnimation(string stateName)
+    {
+        TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
+        TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
+        TPEquipWeapon.Reload(stateName);
+    }
+
     /// <summary>
     /// 재장전 애니메이션 재생하기
     /// </summary>
@@ -827,14 +835,15 @@ public class Character : CharacterBehaviour
         string stateName = equippedWeapon.HasCycledReload() ? "Reload Open" : (equippedWeapon.HasAmmunition() ? "Reload" : "Reload Empty");
         //플레이
         characterAnimator.Play(stateName, layerActions, 0.0f);
-        TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
+       
         #endregion
 
         characterAnimator.SetBool(AHashes.Reloading, reloading = true);
-        TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
 
         equippedWeapon.Reload();
-        TPEquipWeapon.Reload(stateName);
+        PV.RPC("ReloadAnimation", RpcTarget.All, stateName);
+
+
     }
 
     /// <summary>
@@ -876,6 +885,11 @@ public class Character : CharacterBehaviour
         RefreshWeaponSetup();
     }
 
+    [PunRPC]
+    private void EquipWeapon(int index = 0)
+    {
+        StartCoroutine(nameof(Equip),index);
+    }
     /// <summary>
     /// 무기 새로고침하기
     /// </summary>
@@ -1470,7 +1484,7 @@ public class Character : CharacterBehaviour
                 int indexCurrent = inventory.GetEquippedIndex();
                 //무기를 바꿀수 있고, 현재 인덱스과 다음 인덱스와 같지 않다면
                 if (CanChangeWeapon() && (indexCurrent != indexNext))
-                    StartCoroutine(nameof(Equip), indexNext);
+                    PV.RPC("EquipWeapon", RpcTarget.All, indexNext);
                 break;              
 
         }
@@ -1649,12 +1663,18 @@ public class Character : CharacterBehaviour
 
     public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
     {
-        if(stream.IsWriting)
+  
+        if (stream.IsWriting)
         {
             stream.SendNext(transform.position);
             stream.SendNext(transform.rotation);
             stream.SendNext(axisMovement);
             stream.SendNext(movementValue);
+            stream.SendNext(reloading);
+            stream.SendNext(inspecting);
+            stream.SendNext(ishostering);
+            stream.SendNext(meleeing);
+            stream.SendNext(throwingGrenade);
         }
         else
         {
@@ -1666,11 +1686,16 @@ public class Character : CharacterBehaviour
             syncRot = (Quaternion)stream.ReceiveNext();
             axisMovement = (Vector2)stream.ReceiveNext();
             movementValue = (float)stream.ReceiveNext();
+            reloading = (bool)stream.ReceiveNext();
+            inspecting = (bool)stream.ReceiveNext();
+            ishostering= (bool)stream.ReceiveNext();
+            meleeing= (bool)stream.ReceiveNext();
+            throwingGrenade= (bool)stream.ReceiveNext();
         }
 
         CL.OnPhotonSerializeView(stream, info);
         movementBehaviour.OnPhotonSerializeView(stream, info);
-
+        weaponAttachmentManager.OnPhotonSerializeView(stream, info);
 
 
     }
