@@ -1,7 +1,9 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
 {
@@ -114,13 +116,25 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     /// ÀåÂøµÈ ÅºÃ¢
     /// </summary>
     private MagazineBehaviour magazineBehaviour;
+
+    [SerializeField]
+    private PhotonView PV;
+
+    private int PVScopeIndex = -1;
+    private int PVLaserIndex = -1;
+    private int PVGripIndex = -1;
+    private int PVMuzzleIndex = 0;
+
+    [SerializeField]
+    private bool isreceive = false;
+
     #endregion
 
     #region UNITY FUNCTIONS
 
     protected override void Awake()
     {
- 
+                 
         //·£´ý ½ºÄÚÇÁ¶ó¸é
         if (scopeIndexRandom)
             scopeIndex = Random.Range(scopeIndexFirst, scopeArray.Length);
@@ -155,18 +169,16 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
             magazineIndex = Random.Range(0, magazineArray.Length);
         //ÅºÃ¢ ¼±ÅÃ
         magazineBehaviour = magazineArray.SelectAndSetActive(magazineIndex);
-
     }
+
     #endregion
 
     #region GETTERS
 
     public override ScopeBehaviour GetEquippedScope() => scopeBehaviour;
     public override ScopeBehaviour GetEquippedScopeDefault() => scopeDefaultBehaviour;
-
     public override MagazineBehaviour GetEquippedMagazine() => magazineBehaviour;
     public override MuzzleBehaviour GetEquippedMuzzle() => muzzleBehaviour;
-
     public override LaserBehaviour GetEquippedLaser() => laserBehaviour;
     public override GripBehaviour GetEquippedGrip() => gripBehaviour;
     
@@ -175,6 +187,14 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     public override int GetEquippedGripIndex() => gripIndex;
     public override int GetEquippedScopeIndex() => scopeIndex;
 
+    public override int GetEquippedMuzzlePVIndex() => PVMuzzleIndex;
+    public override int GetEquippedLaserPVIndex() => PVLaserIndex;
+    public override int GetEquippedGripPVIndex() => PVGripIndex;
+    public override int GetEquippedScopePVIndex() => PVScopeIndex;
+
+
+    public override bool Getreceive() => isreceive;
+    
     #endregion
 
     #region METHODS
@@ -221,6 +241,29 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
         }
     }
 
+    public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(scopeIndex);
+            stream.SendNext(laserIndex);
+            stream.SendNext(muzzleIndex);
+            stream.SendNext(gripIndex);
+            stream.SendNext(magazineIndex);
+            stream.SendNext(true);
+        }
+        else
+        {
+
+            PVScopeIndex = (int)stream.ReceiveNext();
+            PVLaserIndex = (int)stream.ReceiveNext();
+            PVMuzzleIndex = (int)stream.ReceiveNext();
+            PVGripIndex = (int)stream.ReceiveNext();
+            magazineIndex = (int)stream.ReceiveNext();
+            isreceive = (bool)stream.ReceiveNext();
+      
+        }
+    }
     #endregion
 }
 
