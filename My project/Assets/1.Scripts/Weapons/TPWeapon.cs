@@ -1,3 +1,5 @@
+using InfimaGames.LowPolyShooterPack;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,11 +31,17 @@ public class TPWeapon : MonoBehaviour
 
     private WeaponAttachmentManagerBehaviour EquipWeaponAttachmentManager;
 
+    private PhotonView PV;
 
     private int ScopeIndex = -1;
     private int LaserIndex = -1;
     private int MuzzleIndex = 0;
     private int GripIndex = -1;
+
+    private int TPScopeIndex = -1;
+    private int TPLaserIndex = -1;
+    private int TPMuzzleIndex = 0;
+    private int TPGripIndex = -1;
 
     [Title("Weapon AttachMent")]
 
@@ -61,13 +69,13 @@ public class TPWeapon : MonoBehaviour
 
     private GameObject[] GripGameObjects = new GameObject[3];
 
-
+    [SerializeField]
+    private bool isgo = false;
+    #region UNITY METHODS
     private void Awake()
     {
 
         Init();
-        WeaponAnimator = transform.GetComponent<Animator>();
-
         if (ChangeTransform)
         {
             transform.SetParent(ParentTransform, false);
@@ -75,71 +83,54 @@ public class TPWeapon : MonoBehaviour
         
     }
 
+    private void Update()
+    {
+        if(!isgo&&EquipWeaponAttachmentManager.Getreceive()&&!PV.IsMine)
+        {
+            TPScopeIndex = EquipWeaponAttachmentManager.GetEquippedScopePVIndex();
+            TPLaserIndex = EquipWeaponAttachmentManager.GetEquippedLaserPVIndex();
+            TPMuzzleIndex = EquipWeaponAttachmentManager.GetEquippedMuzzlePVIndex();
+            TPGripIndex = EquipWeaponAttachmentManager.GetEquippedGripPVIndex();
+
+            SetActiveIndex(ScopeGameObjects, TPScopeIndex);
+            SetActiveIndex(GripGameObjects, TPGripIndex);
+            SetActiveIndex(LaserGameObjects, TPLaserIndex);
+            SetActiveIndex(MuzzleGameObjects, TPMuzzleIndex);
+            isgo = true;
+        }
+
+    }
+
+    #endregion
+
     #region METHODS
 
     private void Init()
     {
-        //Character = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+        WeaponAnimator = transform.GetComponent<Animator>();
         Character = transform.parent.GetComponent<TPInventory>().GetCharacterBehaviour();
+        PV = Character.transform.GetComponent<PhotonView>();
         FPInventory = Character.GetInventory();
         EquipWeapon = FPInventory.GetEquipped();
         EquipWeaponAttachmentManager = EquipWeapon.GetAttachmentManager();
-        
         ScopeIndex = EquipWeaponAttachmentManager.GetEquippedScopeIndex();
         LaserIndex = EquipWeaponAttachmentManager.GetEquippedLaserIndex();
         MuzzleIndex = EquipWeaponAttachmentManager.GetEquippedMuzzleIndex();
         GripIndex = EquipWeaponAttachmentManager.GetEquippedGripIndex();
 
-        for (int i = 0; i < Scopes.childCount; i++)
-        {
-            ScopeGameObjects[i] = Scopes.GetChild(i).gameObject;
-            ScopeGameObjects[i].SetActive(false);
-            renderers.Add(ScopeGameObjects[i].GetComponent<Renderer>());
-        }
-        
-        for(int i = 0; i < Lasers.childCount; i++)
-        {
-            LaserGameObjects[i] = Lasers.GetChild(i).gameObject;
-            LaserGameObjects[i].SetActive(false);
-            renderers.Add(LaserGameObjects[i].GetComponent<Renderer>());
-        }
-        
-        for(int i = 0; i < Muzzles.childCount; i++)
-        {
-            MuzzleGameObjects[i] = Muzzles.GetChild(i).gameObject;
-            MuzzleGameObjects[i].SetActive(false);
-            renderers.Add(MuzzleGameObjects[i].GetComponent<Renderer>());
-        }
-        
-        for(int i = 0; i < Grips.childCount; i++)
-        {
-            GripGameObjects[i] = Grips.GetChild(i).gameObject;
-            GripGameObjects[i].SetActive(false);
-            renderers.Add(GripGameObjects[i].GetComponent<Renderer>());
-        }
-        EquipAttachment();
 
-    }
+        SetActive(ScopeGameObjects, Scopes);
+        SetActive(LaserGameObjects, Lasers);
+        SetActive(MuzzleGameObjects,Muzzles);
+        SetActive(GripGameObjects, Grips);
 
-    private void EquipAttachment()
-    {
-        if(ScopeIndex != -1)
-        {
-            ScopeGameObjects[ScopeIndex].SetActive(true);
-        }
-        if(LaserIndex != -1)
-        {
-            LaserGameObjects[LaserIndex].SetActive(true);
-        }
-        if(GripIndex != -1)
-        {
-            GripGameObjects[GripIndex].SetActive(true);
-        }
-        if(MuzzleIndex != 0)
-        {
-            MuzzleGameObjects[MuzzleIndex-1].SetActive(true);
-        }
-  
+
+        SetActiveIndex(ScopeGameObjects, TPScopeIndex);
+        SetActiveIndex(GripGameObjects, TPGripIndex);
+        SetActiveIndex(LaserGameObjects, TPLaserIndex);
+        SetActiveIndex(MuzzleGameObjects, TPMuzzleIndex);
+
+       
     }
 
     public void Reload(string stateName)
@@ -176,4 +167,36 @@ public class TPWeapon : MonoBehaviour
     public Animator GetAnimator() => WeaponAnimator;
 
     #endregion
+
+    #region HELP METHODS
+
+    /// <summary>
+    /// 배열에 게임오브젝트를 넣고, 게임오브젝트 비활성화하기
+    /// </summary>
+    /// <param name="array"></param>
+    /// <param name="gametransform"></param>
+    private void SetActive(GameObject[] array, Transform gametransform)
+    {
+        for (int i = 0; i < gametransform.childCount; i++)
+        {
+            array[i] = gametransform.GetChild(i).gameObject;
+            array[i].SetActive(false);
+            renderers.Add(array[i].GetComponent<Renderer>());
+        }
+    }
+    
+    private void SetActiveIndex(GameObject[] array, int index)
+    {
+        if (index < 0)
+            return;
+        for(int i = 0; i < array.Length;i++)
+        {
+            array[i].SetActive(false);
+        }
+        array[index].SetActive(true);
+
+    }
+
+    #endregion
+
 }
