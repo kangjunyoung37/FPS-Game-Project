@@ -184,6 +184,7 @@ public class Weapon : WeaponBehaviour
     private GripBehaviour gripBehaviour;
 
 
+
     #endregion
 
 
@@ -209,7 +210,6 @@ public class Weapon : WeaponBehaviour
         animator = GetComponent<Animator>();
         attachMentManager = GetComponent<WeaponAttachmentManagerBehaviour>();
         gameModeService = ServiceLocator.Current.Get<IGameModeService>();
-        //characterBehaviour = gameModeService.GetPlayerCharacter();
         characterBehaviour = transform.parent.GetComponent<Inventory>().GetCharacterBehaviour();
         playerCamera = characterBehaviour.GetCameraWold().transform;
 
@@ -223,6 +223,7 @@ public class Weapon : WeaponBehaviour
         laserBehaviour = attachMentManager.GetEquippedLaser();
         gripBehaviour = attachMentManager.GetEquippedGrip();
         ammunitionCurrent = magazineBehaviour.GetAmmunitionTotal();
+
 
     }
     #endregion
@@ -364,11 +365,17 @@ public class Weapon : WeaponBehaviour
             spreadValue = playerCamera.TransformDirection(spreadValue);
             //발사체 소환
             GameObject projectile = Instantiate(prefabProjectile, playerCamera.position, Quaternion.Euler(playerCamera.eulerAngles + spreadValue));
-
+            Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(),projectile.GetComponent<Collider>());
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
 
         }
     }
+
+    public override void InstateProjectile(float spreadMutiplier = 1)
+    {
+ 
+    }
+
     //탄약 채우기
     public override void FillAmmunition(int amount)
     {
@@ -401,6 +408,10 @@ public class Weapon : WeaponBehaviour
         WeaponRenderer.enabled = false;
         
     }
+
+
+
+
 
     #endregion
 }
