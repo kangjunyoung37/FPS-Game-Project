@@ -69,8 +69,10 @@ public class TPWeapon : MonoBehaviour
 
     private GameObject[] GripGameObjects = new GameObject[3];
 
-    [SerializeField]
     private bool isgo = false;
+
+    private MuzzleBehaviour muzzle;
+
     #region UNITY METHODS
     private void Awake()
     {
@@ -118,11 +120,12 @@ public class TPWeapon : MonoBehaviour
         MuzzleIndex = EquipWeaponAttachmentManager.GetEquippedMuzzleIndex();
         GripIndex = EquipWeaponAttachmentManager.GetEquippedGripIndex();
 
-
         SetActive(ScopeGameObjects, Scopes);
         SetActive(LaserGameObjects, Lasers);
         SetActive(MuzzleGameObjects,Muzzles);
         SetActive(GripGameObjects, Grips);
+
+        muzzle = MuzzleGameObjects[MuzzleIndex].GetComponent<MuzzleBehaviour>();
 
 
         SetActiveIndex(ScopeGameObjects, TPScopeIndex);
@@ -160,6 +163,13 @@ public class TPWeapon : MonoBehaviour
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
         }
     }
+
+    public void MuzzleFire()
+    {
+        muzzle.Effect();
+        
+    }
+
     #endregion
 
     #region GETTERS
