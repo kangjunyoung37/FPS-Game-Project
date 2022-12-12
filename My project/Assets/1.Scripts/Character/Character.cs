@@ -156,6 +156,10 @@ public class Character : CharacterBehaviour
     [SerializeField]
     private FPRenController fPRenController;
 
+    [Title(label: "Leaning Input")]
+    [SerializeField]
+    private LeaningInput leaningInput;
+
     #endregion
 
     #region FIELDS
@@ -409,8 +413,12 @@ public class Character : CharacterBehaviour
 
         if (!PV.IsMine)
         {
-            Destroy(cameraWorld.gameObject);
-            Destroy(cameraDepth.gameObject);
+            //Destroy(cameraWorld.gameObject);
+            //Destroy(cameraDepth.gameObject);
+            cameraWorld.enabled = false;
+            cameraDepth.enabled = false;
+            cameraWorld.GetComponent<AudioListener>().enabled = false;
+
             fPRenController.FPRenOff();
             equippedWeapon.FPWPOff();
         }
@@ -437,6 +445,7 @@ public class Character : CharacterBehaviour
 
     protected override void Update()
     {
+        PVAnimatorUpdate();
         if (!PV.IsMine)
         {
             transform.position = Vector3.Lerp(transform.position, syncPos, Time.deltaTime * 15f);
@@ -507,8 +516,6 @@ public class Character : CharacterBehaviour
 
         wasAiming = aiming;
 
-        PV.RPC("PVJumping", RpcTarget.All);
-        PV.RPC("PVAnimatorUpdate", RpcTarget.All);
 
     }
     protected override void LateUpdate()
@@ -748,19 +755,16 @@ public class Character : CharacterBehaviour
 
         //조준 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Aim, aiming);
-        TPcharacterAnimator.SetBool(AHashes.Aim, aiming);
         //달리기 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Running, running);
-        TPcharacterAnimator.SetBool(AHashes.Running, running);
         //웅크리기 애니메이터 업데이트
         characterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
-        TPcharacterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
     }
 
-    [PunRPC]
     private void PVAnimatorUpdate()
     {
-
+        TPcharacterAnimator.SetBool(AHashes.Aim, aiming);
+        TPcharacterAnimator.SetBool(AHashes.Running, running);
         TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
@@ -811,10 +815,17 @@ public class Character : CharacterBehaviour
         if (!equippedWeapon.HasAmmunition() && equippedWeapon.GetAutomaticallyReloadOnEmpty())
             StartCoroutine(nameof(TryReloadAutomatic));
     }
+
     [PunRPC]
     private void FireAnimation()
     {
+        //TP발사 애니메이션 재생
         TPcharacterAnimator.CrossFade("Fire", 0.05f, TPlayerOverlay, 0);
+        if (!PV.IsMine)
+        {
+            equippedWeapon.InstateProjectile(aiming ? equippedWeaponScope.GetMultiplierSpread() : 1.0f);
+            TPEquipWeapon.MuzzleFire();
+        }
     }
 
     [PunRPC]
@@ -1675,6 +1686,8 @@ public class Character : CharacterBehaviour
             stream.SendNext(ishostering);
             stream.SendNext(meleeing);
             stream.SendNext(throwingGrenade);
+            stream.SendNext(shotsFired);
+            stream.SendNext(aiming);
         }
         else
         {
@@ -1691,12 +1704,14 @@ public class Character : CharacterBehaviour
             ishostering= (bool)stream.ReceiveNext();
             meleeing= (bool)stream.ReceiveNext();
             throwingGrenade= (bool)stream.ReceiveNext();
+            shotsFired = (int)stream.ReceiveNext();
+            aiming = (bool)stream.ReceiveNext();
         }
 
         CL.OnPhotonSerializeView(stream, info);
         movementBehaviour.OnPhotonSerializeView(stream, info);
         weaponAttachmentManager.OnPhotonSerializeView(stream, info);
-
+        leaningInput.OnPhotonSerializeView(stream, info);
 
     }
 
