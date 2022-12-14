@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements.Experimental;
 
 
 /// <summary>
@@ -450,6 +451,22 @@ public class Character : CharacterBehaviour
         {
             transform.position = Vector3.Lerp(transform.position, syncPos, Time.deltaTime * 15f);
             transform.rotation = Quaternion.Slerp(transform.rotation, syncRot, Time.deltaTime * 15f);
+            //TPcharacterAnimator.SetBool(AHashes.Reloading, reloading);
+
+            const string boolNameReloading = "Reloading";
+            if (TPcharacterAnimator.GetBool(boolNameReloading))
+            {
+                //재장전할 총알이 하나라도 있다면 값을 변경할 수 있습니다.
+                if (equippedWeapon.GetAmmunitionTotal() - equippedWeapon.GetAmmunitionCurrent() < 1)
+                {
+                    //캐릭터 애니메이터 업데이트
+  
+                    TPcharacterAnimator.SetBool(boolNameReloading, false);
+                    TPEquipWeapon.GetAnimator().SetBool(boolNameReloading, false);
+
+                }
+
+            }
             return;
         }
             
@@ -661,27 +678,24 @@ public class Character : CharacterBehaviour
     public override bool IsInspecting() => inspecting;
 
     /// <summary>
+    /// 포톤 뷰를 리턴
+    /// </summary>
+    public override PhotonView GetPhotonView() => PV;
+
+    /// <summary>
+    /// TP오디오 소스를 리턴합니다.
+    /// </summary>
+    public override AudioSource GetTPWeaponAudioSource() => TPEquipWeapon.GetTPAudiosorce();
+
+    /// <summary>
     /// 발사버튼을 계속 누르고 있는지
     /// </summary>
     public override bool isHoldingButtonFire() => holdingButtonFire;
 
-    public override void DropMagazine(bool drop = true)
-    {
-        magazineTransform.gameObject.SetActive(!drop);
-
-        if (!drop)
-            return;
-
-        //새로운 탄창 생성
-        GameObject spawnedMagazine = Instantiate(prefabMagazine, magazineTransform.position, magazineTransform.rotation);
-
-        spawnedMagazine.GetComponent<MeshRenderer>().sharedMaterials = meshRenderer.sharedMaterials;
-
-        spawnedMagazine.GetComponent<MeshFilter>().sharedMesh = meshFilter.sharedMesh;
-
-        Destroy(spawnedMagazine, 5.0f);
-    }
-
+    /// <summary>
+    /// 현재 장착하고 있는 무기를 리턴합니다
+    /// </summary>
+    public override WeaponBehaviour GetWeaponBehaviour() => inventory.GetEquipped();
     #endregion
 
     #region METHODS
@@ -705,6 +719,7 @@ public class Character : CharacterBehaviour
                 TPcharacterAnimator.SetBool(boolNameReloading, false);
                 equippedWeapon.GetAnimator().SetBool(boolNameReloading, false);
                 TPEquipWeapon.GetAnimator().SetBool(boolNameReloading, false);
+
             }
 
         }
@@ -798,29 +813,36 @@ public class Character : CharacterBehaviour
         equippedWeapon.Fire(aiming ? equippedWeaponScope.GetMultiplierSpread() : 1.0f);
         //TP발사 애니메이션 재생
         TPEquipWeapon.Fire();
-        if(equippedWeapon.GetAmmunitionCurrent() == 0)
+        //현재 가진 총알 수가 0이라면 슬라이드 백 포즈를 취함
+        if (equippedWeapon.GetAmmunitionCurrent() == 0)
         {
-            TPEquipWeapon.SetSlideBack(1);
+            PV.RPC("WeaponSlideBackAnimation", RpcTarget.All);
         }
         //발사 애니메이션 재생
         const string stateName = "Fire";
         characterAnimator.CrossFade(stateName, 0.05f, layerOverlay, 0);
-        //FireAnimation();
         PV.RPC("FireAnimation", RpcTarget.All);
 
-        //탄약이 있는 경우 볼트 액션 애니메이션을 재생합니다.
-        if (equippedWeapon.IsBoltAction() && equippedWeapon.HasAmmunition())
-            UpdateBolt(true);
         //필요한 경우 무기를 자동으로 재장전합니다. 유탄 발사기 또는 로켓 발사기와 같은 것에 매우 유용합니다.
         if (!equippedWeapon.HasAmmunition() && equippedWeapon.GetAutomaticallyReloadOnEmpty())
             StartCoroutine(nameof(TryReloadAutomatic));
     }
 
     [PunRPC]
+    private void WeaponSlideBackAnimation()
+    {
+        TPEquipWeapon.SetSlideBack(1);
+    }
+    
+    [PunRPC]
     private void FireAnimation()
     {
         //TP발사 애니메이션 재생
         TPcharacterAnimator.CrossFade("Fire", 0.05f, TPlayerOverlay, 0);
+
+        if (equippedWeapon.IsBoltAction() && equippedWeapon.HasAmmunition())
+            UpdateBolt(true);
+
         if (!PV.IsMine)
         {
             equippedWeapon.InstateProjectile(aiming ? equippedWeaponScope.GetMultiplierSpread() : 1.0f);
@@ -828,12 +850,16 @@ public class Character : CharacterBehaviour
         }
     }
 
-    [PunRPC]
-    private void ReloadAnimation(string stateName)
+    /// <summary>
+    ///  볼트 애니메이션 재생
+    /// </summary>
+    /// <param name="value"></param>
+    private void UpdateBolt(bool value)
     {
-        TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
-        TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
-        TPEquipWeapon.Reload(stateName);
+        //상태 업데이트
+        characterAnimator.SetBool(AHashes.Bolt, bolting = value);
+        TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
+
     }
 
     /// <summary>
@@ -846,7 +872,7 @@ public class Character : CharacterBehaviour
         string stateName = equippedWeapon.HasCycledReload() ? "Reload Open" : (equippedWeapon.HasAmmunition() ? "Reload" : "Reload Empty");
         //플레이
         characterAnimator.Play(stateName, layerActions, 0.0f);
-       
+
         #endregion
 
         characterAnimator.SetBool(AHashes.Reloading, reloading = true);
@@ -855,6 +881,16 @@ public class Character : CharacterBehaviour
         PV.RPC("ReloadAnimation", RpcTarget.All, stateName);
 
 
+    }
+
+    [PunRPC]
+    private void ReloadAnimation(string stateName)
+    {
+        TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
+        TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
+        TPEquipWeapon.Reload(stateName);
+        if (!PV.IsMine)
+            TPEquipWeapon.PlaySound(stateName == "Reload Open" ? equippedWeapon.GetAudioClipReloadOpen() : (stateName == "Reload" ? equippedWeapon.GetAudioClipReload() : equippedWeapon.GetAudioClipReloadEmpty()), 1.0f);
     }
 
     /// <summary>
@@ -867,6 +903,23 @@ public class Character : CharacterBehaviour
 
         //재장전
         PlayReloadAnimation();
+    }
+
+    public override void DropMagazine(bool drop = true)
+    {
+        magazineTransform.gameObject.SetActive(!drop);
+
+        if (!drop)
+            return;
+
+        //새로운 탄창 생성
+        GameObject spawnedMagazine = Instantiate(prefabMagazine, magazineTransform.position, magazineTransform.rotation);
+
+        spawnedMagazine.GetComponent<MeshRenderer>().sharedMaterials = meshRenderer.sharedMaterials;
+
+        spawnedMagazine.GetComponent<MeshFilter>().sharedMesh = meshFilter.sharedMesh;
+
+        Destroy(spawnedMagazine, 5.0f);
     }
 
     /// <summary>
@@ -925,6 +978,7 @@ public class Character : CharacterBehaviour
 
         //장착된 탄창정보를 가져옵니다.
         equipeedWeaponMagazine = weaponAttachmentManager.GetEquippedMagazine();
+
     }
 
     /// <summary>
@@ -981,17 +1035,6 @@ public class Character : CharacterBehaviour
         TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
 
-    }
-    /// <summary>
-    ///  볼트 애니메이션 재생
-    /// </summary>
-    /// <param name="value"></param>
-    private void UpdateBolt(bool value)
-    {
-        //상태 업데이트
-        characterAnimator.SetBool(AHashes.Bolt, bolting = value);
-        TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
-        
     }
 
     /// <summary>
@@ -1712,6 +1755,7 @@ public class Character : CharacterBehaviour
         movementBehaviour.OnPhotonSerializeView(stream, info);
         weaponAttachmentManager.OnPhotonSerializeView(stream, info);
         leaningInput.OnPhotonSerializeView(stream, info);
+        equippedWeapon.OnPhotonSerializeView(stream, info);
 
     }
 
