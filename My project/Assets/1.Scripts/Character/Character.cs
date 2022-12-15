@@ -4,6 +4,7 @@ using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements.Experimental;
@@ -414,8 +415,6 @@ public class Character : CharacterBehaviour
 
         if (!PV.IsMine)
         {
-            //Destroy(cameraWorld.gameObject);
-            //Destroy(cameraDepth.gameObject);
             cameraWorld.enabled = false;
             cameraDepth.enabled = false;
             cameraWorld.GetComponent<AudioListener>().enabled = false;
@@ -538,9 +537,8 @@ public class Character : CharacterBehaviour
     protected override void LateUpdate()
     {
        
-        if (reloading || inspecting || ishostering || meleeing || throwingGrenade )
+        if (reloading || inspecting || ishostering || meleeing || throwingGrenade || running)
         {
-
             CharacterForward = aimik.solver.transform.InverseTransformDirection(transform.forward);
             float x = aimik.solver.axis.x;
             float y = aimik.solver.axis.y;
@@ -551,12 +549,17 @@ public class Character : CharacterBehaviour
             z = Mathf.Lerp(z, CharacterForward.z, Time.deltaTime * 15);
        
             aimik.solver.axis = new Vector3(x, y, z);
+
+
+            
         }
+
         else if (aimik.solver.axis == new Vector3(0.0f, 0.0f, 1f))
             return;
+
         else
         {
-
+            
             float x = aimik.solver.axis.x;
             float y = aimik.solver.axis.y;
             float z = aimik.solver.axis.z;
@@ -565,6 +568,7 @@ public class Character : CharacterBehaviour
             y = Mathf.Lerp(y, 0.0f, Time.deltaTime * 8.0f);
             z = Mathf.Lerp(z, 1.0f, Time.deltaTime * 8.0f);
             aimik.solver.axis = new Vector3(x, y, z);
+ 
         }
     }
     #endregion
@@ -784,6 +788,10 @@ public class Character : CharacterBehaviour
         TPcharacterAnimator.SetFloat(AHashes.Vertical, axisMovement.y, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetFloat(AHashes.Movement, movementValue, dampTimeLocomotion, Time.deltaTime);
         TPcharacterAnimator.SetBool(AHashes.Crouching, movementBehaviour.IsCrouching());
+        if (aiming)
+            TPcharacterAnimator.SetFloat("RunSpeed", 0.44f);
+        else
+            TPcharacterAnimator.SetFloat("RunSpeed", 1.0f);
     }
 
     /// <summary>
@@ -941,18 +949,18 @@ public class Character : CharacterBehaviour
         SetHolstered(false);
 
         characterAnimator.Play("Unholster", layerHolster, 0);
-        //TPcharacterAnimator.Play("Unholster", TPlayerHolster, 0);
-        //새로운 장비 장착
-        inventory.Equip(index);
 
-        //새로 고침
-        RefreshWeaponSetup();
+        PV.RPC("EquipWeapon", RpcTarget.All, index);
     }
 
     [PunRPC]
     private void EquipWeapon(int index = 0)
     {
-        StartCoroutine(nameof(Equip),index);
+        //새로운 장비 장착
+        inventory.Equip(index);
+
+        //새로 고침
+        RefreshWeaponSetup();
     }
     /// <summary>
     /// 무기 새로고침하기
@@ -978,6 +986,12 @@ public class Character : CharacterBehaviour
 
         //장착된 탄창정보를 가져옵니다.
         equipeedWeaponMagazine = weaponAttachmentManager.GetEquippedMagazine();
+        if (!PV.IsMine)
+            equippedWeapon.FPWPOff();
+        else
+        {
+            TPEquipWeapon.TPWeaponOff();
+        }
 
     }
 
@@ -1538,7 +1552,7 @@ public class Character : CharacterBehaviour
                 int indexCurrent = inventory.GetEquippedIndex();
                 //무기를 바꿀수 있고, 현재 인덱스과 다음 인덱스와 같지 않다면
                 if (CanChangeWeapon() && (indexCurrent != indexNext))
-                    PV.RPC("EquipWeapon", RpcTarget.All, indexNext);
+                    StartCoroutine(nameof(Equip), indexNext);
                 break;              
 
         }
@@ -1731,6 +1745,7 @@ public class Character : CharacterBehaviour
             stream.SendNext(throwingGrenade);
             stream.SendNext(shotsFired);
             stream.SendNext(aiming);
+            stream.SendNext(running);
         }
         else
         {
@@ -1749,6 +1764,7 @@ public class Character : CharacterBehaviour
             throwingGrenade= (bool)stream.ReceiveNext();
             shotsFired = (int)stream.ReceiveNext();
             aiming = (bool)stream.ReceiveNext();
+            running = (bool)stream.ReceiveNext();
         }
 
         CL.OnPhotonSerializeView(stream, info);
