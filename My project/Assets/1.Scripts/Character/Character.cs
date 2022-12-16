@@ -4,6 +4,7 @@ using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -61,6 +62,9 @@ public class Character : CharacterBehaviour
     [Tooltip("칼 게임오브젝트")]
     [SerializeField]
     private GameObject knife;
+
+    [SerializeField]
+    private GameObject TPknife;
 
     [Title(label: "Cameras")]
 
@@ -421,18 +425,25 @@ public class Character : CharacterBehaviour
 
             fPRenController.FPRenOff();
             equippedWeapon.FPWPOff();
+            knife.GetComponent<Renderer>().enabled = false;
         }
         else
         {
             tPRenController.TPRenderOff();
             TPEquipWeapon.TPWeaponOff();
+            knife.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+
         }
 
         //수류탄 양 최대로 설정
         grenadeCount = grenadeTotal;
         //칼을 숨깁니다.
         if (knife != null)
+        {
             knife.SetActive(false);
+            TPknife.SetActive(false);
+        }
+            
 
         //레이어 인덱스 캐싱
         layerHolster = characterAnimator.GetLayerIndex("Layer Holster");
@@ -962,6 +973,7 @@ public class Character : CharacterBehaviour
         //새로 고침
         RefreshWeaponSetup();
     }
+
     /// <summary>
     /// 무기 새로고침하기
     /// </summary>
@@ -1029,10 +1041,14 @@ public class Character : CharacterBehaviour
         //애니메이션 재생
         characterAnimator.CrossFade("Grenade Throw", 0.15f, characterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         characterAnimator.CrossFade("Grenade Throw", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
+        PV.RPC("PlayTPGrenadeThrow", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void PlayTPGrenadeThrow()
+    {
         TPcharacterAnimator.CrossFade("Grenade Throw", 0.15f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         TPcharacterAnimator.CrossFade("Grenade Throw", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
-
-
     }
 
     /// <summary>
@@ -1046,9 +1062,17 @@ public class Character : CharacterBehaviour
         //애니메이션 재생
         characterAnimator.CrossFade("Knife Attack", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         characterAnimator.CrossFade("Knife Attack", 0.05f, characterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
+        PV.RPC("TPPlayMelee", RpcTarget.All);
+    }
+
+    /// <summary>
+    /// TP모델 근접 무기 애니메이션 재생
+    /// </summary>
+    [PunRPC]
+    private void TPPlayMelee()
+    {
         TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Left"), 0.0f);
         TPcharacterAnimator.CrossFade("Knife Attack", 0.05f, TPcharacterAnimator.GetLayerIndex("Layer Actions Arm Right"), 0.0f);
-
     }
 
     /// <summary>
@@ -1644,7 +1668,8 @@ public class Character : CharacterBehaviour
         Vector3 position = cTransform.position;
         position += cTransform.forward * grenadeSpawnOffset;
         //던지기
-        Instantiate(grenadePrefab, position, cTransform.rotation);
+        PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "P_LPSP_PROJ_Grenade_01"),position,cTransform.rotation);
+
     }
 
     /// <summary>
@@ -1722,6 +1747,7 @@ public class Character : CharacterBehaviour
     {
         //활성화하기
         knife.SetActive(active != 0);
+        TPknife.SetActive(active != 0);
     }
 
 
