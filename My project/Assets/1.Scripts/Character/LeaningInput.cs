@@ -87,12 +87,13 @@ public class LeaningInput : MonoBehaviour
     public void Lean(InputAction.CallbackContext context)
     {
 
+        if (!PV.IsMine)
+            return;
         //커서가 잠겨있지 않다면
-        if(!characterBehaviour.isCursorLocked() || !PV.IsMine)
+        if(!characterBehaviour.isCursorLocked())
         {
             //기울기를 0으로 유지
             leaningInput = 0.0f;
-            
             return;
         }
 
@@ -100,6 +101,19 @@ public class LeaningInput : MonoBehaviour
 
 
 
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(leaningInput);
+        }
+        else
+        {
+            leaningInput = (float)stream.ReceiveNext();
+
+        }
     }
 
 
