@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -39,6 +40,13 @@ public class FootstepPlayer : MonoBehaviour
 
     #endregion
 
+    #region FIELD
+
+    private PhotonView PV;
+
+    #endregion
+
+
     #region UNITY
 
     private void Awake()
@@ -48,6 +56,8 @@ public class FootstepPlayer : MonoBehaviour
             audioSource.clip = audioClipWalking;
             audioSource.loop = true;
         }
+        PV = gameObject.GetComponent<PhotonView>();
+  
     }
 
     private void Update()
@@ -59,19 +69,20 @@ public class FootstepPlayer : MonoBehaviour
             return;
         }
 
-        //땅에서 움직이는 체크
-        if (movementBehaviour.IsGrounded() && movementBehaviour.GetVelocity().sqrMagnitude > minVelocityMagnitude)
+        if(!PV.IsMine)
         {
-            audioSource.clip = characterAnimator.GetBool(AHashes.Running) ? audioClipWalking : audioClipRunning;
-            if (!audioSource.isPlaying)
-                audioSource.Play();
 
+            PlayWalkSound(movementBehaviour.GetPVIsGrounded() ,movementBehaviour.GetPVVelocity());
         }
-        else if (audioSource.isPlaying)
-            audioSource.Pause();
-
+        else
+        {
+            PlayWalkSound(movementBehaviour.IsGrounded(),movementBehaviour.GetVelocity());
+        }
 
     }
+
+
+    #endregion
 
     #region GETTERS
 
@@ -79,6 +90,20 @@ public class FootstepPlayer : MonoBehaviour
 
     #endregion
 
+    #region METHODS
 
+    private void PlayWalkSound(bool IsGrounded ,Vector3 charactervelocity)
+    {
+        if (IsGrounded && charactervelocity.sqrMagnitude > minVelocityMagnitude)
+        {
+            audioSource.clip = characterAnimator.GetBool(AHashes.Running) ? audioClipRunning : audioClipWalking;
+            if (!audioSource.isPlaying)
+                audioSource.Play();
+
+        }
+        else if (audioSource.isPlaying)
+            audioSource.Pause();
+
+    }
     #endregion
 }
