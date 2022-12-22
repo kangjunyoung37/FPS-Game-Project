@@ -1,21 +1,18 @@
-using InfimaGames.LowPolyShooterPack;
-using InfimaGames.LowPolyShooterPack.Interface;
 using Photon.Pun;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements.Experimental;
-
+using InfimaGames.LowPolyShooterPack;
+using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// 주요 캐릭터의 구성요소
 /// </summary>
 [RequireComponent(typeof(CharacterKinematicss))]
-public class Character : CharacterBehaviour
+public class Character : CharacterBehaviour, IDamageable
 {
     #region FIELDS SERIALIZED
 
@@ -165,6 +162,10 @@ public class Character : CharacterBehaviour
     [Title(label: "Leaning Input")]
     [SerializeField]
     private LeaningInput leaningInput;
+
+    [Title(label: "Blood Prefab")]
+    [SerializeField]
+    private GameObject BloodPrefab;
 
     #endregion
 
@@ -381,7 +382,15 @@ public class Character : CharacterBehaviour
     /// </summary>
     private CameraLook CL;
 
+    /// <summary>
+    /// 움직임 값
+    /// </summary>
     private float movementValue;
+
+    /// <summary>
+    /// 현재 시간
+    /// </summary>
+    private float curTime;
     #endregion
 
     #region UNITY
@@ -396,6 +405,9 @@ public class Character : CharacterBehaviour
         UpdateCursorState();
 
         #endregion
+        //수정 필요 게임 매니저에 넣어야할듯
+        //Physics.IgnoreLayerCollision(0, 15);//Default , Projectile
+        Physics.IgnoreLayerCollision(7, 10);//TPCharacter , Character
 
         //캐싱
         //movementBehaviour = GetComponent<MovementBehaviour>();
@@ -416,7 +428,6 @@ public class Character : CharacterBehaviour
 
     protected override void Start()
     {
-
         if (!PV.IsMine)
         {
             cameraWorld.enabled = false;
@@ -456,6 +467,8 @@ public class Character : CharacterBehaviour
 
     protected override void Update()
     {
+
+        //IKChange(running);
         PVAnimatorUpdate();
         if (!PV.IsMine)
         {
@@ -547,30 +560,26 @@ public class Character : CharacterBehaviour
     }
     protected override void LateUpdate()
     {
-       
-        if (reloading || inspecting || ishostering || meleeing || throwingGrenade || running)
+        if (reloading || inspecting || ishostering || meleeing || throwingGrenade || running )
         {
             CharacterForward = aimik.solver.transform.InverseTransformDirection(transform.forward);
             float x = aimik.solver.axis.x;
             float y = aimik.solver.axis.y;
             float z = aimik.solver.axis.z;
-
             x = Mathf.Lerp(x, CharacterForward.x, Time.deltaTime * 15);
             y = Mathf.Lerp(y, CharacterForward.y, Time.deltaTime * 15);
             z = Mathf.Lerp(z, CharacterForward.z, Time.deltaTime * 15);
-       
+
             aimik.solver.axis = new Vector3(x, y, z);
 
-
-            
         }
 
         else if (aimik.solver.axis == new Vector3(0.0f, 0.0f, 1f))
-            return;
+            aimik.solver.axis = new Vector3(0.0f, 0.0f, 1f);
+
 
         else
         {
-            
             float x = aimik.solver.axis.x;
             float y = aimik.solver.axis.y;
             float z = aimik.solver.axis.z;
@@ -579,13 +588,24 @@ public class Character : CharacterBehaviour
             y = Mathf.Lerp(y, 0.0f, Time.deltaTime * 8.0f);
             z = Mathf.Lerp(z, 1.0f, Time.deltaTime * 8.0f);
             aimik.solver.axis = new Vector3(x, y, z);
- 
+
         }
+
+
     }
     #endregion
 
     #region GETTERS
 
+    /// <summary>
+    /// running 값을 리턴합니다.
+    /// </summary>
+    public override bool GetRunning() => running;
+
+    /// <summary>
+    /// TPRenController를 리턴합니다.
+    /// </summary>
+    public override TPRenController GetTPRenController() => tPRenController;
     /// <summary>
     /// 쏜 총알의 수
     /// </summary>
@@ -716,6 +736,21 @@ public class Character : CharacterBehaviour
     #region METHODS
 
     /// <summary>
+    /// IK weight 값 변경하기
+    /// </summary>
+    private void IKChange(bool check)
+    {
+        if(check)
+        {
+            aimik.solver.IKPositionWeight = 0.0f;
+        }
+        else
+        {
+            aimik.solver.IKPositionWeight = 1.0f;
+        }
+    }
+
+    /// <summary>
     /// 애니메이터 업데이트하기
     /// </summary>
     private void UpdateAnimator()
@@ -793,6 +828,7 @@ public class Character : CharacterBehaviour
 
     private void PVAnimatorUpdate()
     {
+
         TPcharacterAnimator.SetBool(AHashes.Aim, aiming);
         TPcharacterAnimator.SetBool(AHashes.Running, running);
         TPcharacterAnimator.SetFloat(AHashes.Horizontal, axisMovement.x, dampTimeLocomotion, Time.deltaTime);
@@ -837,9 +873,11 @@ public class Character : CharacterBehaviour
         {
             PV.RPC("WeaponSlideBackAnimation", RpcTarget.All);
         }
+
         //발사 애니메이션 재생
         const string stateName = "Fire";
         characterAnimator.CrossFade(stateName, 0.05f, layerOverlay, 0);
+
         PV.RPC("FireAnimation", RpcTarget.All);
 
         //필요한 경우 무기를 자동으로 재장전합니다. 유탄 발사기 또는 로켓 발사기와 같은 것에 매우 유용합니다.
@@ -856,6 +894,7 @@ public class Character : CharacterBehaviour
     [PunRPC]
     private void FireAnimation()
     {
+
         //TP발사 애니메이션 재생
         TPcharacterAnimator.CrossFade("Fire", 0.05f, TPlayerOverlay, 0);
 
@@ -876,8 +915,11 @@ public class Character : CharacterBehaviour
     private void UpdateBolt(bool value)
     {
         //상태 업데이트
-        characterAnimator.SetBool(AHashes.Bolt, bolting = value);
-        TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
+        if (equippedWeapon.IsBoltAction() && equippedWeapon.HasAmmunition())
+        {
+            characterAnimator.SetBool(AHashes.Bolt, bolting = value);
+            TPcharacterAnimator.SetBool(AHashes.Bolt, bolting = value);
+        }
 
     }
 
@@ -1086,6 +1128,7 @@ public class Character : CharacterBehaviour
         characterAnimator.SetBool(boolName, holstered);
         TPcharacterAnimator.SetBool(boolName, holstered);
     }
+
     #endregion
 
     #region ACTION CHECKS
@@ -1800,6 +1843,24 @@ public class Character : CharacterBehaviour
         equippedWeapon.OnPhotonSerializeView(stream, info);
 
     }
+
+    #endregion
+
+
+    #region DAMAGE
+
+    public void TakeDamage(float damage, Vector3 pos,Quaternion rot)
+    {
+        PV.RPC("RPC_TakeDamage", RpcTarget.All, damage,pos,rot);
+
+    }
+
+    [PunRPC]
+    public void RPC_TakeDamage(float damame,Vector3 pos,Quaternion rot)
+    {
+        Instantiate(BloodPrefab, pos, rot);
+    }
+
 
     #endregion
 }

@@ -15,12 +15,23 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     #endregion UNITY
 
     #region GETTER
+
+    /// <summary>
+    /// running 값을 리턴합니다.
+    /// </summary>
+    public abstract bool GetRunning();
+
+    /// <summary>
+    /// TPRenController를 리턴합니다.
+    /// </summary>
+    public abstract TPRenController GetTPRenController();
     
     /// <summary>
     /// 캐릭터가 연속적으로 발사한 샷의 양을 반환하는 함수
     /// 반동을 적용하고 스프레드를 수정하기 위해 사용 
     /// </summary>
     public abstract int GetShotsFired();
+    
     /// <summary>
     /// 캐릭터가 무기를 내리고 있는지 확인하는 함수
     /// </summary>
@@ -119,6 +130,22 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     /// 플레이어가 발사버튼을 계속 누르고 있는지 반환
     /// </summary>
     public abstract bool isHoldingButtonFire();
+
+    /// <summary>
+    /// 플레이어의 포톤뷰를 리턴합니다.
+    /// </summary>
+    public abstract PhotonView GetPhotonView();
+
+    /// <summary>
+    /// TPWeapon에 있는 오디오 소스를 리턴합니다.
+    /// </summary>
+    /// <returns></returns>
+    public abstract AudioSource GetTPWeaponAudioSource();
+
+    /// <summary>
+    /// 지금 장착하고 있는 무기를 리턴합니다.
+    /// </summary>
+    public abstract WeaponBehaviour GetWeaponBehaviour();
     #endregion GETTER
 
     #region ANIMATION
@@ -189,11 +216,12 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     /// </summary>
     public abstract void DropMagazine(bool drop);
 
-    public abstract void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info);
-
-
-
     #endregion ANIMATION
 
+    #region PhotonNetwork
+
+    public abstract void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info);
+
+    #endregion
 
 }
