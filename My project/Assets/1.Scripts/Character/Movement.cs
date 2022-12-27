@@ -171,36 +171,47 @@ public class Movement : MovementBehaviour
 
     private PhotonView PV;
 
+    private Vector3 PVcontrolVelocity;
+
+    private bool PVisGrounded;
+
+    private bool CharacterDead = false;
     #endregion
 
     #region UNITY FUNCTIONS
 
     protected override void Awake()
     {
-
+       
         controller = GetComponent<CharacterController>();
-        //playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
         playerCharacter = transform.GetComponent<CharacterBehaviour>();
         PV = transform.GetComponent<PhotonView>();
+        PVcontrolVelocity = new Vector3(0.0f,0.0f, 0.0f);
+        playerCharacter.OnCharacterDie += CharacterDie;
     }
    
     //시작시 FPS 콘트롤러를 초기화합니다.
     protected override void Start()
     {
-
         standingHeight = controller.height;
     }
 
     protected override void Update()
     {
+        if (CharacterDead)
+            return;
+        PVJumping();
+   
         if (!PV.IsMine)
             return;
+
         //인벤토리에서 무기를 가져옴
         equippedWeapon = playerCharacter.GetInventory().GetEquipped();
+
         //이 프레임에 땅에 있었는지
         isGrounded = IsGrounded();
-        
-        if(isGrounded && !wasGrounded)
+
+        if (isGrounded && !wasGrounded)
         {
             jumping = false;
             lastJumpTime = 0.0f;
@@ -212,11 +223,8 @@ public class Movement : MovementBehaviour
 
         wasGrounded = isGrounded;
 
-        //TPAnimatorController.SetBool("Jumping", jumping);
-        
     }
 
-    [PunRPC]
     public override void PVJumping()
     {
         TPAnimatorController.SetBool("Jumping", jumping);
@@ -241,6 +249,12 @@ public class Movement : MovementBehaviour
 
     #region METHODS
 
+    private void CharacterDie()
+    {
+        controller.enabled = false;
+        CharacterDead = true;
+    }
+
     private void MoveCharacter()
     {
         //움직인 input을 받아옵니다.
@@ -251,8 +265,11 @@ public class Movement : MovementBehaviour
 
         //달리는 속도를 계산
         if (playerCharacter.IsRunning())
+        {
             desiredDirection *= speedRunning;
-
+            desiredDirection.x = 0.0f;
+        }
+            
         else
         {
             if (crouching)
@@ -365,6 +382,7 @@ public class Movement : MovementBehaviour
         lastJumpTime = Time.time;
     }
 
+
     /// <summary>
     /// 웅크리기
     /// </summary>
@@ -375,6 +393,7 @@ public class Movement : MovementBehaviour
         controller.height = crouching ? crouchHeight : standingHeight;
 
         controller.center = controller.height / 2.0f * Vector3.up;
+        
     }
 
     /// <summary>
@@ -436,20 +455,38 @@ public class Movement : MovementBehaviour
     /// <summary>
     /// 땅에 있는지를 리턴합니다.
     /// </summary>
-    /// <returns></returns>
     public override bool IsGrounded() => controller.isGrounded;
 
+    /// <summary>
+    /// 캐릭터의 PVVelocity값을 리턴합니다.
+    /// </summary>
+    public override Vector3 GetPVVelocity() => PVcontrolVelocity;
+
+    /// <summary>
+    /// 캐릭터의 PVisGrounded값을 리턴합니다.
+    /// </summary>
+    public override bool GetPVIsGrounded() => PVisGrounded;
 
     public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
             stream.SendNext(jumping);
+            stream.SendNext(crouching);
+            stream.SendNext(controller.height);
+            stream.SendNext(controller.center);
+            stream.SendNext(controller.velocity);
+            stream.SendNext(controller.isGrounded);
          
         }
         else
         {
             jumping = (bool)stream.ReceiveNext();
+            crouching = (bool)stream.ReceiveNext(); 
+            controller.height = (float)stream.ReceiveNext();
+            controller.center = (Vector3)stream.ReceiveNext();
+            PVcontrolVelocity = (Vector3)stream.ReceiveNext();
+            PVisGrounded = (bool)stream.ReceiveNext();
         }
 
 
