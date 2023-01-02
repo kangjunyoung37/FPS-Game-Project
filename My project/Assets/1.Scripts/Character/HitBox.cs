@@ -4,10 +4,18 @@ using UnityEngine;
 
 public class HitBox : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
-    {
-        Debug.Log(other.gameObject.name);
-        if (other.gameObject.GetComponent<Projectile>() != null)
-            Debug.Log("dd");
-    }
+    #region SerializeField
+
+    [SerializeField]
+    private float damagePercent;
+
+    #endregion
+
+    #region Getters
+
+    public float GetDamagePercent() => damagePercent;
+
+    #endregion
+
+
 }
