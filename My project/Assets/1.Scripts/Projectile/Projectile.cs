@@ -2,11 +2,11 @@ using UnityEngine;
 using System.Collections;
 using InfimaGames.LowPolyShooterPack.Legacy;
 using Random = UnityEngine.Random;
-
+using Photon.Pun;
 
 public class Projectile : MonoBehaviour
 {
-
+    [Title(label:"Settings")]
     [Range(5, 100)]
     [Tooltip("After how long time should the bullet prefab be destroyed?")]
     public float destroyAfter;
@@ -20,22 +20,44 @@ public class Projectile : MonoBehaviour
     [Tooltip("Maximum time after impact that the bullet is destroyed")]
     public float maxDestroyTime;
 
-    [Header("Impact Effect Prefabs")]
-    public Transform[] bloodImpactPrefabs;
 
+    [Title(label: "Effect Prefabs")]
+    public Transform[] bloodImpactPrefabs;
     public Transform[] metalImpactPrefabs;
     public Transform[] dirtImpactPrefabs;
     public Transform[] concreteImpactPrefabs;
 
+    #region FIELDS
+
+    private CharacterBehaviour chbehaviour;
+    private PhotonView PV;
+    private bool IsLocalPlayer;
+    private int team;
+    private int damage;
+    private float totalDamage;
+    #endregion
+
+    #region SERIALZED FIELDS
+
+
+
+    #endregion
+
+    #region SETUP
+
+    public void Setup(CharacterBehaviour characterBehaviour, int damage)
+    {
+        chbehaviour = characterBehaviour;
+        PV = characterBehaviour.GetPhotonView();
+        IsLocalPlayer = PV.IsMine;
+        team = characterBehaviour.GetPlayerTeam();
+        this.damage = damage;
+    }
+
+    #endregion
+
     private void Start()
     {
-        //Grab the game mode service, we need it to access the player character!
-        var gameModeService = ServiceLocator.Current.Get<IGameModeService>();
-        //Ignore the main player character's collision. A little hacky, but it should work.
-        var movementGameObject = gameModeService.GetPlayerCharacter().GetComponent<FootstepPlayer>().GetTransform;
-        Physics.IgnoreCollision(movementGameObject.GetComponent<Collider>(),
-            GetComponent<Collider>());
-
         //Start destroy timer
         StartCoroutine(DestroyAfter());
     }
@@ -46,20 +68,6 @@ public class Projectile : MonoBehaviour
         //Ignore collisions with other projectiles.
         if (collision.gameObject.GetComponent<Projectile>() != null)
             return;
-
-        //Ignore collision if bullet collides with "Player" tag
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            //Physics.IgnoreCollision (collision.collider);
-            Debug.LogWarning("Collides with player");
-            //Physics.IgnoreCollision(GetComponent<Collider>(), GetComponent<Collider>());
-
-            //Ignore player character collision, otherwise this moves it, which is quite odd, and other weird stuff happens!
-            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
-
-            //Return, otherwise we will destroy with this hit, which we don't want!
-            return;
-        }
 
         //If destroy on impact is false, start 
         //coroutine with random destroy timer
@@ -76,10 +84,16 @@ public class Projectile : MonoBehaviour
         //If bullet collides with "Blood" tag
         if (collision.transform.tag == "Blood")
         {
+            if(!IsLocalPlayer || team == collision.transform.root.GetComponent<CharacterBehaviour>().GetPlayerTeam())
+            {
+                Destroy(gameObject);
+                return;
+            }
+            totalDamage = damage * collision.transform.GetComponent<HitBox>().GetDamagePercent();            
+            collision.transform.root.GetComponent<Character>().TakeDamage((int)totalDamage, transform.position, Quaternion.LookRotation(collision.contacts[0].normal),team, PV.ViewID);
             //Instantiate random impact prefab from array
-            Instantiate(bloodImpactPrefabs[Random.Range
-                    (0, bloodImpactPrefabs.Length)], transform.position,
-                Quaternion.LookRotation(collision.contacts[0].normal));
+            //Instantiate(bloodImpactPrefabs[Random.Range (0, bloodImpactPrefabs.Length)], transform.position,
+            //    Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
             Destroy(gameObject);
         }
