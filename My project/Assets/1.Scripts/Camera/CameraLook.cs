@@ -33,6 +33,15 @@ public class CameraLook : MonoBehaviourPunCallbacks
     [SerializeField]
     private Transform lotateTransform;
 
+    [SerializeField]
+    private float lerpTime = 0.5f;
+
+    [SerializeField]
+    private float currentTime = 0;
+
+    [SerializeField]
+    private float defaultFOV = 100.0f;
+
     #endregion
 
     #region FIELDS
@@ -64,12 +73,13 @@ public class CameraLook : MonoBehaviourPunCallbacks
 
     private Quaternion YRotation;
     private bool IsDead = false;
+    private bool moveDeathCam = false;
     private Transform cameraTransform;
     private Transform targetTransform;
+    private Vector3 deadCamPosition = new Vector3(0.0f,-0.5f,-1.5f);
+    private Vector3 startPosition;
     private Quaternion onlyCamRotation;
-
-
-
+    
     #endregion
 
     private void Awake()
@@ -78,6 +88,7 @@ public class CameraLook : MonoBehaviourPunCallbacks
         cameraTransform = playerCharacter.GetCameraWold().transform;
         PV = GetComponent<PhotonView>();
         playerCharacter.OnCharacterDie += CharacterDie;
+        startPosition = cameraTransform.localPosition;
     }
     #region UNITY
     private void Start()
@@ -95,6 +106,7 @@ public class CameraLook : MonoBehaviourPunCallbacks
     
     private void CharacterDie()
     {
+        playerCharacter.GetCameraWold().fieldOfView = defaultFOV;
         targetTransform = playerCharacter.GetEnemyCharacterBehaviour().transform;
         IsDead = true;
 
@@ -102,10 +114,18 @@ public class CameraLook : MonoBehaviourPunCallbacks
 
     private void LateUpdate()
     {
+        //프레임 입력      
+        frameInput = playerCharacter.isCursorLocked() ? playerCharacter.GetInputLook() : default;
+
+        //감도
+        frameInput *= sensitivity;
+        Quaternion rotationYaw = Quaternion.Euler(0.0f, frameInput.x, 0.0f);
+        Quaternion rotationPitch = Quaternion.Euler(-frameInput.y, 0.0f, 0.0f);
+        
         if (IsDead)
-        {
-            Quaternion rotTarget = Quaternion.LookRotation(targetTransform.position - cameraTransform.position);
-            cameraTransform.rotation = Quaternion.RotateTowards(cameraTransform.rotation, rotTarget, interpolationSpeed * Time.deltaTime);
+        {   
+            if(!moveDeathCam && targetTransform != null)
+                StartCoroutine(nameof(MoveDeathCam));
             return;
         }
             
@@ -118,19 +138,33 @@ public class CameraLook : MonoBehaviourPunCallbacks
             return;
 
         }
-        //프레임 입력 
-        
-        frameInput = playerCharacter.isCursorLocked() ? playerCharacter.GetInputLook() : default;
-        //감도
-        frameInput *= sensitivity;
-        Quaternion rotationYaw = Quaternion.Euler(0.0f, frameInput.x, 0.0f);
-        Quaternion rotationPitch = Quaternion.Euler(-frameInput.y, 0.0f, 0.0f);
+
         CameraLotation(rotationPitch, rotationYaw);
     }
 
     #endregion
 
     #region FUNCTION
+
+    IEnumerator MoveDeathCam()
+    {
+        currentTime += Time.deltaTime;
+
+        if (currentTime >= lerpTime)
+            currentTime = lerpTime;
+        float t = currentTime / lerpTime;
+
+        t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+        cameraTransform.localPosition = Vector3.Lerp(startPosition, deadCamPosition, t);
+        Quaternion rotTarget = Quaternion.LookRotation(targetTransform.position - cameraTransform.position);
+        cameraTransform.rotation = Quaternion.RotateTowards(cameraTransform.rotation, rotTarget, interpolationSpeed);
+
+        yield return new WaitForSeconds(2.0f);
+
+        moveDeathCam = true;
+
+    }
 
     private Quaternion Clamp(Quaternion rotation,Vector2 yClamp)
     {
@@ -158,6 +192,7 @@ public class CameraLook : MonoBehaviourPunCallbacks
     private void OnlyCamRotate(Quaternion rotationPitch,Quaternion rotationYaw)
     {
         
+
         onlyCamRotation *= rotationPitch;
         onlyCamRotation = Clamp(onlyCamRotation, yClamp);
         //onlyCamRotation *= rotationYaw;
