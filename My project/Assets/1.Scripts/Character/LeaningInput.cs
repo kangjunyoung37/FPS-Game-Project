@@ -87,7 +87,7 @@ public class LeaningInput : MonoBehaviour
     public void Lean(InputAction.CallbackContext context)
     {
 
-        if (!PV.IsMine)
+        if (!PV.IsMine || characterBehaviour.GetPlayerDead())
             return;
         //커서가 잠겨있지 않다면
         if(!characterBehaviour.isCursorLocked())
