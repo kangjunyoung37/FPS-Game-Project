@@ -6,8 +6,9 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using InfimaGames.LowPolyShooterPack;
-using Newtonsoft.Json.Linq;
-
+using UnityEngine.Rendering;
+using EZCameraShake;
+using static UnityEngine.EventSystems.EventTrigger;
 /// <summary>
 /// 주요 캐릭터의 구성요소
 /// </summary>
@@ -166,7 +167,7 @@ public class Character : CharacterBehaviour, IDamageable
     [Title(label: "Blood Prefab")]
     [SerializeField]
     private GameObject BloodPrefab;
-
+    
     #endregion
 
     #region FIELDS
@@ -190,6 +191,11 @@ public class Character : CharacterBehaviour, IDamageable
     /// 캐릭터가 무기를 넣은 경우 참입니다.
     /// </summary>
     private bool holstered;
+
+    /// <summary>
+    /// 캐릭터가 죽었는지
+    /// </summary>
+    private bool isDead;
 
     /// <summary>
     /// 마지막으로 쏜 시간
@@ -223,8 +229,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// <summary>
     /// TP캐릭터의 레이어 인덱스, 재장전 같은 action을 재생하는데 유용합니다.
     /// </summary>
-    private int TPlayerActions; 
- 
+    private int TPlayerActions;
 
     /// <summary>
     /// 현재 장착된 무기
@@ -391,43 +396,137 @@ public class Character : CharacterBehaviour, IDamageable
     /// 현재 시간
     /// </summary>
     private float curTime;
+
+    /// <summary>
+    /// Player HP
+    /// </summary>
+    private int hp = 100;
+
+    /// <summary>
+    /// 반짝거리는 정도
+    /// </summary>
+    private float blinkIntensity = 2.0f;
+
+    /// <summary>
+    /// 반짝거리는 시간
+    /// </summary>
+    private float blinkDuration = 3.0f;
+
+    /// <summary>
+    /// TP캐릭터의 skinnedMeshRenderer
+    /// </summary>
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+
+    /// <summary>
+    /// 리스폰 무적 시간
+    /// </summary>
+    private bool respawnUnbeatable = true;
+
+    /// <summary>
+    /// 반짝임 정도
+    /// </summary>
+    private float intensity;
+
+    /// <summary>
+    /// 캐릭터에 materials
+    /// </summary>
+    private Material[] charactermaterial;
+
+    /// <summary>
+    /// Plater team
+    /// </summary>
+    private int team;
+
+    /// <summary>
+    /// TP캐릭터의 IK
+    /// </summary>
+    private LeftHandOnGun TPik;
+
+    /// <summary>
+    /// 캐릭터 테두리
+    /// </summary>
+    private Outline characterOutline;
+
+    /// <summary>
+    /// 무기 테두리
+    /// </summary>
+    private Outline weaponOutline;
+
+    /// <summary>
+    /// 나를 죽인 적 CharacterBehaviour
+    /// </summary>
+    private Transform enemyWhoKilledMeTransform;
+
+    /// <summary>
+    /// 플레이어의 CustomProperties
+    /// </summary>
+    private ExitGames.Client.Photon.Hashtable playerHasTable;
+
+    /// <summary>
+    /// 카메라 흔들림 구현
+    /// </summary>
+    private CameraShaker cameraShaker;
+
+    /// <summary>
+    /// 캐릭터의 발소리 오디오 소스
+    /// </summary>
+    private AudioSource audioSource;
+
+    /// <summary>
+    /// 캐릭터 발소리 컴포넌트
+    /// </summary>
+    private FootstepPlayer footstepPlayer;
+
     #endregion
 
     #region UNITY
 
     protected override void Awake()
     {
-        #region Lock Cursor
 
+        #region Lock Cursor
         //게임이 시작될 때 항상 커서가 잠겨 있는지 확인하세여
         cursorLocked = true;
-
         UpdateCursorState();
-
         #endregion
-        //수정 필요 게임 매니저에 넣어야할듯
-        //Physics.IgnoreLayerCollision(0, 15);//Default , Projectile
-        Physics.IgnoreLayerCollision(7, 10);//TPCharacter , Character
-
-        //캐싱
-        //movementBehaviour = GetComponent<MovementBehaviour>();
-
-        //캐싱
-        PV = transform.GetComponent<PhotonView>();
+        //캐싱       
+        PV = transform.GetComponent<PhotonView>();   
+        team =  (int)PV.Owner.CustomProperties["Team"];
+        if(PV.IsMine)
+        {
+            InGame.Instance.GetdamageIndicator().Player = transform;
+            InGame.Instance.GetdamageIndicator().PlayerCamera = cameraWorld;
+        }
+        audioSource = GetComponent<AudioSource>();
+        footstepPlayer = GetComponent<FootstepPlayer>();
         CL = GetComponent<CameraLook>();
         meshFilter = magazineTransform.GetComponent<MeshFilter>();
         meshRenderer = magazineTransform.GetComponent<MeshRenderer>();
         aimik = TPcharacterAnimator.transform.GetComponent<AimIK>();
+        TPik = TPcharacterAnimator.transform.GetComponent<LeftHandOnGun>();
+        characterOutline = TPcharacterAnimator.transform.GetComponent<Outline>();
+        skinnedMeshRenderer = tPRenController.TPRenderer[0].GetComponent<SkinnedMeshRenderer>();
+        charactermaterial = skinnedMeshRenderer.materials;
+        playerHasTable = PV.Owner.CustomProperties;
         //인벤토리 초기화
         inventory.Init(weaponIndexEquippedAtStart);
+        OnCharacterDie += CharacterDie;
         
         //새로 고치기
         RefreshWeaponSetup();
-        
+        if (team != (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
+            characterOutline.enabled = false;
+
+        gameObject.name = PV.Owner.NickName;
+        InGame.Instance.UpdateDictionary(transform, PV.ViewID);
+
     }
 
     protected override void Start()
     {
+        
+        if ((bool)playerHasTable["IsDead"])
+            gameObject.SetActive(false);
         if (!PV.IsMine)
         {
             cameraWorld.enabled = false;
@@ -437,13 +536,17 @@ public class Character : CharacterBehaviour, IDamageable
             fPRenController.FPRenOff();
             equippedWeapon.FPWPOff();
             knife.GetComponent<Renderer>().enabled = false;
+
         }
         else
         {
-            tPRenController.TPRenderOff();
-            TPEquipWeapon.TPWeaponOff();
-            knife.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+            tPRenController.TPRenderControl(ShadowCastingMode.ShadowsOnly);
+            TPEquipWeapon.TPWPRendererControl(ShadowCastingMode.ShadowsOnly);
+            TPknife.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
 
+            cameraShaker = cameraWorld.gameObject.AddComponent<CameraShaker>();
+            cameraShaker.DefaultPosInfluence =  new Vector3(0.01f, 0.01f, 0.01f);
+            cameraShaker.DefaultRotInfluence = new Vector3(7.0f, 7.0f, 7.0f);
         }
 
         //수류탄 양 최대로 설정
@@ -466,9 +569,7 @@ public class Character : CharacterBehaviour, IDamageable
     }
 
     protected override void Update()
-    {
-
-        //IKChange(running);
+    {       
         PVAnimatorUpdate();
         if (!PV.IsMine)
         {
@@ -490,11 +591,20 @@ public class Character : CharacterBehaviour, IDamageable
                 }
 
             }
+            
+            foreach (Material mat in charactermaterial)
+            {
+                mat.color = Color.white * intensity;
+            }
             return;
         }
-            
+
+        if (respawnUnbeatable)
+            StartCoroutine(nameof(unbeatable));
+
         aiming = holdingButtonAim && CanAim();
         running = holdingButtonRun && CanRun();
+        
         if(aimik == null)
         {
             Debug.LogError("에러");
@@ -549,8 +659,12 @@ public class Character : CharacterBehaviour, IDamageable
 
         //달리기 Fov곱셈값
         float runningFieldOfView = Mathf.Lerp(1.0f, fieldOfViewRunningMultiplier, runningAlpha);
-        //조준 여부에 따라 월드 카메라의 시야를 보간합니다.
-        cameraWorld.fieldOfView = Mathf.Lerp(fieldOfView, fieldOfView * equippedWeapon.GetFieldOfViewMutiplierAim(), aimingAlpha) * runningFieldOfView;
+        //죽어있지 않은 경우에만 실행
+        if(!isDead)
+        {
+            //조준 여부에 따라 월드 카메라의 시야를 보간합니다.
+            cameraWorld.fieldOfView = Mathf.Lerp(fieldOfView, fieldOfView * equippedWeapon.GetFieldOfViewMutiplierAim(), aimingAlpha) * runningFieldOfView;
+        }
         //조준 여부에 따라 딥 카메라의 시야를 보간합니다.
         cameraDepth.fieldOfView = Mathf.Lerp(fieldOfViewWeapon, fieldOfViewWeapon * equippedWeapon.GetFieldOfViewMutiplierAimWeapon(), aimingAlpha);
 
@@ -596,6 +710,8 @@ public class Character : CharacterBehaviour, IDamageable
     #endregion
 
     #region GETTERS
+
+    public override bool GetPlayerDead() => isDead;
 
     /// <summary>
     /// running 값을 리턴합니다.
@@ -731,9 +847,30 @@ public class Character : CharacterBehaviour, IDamageable
     /// 현재 장착하고 있는 무기를 리턴합니다
     /// </summary>
     public override WeaponBehaviour GetWeaponBehaviour() => inventory.GetEquipped();
+
+    /// <summary>
+    /// 현재 player가 속한 Team을 리턴합니다.
+    /// </summary>
+    public override int GetPlayerTeam() => team;
+
+    /// <summary>
+    /// 나를 죽인 적 CharacterBehaviour를 리턴합니다.
+    /// </summary>
+    public override Transform GetEnemyCharacterBehaviour() => enemyWhoKilledMeTransform;    
+    
     #endregion
 
     #region METHODS
+
+    IEnumerator unbeatable()
+    {
+        blinkDuration -= Time.deltaTime;
+        float lerp = Mathf.Clamp01(blinkDuration / 3.0f);
+        intensity = (lerp * blinkIntensity) + 1.0f;
+       
+        yield return new WaitForSeconds(3.0f);
+        respawnUnbeatable = false;
+    }
 
     /// <summary>
     /// IK weight 값 변경하기
@@ -865,7 +1002,7 @@ public class Character : CharacterBehaviour, IDamageable
         //발사 시간을 저장하여 발사 속도를 올바르게 계산할 수 있습니다.
         lastShotTime = Time.time;
         //조준하는 경우 스코프의 확산 배율도 전달해야 합니다.
-        equippedWeapon.Fire(aiming ? equippedWeaponScope.GetMultiplierSpread() : 1.0f);
+        equippedWeapon.Fire(aiming ? equippedWeaponScope.GetMultiplierSpread() : 10.0f);
         //TP발사 애니메이션 재생
         TPEquipWeapon.Fire();
         //현재 가진 총알 수가 0이라면 슬라이드 백 포즈를 취함
@@ -1026,6 +1163,10 @@ public class Character : CharacterBehaviour, IDamageable
             return;
         if ((TPEquipWeapon = inventory.EquipTPWeapon()) == null)
             return;
+        
+        if (team != (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
+            TPEquipWeapon.GetComponent<Outline>().enabled = false;
+
         //애니메이터 컨트롤러를 업데이트합니다.
         characterAnimator.runtimeAnimatorController = equippedWeapon.GetAnimatorController();
         TPcharacterAnimator.runtimeAnimatorController = TPEquipWeapon.Controller;
@@ -1044,7 +1185,7 @@ public class Character : CharacterBehaviour, IDamageable
             equippedWeapon.FPWPOff();
         else
         {
-            TPEquipWeapon.TPWeaponOff();
+            TPEquipWeapon.TPWPRendererControl(ShadowCastingMode.ShadowsOnly);
         }
 
     }
@@ -1127,6 +1268,36 @@ public class Character : CharacterBehaviour, IDamageable
         const string boolName = "Holstered";
         characterAnimator.SetBool(boolName, holstered);
         TPcharacterAnimator.SetBool(boolName, holstered);
+    }
+    
+    private void CharacterDie()
+    {
+        TPik.enabled = false;
+        isDead = true;
+        cameraDepth.enabled = false;
+        characterAnimator.enabled = false;
+        fPRenController.FPRenOff();
+        equippedWeapon.FPWPOff();
+        tPRenController.TPRenderControl(ShadowCastingMode.On);
+        TPEquipWeapon.TPWPRendererControl(ShadowCastingMode.On);
+        footstepPlayer.enabled = false;
+        audioSource.enabled = false;
+        
+
+    }
+
+    [PunRPC]
+    private void Scoreup(int team)
+    {
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if(team == 0)            
+                InGame.Instance.BlueTeamPoint += 1;
+            
+            else            
+                InGame.Instance.RedTeamPoint += 1;        
+        }
     }
 
     #endregion
@@ -1312,6 +1483,9 @@ public class Character : CharacterBehaviour, IDamageable
     private bool CanAim()
     {
         //무기를 집어 넣었거나 ,검사중이면
+        if (movementBehaviour.IsJumping())
+            return false;
+
         if (holstered || inspecting)
             return false;
 
@@ -1369,7 +1543,7 @@ public class Character : CharacterBehaviour, IDamageable
     public void OnTryFire(InputAction.CallbackContext context)
     {
         //커서가 잠겨있지 않다면
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context)
@@ -1417,7 +1591,7 @@ public class Character : CharacterBehaviour, IDamageable
     public void OnTryPlayReload(InputAction.CallbackContext context)
     {
         //커서가 잡겨있지 않다면 리턴
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         //재장전할 수 없다면 
@@ -1438,7 +1612,7 @@ public class Character : CharacterBehaviour, IDamageable
     public void OnTryInspect(InputAction.CallbackContext context)
     {
         //커서가 잠겨있지 않다면
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         if (!CanPlayAnimationInspect())
@@ -1457,7 +1631,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryAiming(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context.phase)
@@ -1483,7 +1657,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryHolster(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         if (!CanPlayAnimationHolster())
@@ -1517,7 +1691,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryThrowGrenade(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context.phase)
@@ -1537,7 +1711,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryMelee(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context.phase)
@@ -1556,7 +1730,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryRun(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context.phase)
@@ -1585,7 +1759,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryJump(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         switch(context.phase)
@@ -1602,7 +1776,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnTryInventoryNext(InputAction.CallbackContext context)
     {
-        if (!cursorLocked || !PV.IsMine)
+        if (!cursorLocked || !PV.IsMine || isDead)
             return;
 
         if (inventory == null)
@@ -1665,6 +1839,21 @@ public class Character : CharacterBehaviour, IDamageable
 
     }
 
+    public void OnLaser(InputAction.CallbackContext context)
+    {
+        if (!PV.IsMine || isDead)
+            return;
+
+        switch (context)
+        {
+            case { phase: InputActionPhase.Performed }:
+                PV.RPC("Toggle", RpcTarget.All);             
+                
+                break;
+        }
+    }
+    
+
     #endregion
 
     #region ANIMATION EVENTS
@@ -1711,7 +1900,9 @@ public class Character : CharacterBehaviour, IDamageable
         Vector3 position = cTransform.position;
         position += cTransform.forward * grenadeSpawnOffset;
         //던지기
-        PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "P_LPSP_PROJ_Grenade_01"),position,cTransform.rotation);
+
+        GameObject grenadeObject = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "P_LPSP_PROJ_Grenade_01"),position,cTransform.rotation);
+        grenadeObject.GetComponent<GrenadeScript>().SetUp(this,team);
 
     }
 
@@ -1815,6 +2006,10 @@ public class Character : CharacterBehaviour, IDamageable
             stream.SendNext(shotsFired);
             stream.SendNext(aiming);
             stream.SendNext(running);
+            stream.SendNext(isDead);
+            stream.SendNext(respawnUnbeatable);
+            stream.SendNext(intensity);
+
         }
         else
         {
@@ -1834,6 +2029,9 @@ public class Character : CharacterBehaviour, IDamageable
             shotsFired = (int)stream.ReceiveNext();
             aiming = (bool)stream.ReceiveNext();
             running = (bool)stream.ReceiveNext();
+            isDead = (bool)stream.ReceiveNext();
+            respawnUnbeatable = (bool)stream.ReceiveNext();
+            intensity = (float)stream.ReceiveNext();
         }
 
         CL.OnPhotonSerializeView(stream, info);
@@ -1849,18 +2047,44 @@ public class Character : CharacterBehaviour, IDamageable
 
     #region DAMAGE
 
-    public void TakeDamage(float damage, Vector3 pos,Quaternion rot)
+    public void TakeDamage(int damage, Vector3 pos,Quaternion rot, int team,int viewID, bool bullet,Transform enemy)
     {
-        PV.RPC("RPC_TakeDamage", RpcTarget.All, damage,pos,rot);
-
+        if (respawnUnbeatable || isDead)
+            return;
+        PV.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage,pos,rot,team,viewID,bullet);
+        
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(float damame,Vector3 pos,Quaternion rot)
+    public void RPC_TakeDamage(int damame,Vector3 pos,Quaternion rot,int team,int viewID,bool bullet)
     {
-        Instantiate(BloodPrefab, pos, rot);
+
+        hp -= damame;
+        if(viewID != 0)
+            enemyWhoKilledMeTransform = InGame.Instance.GetDictionary()[viewID];
+        if (hp <= 0)
+        {
+            playerHasTable["IsDead"] = true;
+            PV.Owner.SetCustomProperties(playerHasTable);
+            TPik.enabled = false;
+            
+            if(viewID != PV.ViewID)
+                InGame.Instance.GameCheck(team);
+            if(PV.IsMine)
+                InGame.Instance.Stop = false;
+            OnCharacterDie();
+
+        }
+        if(bullet)
+            Instantiate(BloodPrefab, pos, rot);
+        if(PV.IsMine)
+        {
+            InGame.Instance.BloodFrameOn();
+             DamageIndicatorSystem.CreateIndicator(enemyWhoKilledMeTransform.transform);          
+        }
+
+
     }
-
-
+    
     #endregion
 }
