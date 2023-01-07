@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,9 +19,7 @@ public class LaserToggleInput : MonoBehaviour
     [SerializeField, NotNull]
     private InventoryBehaviour inventoryBehaviour;
 
-    [Tooltip("캐릭터전용 오디오 소스")]
-    [SerializeField, NotNull]
-    private AudioSource audioSorce;
+
 
     [Tooltip("오디오 클립")]
     [SerializeField, NotNull]
@@ -43,6 +42,11 @@ public class LaserToggleInput : MonoBehaviour
     /// 마지막 프레임에 달리는 중이였는가
     /// </summary>
     private bool wasRunning;
+    
+    /// <summary>
+    /// 오디오 소스
+    /// </summary>
+    private AudioSource audioSorce;
 
     #endregion
 
@@ -50,11 +54,14 @@ public class LaserToggleInput : MonoBehaviour
 
     private void Awake()
     {
-        audioSorce.clip = audioClip;      
+        audioSorce = inventoryBehaviour.GetComponent<AudioSource>();
+        audioSorce.clip = audioClip;
+        
     }
 
     private void Update()
     {
+        
         if(animator == null || inventoryBehaviour == null)
         {
             Debug.LogError($"{this.gameObject}에 animator = {animator} inventoryBehaviour = {inventoryBehaviour}입니다");
@@ -107,21 +114,10 @@ public class LaserToggleInput : MonoBehaviour
         wasRunning = running;
     }
 
-    public void Input(InputAction.CallbackContext context)
-    {
-
-        switch(context)
-        {
-            case { phase: InputActionPhase.Performed }:
-                Toggle();
-
-                break;
-        }
-    }
-
     /// <summary>
     /// 토글방식
     /// </summary>
+    [PunRPC]
     private void Toggle()
     {
         laserBehaviour.Toggle();
