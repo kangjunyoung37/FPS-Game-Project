@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class MainCamManager : MonoBehaviour
 {
+    private static MainCamManager instance ;
+
+    public static MainCamManager Instance
+    {
+        get { 
+                if (instance == null)
+                    return null;
+                return instance;
+            }
+    }
+
     public Camera mainCam;
     
     [SerializeField]
@@ -15,7 +26,12 @@ public class MainCamManager : MonoBehaviour
     private float currentTime = 0f;
     public float lerpTime = 5f;
 
-    public void CamMove(Transform wantTransform,string menuname)
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    public void CamMoveWihtMenu(Transform wantTransform,string menuname)
     {
         currentTime = 0f;
         Vector3 wantPos = wantTransform.position;
@@ -25,18 +41,29 @@ public class MainCamManager : MonoBehaviour
         StartCoroutine(CamMove(wantRot, wantPos, menuname));
     }
 
+    public void OnlyCamMove(Transform wantTransform)
+    {
+        currentTime = 0f;
+        Vector3 wantPos = wantTransform.position;
+        Quaternion wantRot = wantTransform.rotation;
+        defaultPos = mainCam.transform.position;
+        defaultRot = mainCam.transform.rotation;
+        StartCoroutine(CamMove(wantRot, wantPos));
+    }
+
     public void CamMoveMain()
     {
-        CamMove(mainTransform,"Title");
+        CamMoveWihtMenu(mainTransform,"Title");
     }
 
     public void CamMoveStroage()
     {
-        CamMove(storageTransform, "StorageMenu");  
+        CamMoveWihtMenu(storageTransform, "StorageMenu");  
     }
 
-    IEnumerator CamMove(Quaternion wantRot, Vector3 wantPos, string menuname)
+    IEnumerator CamMove(Quaternion wantRot, Vector3 wantPos, string menuname = null)
     {
+        
 
         defaultPos = mainCam.transform.localPosition;
         defaultRot = mainCam.transform.localRotation;
@@ -46,15 +73,15 @@ public class MainCamManager : MonoBehaviour
 
             if (currentTime >= lerpTime)
                 currentTime = lerpTime;
-            mainCam.transform.rotation = Quaternion.Lerp(defaultRot, wantRot, currentTime / lerpTime);
-            mainCam.transform.position = Vector3.Lerp(defaultPos, wantPos, currentTime / lerpTime);
+            float t = currentTime / lerpTime;
+            t = Mathf.Sin(t * Mathf.PI * 0.5f);
+            mainCam.transform.rotation = Quaternion.Lerp(defaultRot, wantRot, t);
+            mainCam.transform.position = Vector3.Lerp(defaultPos, wantPos, t);
 
             yield return null;
         }
-
-        MenuManager.Instance.OpenMenu(menuname);
-
+        if(menuname != null)
+            MenuManager.Instance.OpenMenu(menuname);
     }
-
 
 }
