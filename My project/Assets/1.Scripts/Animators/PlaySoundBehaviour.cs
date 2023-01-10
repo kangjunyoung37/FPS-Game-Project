@@ -29,7 +29,7 @@ public class PlaySoundBehaviour : StateMachineBehaviour
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        audioManagerService ??= ServiceLocator.Current.Get<AudioManagerService>();
+        audioManagerService ??= ServiceLocator.Current.Get<IAudioManagerService>();
         audioManagerService?.PlayOneShot(clip, settings);
     }
 
