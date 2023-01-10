@@ -57,11 +57,11 @@ public class FootstepPlayer : MonoBehaviour
             audioSource.loop = true;
         }
         PV = gameObject.GetComponent<PhotonView>();
-  
     }
 
     private void Update()
     {
+
         if(characterAnimator == null || movementBehaviour == null || audioSource == null)
         {
             Debug.LogError($"{this.gameObject}에 characterAnimator = {characterAnimator} ,movementBehaviour = {movementBehaviour},audioSource = {audioSource}입니다");
@@ -105,5 +105,6 @@ public class FootstepPlayer : MonoBehaviour
             audioSource.Pause();
 
     }
+
     #endregion
 }
