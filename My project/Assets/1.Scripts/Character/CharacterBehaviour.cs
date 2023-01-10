@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon;
 using Photon.Pun;
+using System;
 
 public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObservable
 {
+
+    public Action OnCharacterDie;
 
     #region UNITY
     protected virtual void Awake(){}
@@ -146,6 +149,19 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     /// 지금 장착하고 있는 무기를 리턴합니다.
     /// </summary>
     public abstract WeaponBehaviour GetWeaponBehaviour();
+
+    /// <summary>
+    /// 플레이어가 죽었는지를 리턴합니다.
+    /// </summary>
+    public abstract bool GetPlayerDead();
+
+    /// <summary>
+    /// 플레이어의 팀을 리턴합니다.
+    /// </summary>
+    /// <returns></returns>
+    public abstract int GetPlayerTeam();
+
+    public abstract Transform GetEnemyCharacterBehaviour();
     #endregion GETTER
 
     #region ANIMATION
