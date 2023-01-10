@@ -64,7 +64,6 @@ public class PlaySoundCharacterBehaviour : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         //캐릭터 컴포넌트를 가져온다.
-        //playerCharacter ??= ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
         playerCharacter = animator.GetComponentInParent<CharacterBehaviour>();
         //인벤토리 가져오기
         playerInventory ??= playerCharacter.GetInventory();
