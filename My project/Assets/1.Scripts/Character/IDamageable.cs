@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public interface IDamageable
 {
-    void TakeDamage(float damage, Vector3 pos, Quaternion rot);
+    void TakeDamage(int damage, Vector3 pos, Quaternion rot, int team,int viewID, bool bullet,Transform enemy);
 }
