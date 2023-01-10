@@ -97,6 +97,15 @@ public class CharacterAnimationEventHandler : MonoBehaviour
     }
 
     /// <summary>
+    /// 에임 재장전 애니메이션을 끝냅니다.
+    /// </summary>
+    private void OnAnimationEndedAImReload()
+    {
+        if (playerCharacter != null)
+            playerCharacter.AnimationEndedReload();
+    }
+
+    /// <summary>
     /// 수류탄 던지는 애니메이션을 끝냅니다.
     /// </summary>
     private void OnAnimationEndedGrenadeThrow()
