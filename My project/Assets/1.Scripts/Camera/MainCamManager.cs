@@ -53,11 +53,13 @@ public class MainCamManager : MonoBehaviour
 
     public void CamMoveMain()
     {
+        MenuManager.Instance.CloseMenu("StorageMenu");
         CamMoveWihtMenu(mainTransform,"Title");
     }
 
     public void CamMoveStroage()
     {
+        MenuManager.Instance.CloseMenu("Title");
         CamMoveWihtMenu(storageTransform, "StorageMenu");  
     }
 
