@@ -8,7 +8,8 @@ using UnityEngine.InputSystem;
 using InfimaGames.LowPolyShooterPack;
 using UnityEngine.Rendering;
 using EZCameraShake;
-using static UnityEngine.EventSystems.EventTrigger;
+using HashTable = ExitGames.Client.Photon.Hashtable;
+
 /// <summary>
 /// 주요 캐릭터의 구성요소
 /// </summary>
@@ -28,10 +29,6 @@ public class Character : CharacterBehaviour, IDamageable
     private MovementBehaviour movementBehaviour;
     
     [Title(label: "Inventory")]
-
-    [Tooltip("게임이 시작될 때 장착될 무기 index")]
-    [SerializeField]
-    private int weaponIndexEquippedAtStart;
 
     [Tooltip("인벤토리")]
     [SerializeField]
@@ -202,6 +199,16 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     private float lastShotTime;
 
+    /// <summary>
+    /// 메인 무기
+    /// </summary>
+    private int subWeapon;
+
+    /// <summary>
+    /// 서브 무기
+    /// </summary>
+    private int mainWeapon;
+    
     /// <summary>
     /// 오버레이 레이어 인덱스, 발사 애니메이션같은 것을 재생하는데 유용합니다.
     /// </summary>
@@ -490,9 +497,13 @@ public class Character : CharacterBehaviour, IDamageable
         UpdateCursorState();
         #endregion
         //캐싱       
-        PV = transform.GetComponent<PhotonView>();   
-        team =  (int)PV.Owner.CustomProperties["Team"];
-        if(PV.IsMine)
+        PV = transform.GetComponent<PhotonView>();
+        playerHasTable = PV.Owner.CustomProperties;
+        team =  (int)playerHasTable["Team"];
+        subWeapon = (int)playerHasTable["SubWeapon"];
+        mainWeapon = (int)playerHasTable["MainWeapon"];
+        
+        if (PV.IsMine)
         {
             InGame.Instance.GetdamageIndicator().Player = transform;
             InGame.Instance.GetdamageIndicator().PlayerCamera = cameraWorld;
@@ -507,9 +518,9 @@ public class Character : CharacterBehaviour, IDamageable
         characterOutline = TPcharacterAnimator.transform.GetComponent<Outline>();
         skinnedMeshRenderer = tPRenController.TPRenderer[0].GetComponent<SkinnedMeshRenderer>();
         charactermaterial = skinnedMeshRenderer.materials;
-        playerHasTable = PV.Owner.CustomProperties;
+        
         //인벤토리 초기화
-        inventory.Init(weaponIndexEquippedAtStart);
+        inventory.Init(subWeapon);
         OnCharacterDie += CharacterDie;
         
         //새로 고치기
@@ -711,6 +722,9 @@ public class Character : CharacterBehaviour, IDamageable
 
     #region GETTERS
 
+    /// <summary>
+    /// 플레이어가 죽었는지 리턴합니다.
+    /// </summary>
     public override bool GetPlayerDead() => isDead;
 
     /// <summary>
@@ -856,8 +870,18 @@ public class Character : CharacterBehaviour, IDamageable
     /// <summary>
     /// 나를 죽인 적 CharacterBehaviour를 리턴합니다.
     /// </summary>
-    public override Transform GetEnemyCharacterBehaviour() => enemyWhoKilledMeTransform;    
-    
+    public override Transform GetEnemyCharacterBehaviour() => enemyWhoKilledMeTransform;
+
+    /// <summary>
+    /// 메인 무기의 index값을 리턴
+    /// </summary>
+    public override int GetMainWeaponIndex() => mainWeapon;
+
+    /// <summary>
+    /// 서브 무기의 index값을 리턴
+    /// </summary>
+    public override int GetSubWeapnIndex() => subWeapon;
+
     #endregion
 
     #region METHODS
@@ -1788,7 +1812,8 @@ public class Character : CharacterBehaviour, IDamageable
                 //스크롤 휠 방향을 사용하여 인벤토리에 대한 인덱스 증가 방향을 가져옵니다.
                 float scrollValue = context.valueType.IsEquivalentTo(typeof(Vector2)) ? Mathf.Sign(context.ReadValue<Vector2>().y) : 1.0f;
                 //scrollValue가 양수이면 다음index 음수이면 전index
-                int indexNext = scrollValue > 0 ? inventory.GetNextIndex() : inventory.GetLastIndex();
+                //int indexNext = scrollValue > 0 ? inventory.GetNextIndex() : inventory.GetLastIndex();
+                int indexNext = inventory.GetChangeWeaponIndex();
                 //현재 장착한 무기 인덱스
                 int indexCurrent = inventory.GetEquippedIndex();
                 //무기를 바꿀수 있고, 현재 인덱스과 다음 인덱스와 같지 않다면
@@ -1798,6 +1823,51 @@ public class Character : CharacterBehaviour, IDamageable
 
         }
     }
+
+    /// <summary>
+    /// 메인 무기로 무기 교체
+    /// </summary>
+    /// <param name="context"></param>
+    public void OnTryMainWeaponEquip(InputAction.CallbackContext context)
+    {
+        if (!cursorLocked || !PV.IsMine || isDead)
+            return;
+
+        if (inventory == null)
+            return;
+
+        switch (context.phase)
+        {
+            case InputActionPhase.Performed:
+ 
+                if(mainWeapon != inventory.GetEquippedIndex() && CanChangeWeapon())              
+                    StartCoroutine(nameof(Equip), mainWeapon);             
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 서브 무기로 무기 교체
+    /// </summary>
+    /// <param name="context"></param>
+    public void OnTrySubWeaponEquip(InputAction.CallbackContext context)
+    {
+        if (!cursorLocked || !PV.IsMine || isDead)
+            return;
+
+        if (inventory == null)
+            return;
+
+        switch (context.phase)
+        {
+            case InputActionPhase.Performed:
+
+                if (subWeapon != inventory.GetEquippedIndex() && CanChangeWeapon())
+                    StartCoroutine(nameof(Equip), subWeapon);
+                break;
+        }
+    }
+
 
     /// <summary>
     /// 커서 잠구기
