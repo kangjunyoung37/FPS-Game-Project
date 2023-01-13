@@ -34,6 +34,10 @@ public abstract class InventoryBehaviour : MonoBehaviour
     /// </summary>
     public abstract int GetEquippedIndex();
 
+    /// <summary>
+    /// 바뀔 무기의 인덱스값을 리턴합니다. 
+    /// </summary>
+    public abstract int GetChangeWeaponIndex();
     #endregion
 
     #region METHODS
