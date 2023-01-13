@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -46,15 +47,24 @@ public class Inventory : InventoryBehaviour
     private TPWeapon TPequipeedWeapon;
 
     /// <summary>
-    /// CharacterBehaviour
+    /// 캐릭터의 MainWeapon
     /// </summary>
-
-
-
-
+    private int mainWeapon;
+    
+    /// <summary>
+    /// 캐릭터의 SubWeapon
+    /// </summary>
+    private int subWeapon;
+    
     #endregion
 
     #region METHODS
+
+    private void Awake()
+    {
+        mainWeapon = characterBehaviour.GetMainWeaponIndex();
+        subWeapon = characterBehaviour.GetSubWeapnIndex();
+    }
 
     public override void Init(int equippedAtStart = 0)
     {
@@ -113,7 +123,6 @@ public class Inventory : InventoryBehaviour
 
     public override int GetLastIndex()
     {
-        //
         int newIndex = equippedIndex - 1;
         if (newIndex < 0)
             newIndex = weapons.Length - 1;
@@ -129,6 +138,22 @@ public class Inventory : InventoryBehaviour
 
         return newIndex;
     }
+
+    public override int GetChangeWeaponIndex()
+    {
+        if(equippedIndex == mainWeapon)
+        {
+            return subWeapon;
+        }
+        else
+        {
+            return mainWeapon;
+        }
+
+    }
+
+
+
 
     public override WeaponBehaviour GetEquipped() => equipped;
     public override int GetEquippedIndex() => equippedIndex;
