@@ -484,13 +484,18 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     private FootstepPlayer footstepPlayer;
 
+    /// <summary>
+    /// 플레이어의 이름
+    /// </summary>
+    private string playerName;
+
     #endregion
 
     #region UNITY
 
     protected override void Awake()
     {
-
+        PhotonNetwork.IsMessageQueueRunning = false;
         #region Lock Cursor
         //게임이 시작될 때 항상 커서가 잠겨 있는지 확인하세여
         cursorLocked = true;
@@ -502,7 +507,7 @@ public class Character : CharacterBehaviour, IDamageable
         team =  (int)playerHasTable["Team"];
         subWeapon = (int)playerHasTable["SubWeapon"];
         mainWeapon = (int)playerHasTable["MainWeapon"];
-        
+        playerName = PhotonNetwork.NickName;
         if (PV.IsMine)
         {
             InGame.Instance.GetdamageIndicator().Player = transform;
@@ -535,7 +540,7 @@ public class Character : CharacterBehaviour, IDamageable
 
     protected override void Start()
     {
-        
+        PhotonNetwork.IsMessageQueueRunning = true;
         if ((bool)playerHasTable["IsDead"])
             gameObject.SetActive(false);
         if (!PV.IsMine)
@@ -721,6 +726,8 @@ public class Character : CharacterBehaviour, IDamageable
     #endregion
 
     #region GETTERS
+
+    public override string GetPlayerName() => playerName;
 
     /// <summary>
     /// 플레이어가 죽었는지 리턴합니다.
@@ -2117,23 +2124,26 @@ public class Character : CharacterBehaviour, IDamageable
 
     #region DAMAGE
 
-    public void TakeDamage(int damage, Vector3 pos,Quaternion rot, int team,int viewID, bool bullet,Transform enemy)
+    public void TakeDamage(int damage, Vector3 pos,Quaternion rot, int team,int viewID, bool bullet,string enemyPlayerName, int index)
     {
         if (respawnUnbeatable || isDead)
             return;
-        PV.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage,pos,rot,team,viewID,bullet);
-        
+
+        PV.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage,pos,rot,team,viewID,bullet,enemyPlayerName,index);
     }
 
     [PunRPC]
-    public void RPC_TakeDamage(int damame,Vector3 pos,Quaternion rot,int team,int viewID,bool bullet)
+    public void RPC_TakeDamage(int damame,Vector3 pos,Quaternion rot,int team,int viewID,bool bullet,string enemyPlayerName, int index)
     {
 
         hp -= damame;
-        if(viewID != 0)
+        if(viewID != 0)       
             enemyWhoKilledMeTransform = InGame.Instance.GetDictionary()[viewID];
+
+        Debug.Log(enemyWhoKilledMeTransform);
         if (hp <= 0)
         {
+ 
             playerHasTable["IsDead"] = true;
             PV.Owner.SetCustomProperties(playerHasTable);
             TPik.enabled = false;
@@ -2143,14 +2153,18 @@ public class Character : CharacterBehaviour, IDamageable
             if(PV.IsMine)
                 InGame.Instance.Stop = false;
             OnCharacterDie();
+        
+            InGame.Instance.CreateKillPeed(enemyPlayerName, PV.Owner.NickName, team, (int)PV.Owner.CustomProperties["Team"] , index);
 
         }
+
         if(bullet)
             Instantiate(BloodPrefab, pos, rot);
-        if(PV.IsMine)
+
+        if (PV.IsMine)
         {
             InGame.Instance.BloodFrameOn();
-             DamageIndicatorSystem.CreateIndicator(enemyWhoKilledMeTransform.transform);          
+            DamageIndicatorSystem.CreateIndicator(enemyWhoKilledMeTransform.transform);
         }
 
 
