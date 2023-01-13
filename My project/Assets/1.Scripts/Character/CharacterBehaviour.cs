@@ -20,6 +20,12 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     #region GETTER
 
     /// <summary>
+    /// 플레이어의 이름을 리턴합니다.
+    /// </summary>
+    /// <returns></returns>
+    public abstract string GetPlayerName();
+
+    /// <summary>
     /// running 값을 리턴합니다.
     /// </summary>
     public abstract bool GetRunning();
@@ -161,7 +167,21 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     /// <returns></returns>
     public abstract int GetPlayerTeam();
 
+    /// <summary>
+    /// 적의 위치를 받아옴
+    /// </summary>
     public abstract Transform GetEnemyCharacterBehaviour();
+
+    /// <summary>
+    /// 메인 무기의 index를 리턴합니다.
+    /// </summary>
+    public abstract int GetMainWeaponIndex();
+
+    /// <summary>
+    /// 서브 무기의 index를 리턴합니다.
+    /// </summary>
+    public abstract int GetSubWeapnIndex();
+
     #endregion GETTER
 
     #region ANIMATION
