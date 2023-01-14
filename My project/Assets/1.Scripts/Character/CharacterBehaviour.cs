@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon;
 using Photon.Pun;
 using System;
+using UnityEngine.Experimental.Rendering;
 
 public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -20,9 +21,13 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     #region GETTER
 
     /// <summary>
+    /// 플레이어의 HP를 리턴합니다.
+    /// </summary>
+    public abstract int GetPlayerHP();
+
+    /// <summary>
     /// 플레이어의 이름을 리턴합니다.
     /// </summary>
-    /// <returns></returns>
     public abstract string GetPlayerName();
 
     /// <summary>
@@ -257,6 +262,12 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     #region PhotonNetwork
 
     public abstract void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info);
+
+    #endregion
+
+    #region Methods
+
+    public abstract void CreateHitEffect();
 
     #endregion
 
