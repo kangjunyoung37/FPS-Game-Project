@@ -164,7 +164,17 @@ public class Character : CharacterBehaviour, IDamageable
     [Title(label: "Blood Prefab")]
     [SerializeField]
     private GameObject BloodPrefab;
+
+    [Title(label: "Canvas")]
+
+    [SerializeField]
+    private Canvas playerCanvas;
+
+    [SerializeField]
+    private UIHitEffect uIHitEffect;
+
     
+
     #endregion
 
     #region FIELDS
@@ -495,6 +505,7 @@ public class Character : CharacterBehaviour, IDamageable
 
     protected override void Awake()
     {
+        
         PhotonNetwork.IsMessageQueueRunning = false;
         #region Lock Cursor
         //게임이 시작될 때 항상 커서가 잠겨 있는지 확인하세여
@@ -552,6 +563,7 @@ public class Character : CharacterBehaviour, IDamageable
             fPRenController.FPRenOff();
             equippedWeapon.FPWPOff();
             knife.GetComponent<Renderer>().enabled = false;
+            playerCanvas.enabled = false;
 
         }
         else
@@ -727,6 +739,14 @@ public class Character : CharacterBehaviour, IDamageable
 
     #region GETTERS
 
+    /// <summary>
+    /// 플레이어의 HP를 리턴합니다.
+    /// </summary>
+    public override int GetPlayerHP() => hp;
+
+    /// <summary>
+    /// 플레이어의 닉네임을 리턴합니다.
+    /// </summary>
     public override string GetPlayerName() => playerName;
 
     /// <summary>
@@ -901,6 +921,17 @@ public class Character : CharacterBehaviour, IDamageable
        
         yield return new WaitForSeconds(3.0f);
         respawnUnbeatable = false;
+    }
+    
+    private void KillCountUp(PhotonView photonView)
+    {
+        if (photonView == PV)
+            return;
+        HashTable playerHashTable = photonView.Owner.CustomProperties;
+        int kills = (int)playerHashTable["Kill"];
+        kills++;
+        playerHashTable["Kill"] = kills;
+        photonView.Owner.SetCustomProperties(playerHashTable);
     }
 
     /// <summary>
@@ -1313,6 +1344,10 @@ public class Character : CharacterBehaviour, IDamageable
         TPEquipWeapon.TPWPRendererControl(ShadowCastingMode.On);
         footstepPlayer.enabled = false;
         audioSource.enabled = false;
+        int death = (int)playerHasTable["Death"];
+        death += 1;
+        playerHasTable["Death"] = death;
+        PV.Owner.SetCustomProperties(playerHasTable);
         
 
     }
@@ -2129,7 +2164,7 @@ public class Character : CharacterBehaviour, IDamageable
         if (respawnUnbeatable || isDead)
             return;
 
-        PV.RPC(nameof(RPC_TakeDamage), RpcTarget.All, damage,pos,rot,team,viewID,bullet,enemyPlayerName,index);
+        PV.RPC(nameof(RPC_TakeDamage),RpcTarget.All, damage,pos,rot,team,viewID,bullet,enemyPlayerName,index);
     }
 
     [PunRPC]
@@ -2140,10 +2175,9 @@ public class Character : CharacterBehaviour, IDamageable
         if(viewID != 0)       
             enemyWhoKilledMeTransform = InGame.Instance.GetDictionary()[viewID];
 
-        Debug.Log(enemyWhoKilledMeTransform);
         if (hp <= 0)
         {
- 
+            hp = 0;
             playerHasTable["IsDead"] = true;
             PV.Owner.SetCustomProperties(playerHasTable);
             TPik.enabled = false;
@@ -2151,9 +2185,12 @@ public class Character : CharacterBehaviour, IDamageable
             if(viewID != PV.ViewID)
                 InGame.Instance.GameCheck(team);
             if(PV.IsMine)
+            {
                 InGame.Instance.Stop = false;
+            }
+
             OnCharacterDie();
-        
+            KillCountUp(enemyWhoKilledMeTransform.GetComponent<PhotonView>());
             InGame.Instance.CreateKillPeed(enemyPlayerName, PV.Owner.NickName, team, (int)PV.Owner.CustomProperties["Team"] , index);
 
         }
@@ -2163,12 +2200,17 @@ public class Character : CharacterBehaviour, IDamageable
 
         if (PV.IsMine)
         {
+
             InGame.Instance.BloodFrameOn();
             DamageIndicatorSystem.CreateIndicator(enemyWhoKilledMeTransform.transform);
         }
-
-
     }
-    
+
+    public override void CreateHitEffect()
+    {
+        uIHitEffect.CreateHitEffect();
+    }
+
     #endregion
+
 }
