@@ -15,4 +15,9 @@ public class FPRenController : MonoBehaviour
         }
 
     }
+
+    public void FPChangePlayerMaterial(Material playerMaterial)
+    {
+        FPRenderer[0].material = playerMaterial;
+    }
 }
