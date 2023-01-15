@@ -13,6 +13,8 @@ public class TPPlaySoundCharacterBahaviour : StateMachineBehaviour
         Holster, Unholster,
         //재장전 사이클
         ReloadOpen, ReloadInsert, ReloadClose,
+        //재장전
+        Reload, ReloadEmpty,
         //볼트액션
         BoltAction,
     }
@@ -63,6 +65,11 @@ public class TPPlaySoundCharacterBahaviour : StateMachineBehaviour
             SoundType.Holster => weaponBehaviour.GetAudioClipHolster(),
             //무기 꺼내기
             SoundType.Unholster => weaponBehaviour.GetAudioClipUnHolster(),
+
+            //재장전
+            SoundType.Reload => weaponBehaviour.GetAudioClipReload(),
+            //빈 재장전 
+            SoundType.ReloadEmpty => weaponBehaviour.GetAudioClipReloadEmpty(),
 
             //재장전 열기
             SoundType.ReloadOpen => weaponBehaviour.GetAudioClipReloadOpen(),
