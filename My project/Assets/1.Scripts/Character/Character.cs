@@ -157,6 +157,18 @@ public class Character : CharacterBehaviour, IDamageable
     [SerializeField]
     private FPRenController fPRenController;
 
+    [SerializeField]
+    private Material whiteColorFPMaterial;
+
+    [SerializeField]
+    private Material blackColorFPMaterial;
+
+    [SerializeField]
+    private Material whiteColorTPMaterial;
+
+    [SerializeField]
+    private Material blackColorTPMaterial;
+
     [Title(label: "Leaning Input")]
     [SerializeField]
     private LeaningInput leaningInput;
@@ -173,7 +185,9 @@ public class Character : CharacterBehaviour, IDamageable
     [SerializeField]
     private UIHitEffect uIHitEffect;
 
-    
+    [SerializeField]
+    private GameObject dashBoard;
+
 
     #endregion
 
@@ -564,7 +578,15 @@ public class Character : CharacterBehaviour, IDamageable
             equippedWeapon.FPWPOff();
             knife.GetComponent<Renderer>().enabled = false;
             playerCanvas.enabled = false;
-
+            
+            if(team == 0)
+            {
+                tPRenController.TPChangePlayerMaterial(whiteColorTPMaterial);
+            }
+            else
+            {
+                tPRenController.TPChangePlayerMaterial(blackColorTPMaterial);
+            }
         }
         else
         {
@@ -575,6 +597,14 @@ public class Character : CharacterBehaviour, IDamageable
             cameraShaker = cameraWorld.gameObject.AddComponent<CameraShaker>();
             cameraShaker.DefaultPosInfluence =  new Vector3(0.01f, 0.01f, 0.01f);
             cameraShaker.DefaultRotInfluence = new Vector3(7.0f, 7.0f, 7.0f);
+            if (team == 0)
+            {
+                fPRenController.FPChangePlayerMaterial(whiteColorFPMaterial);
+            }
+            else
+            {
+                fPRenController.FPChangePlayerMaterial(blackColorFPMaterial);
+            }
         }
 
         //수류탄 양 최대로 설정
@@ -961,7 +991,7 @@ public class Character : CharacterBehaviour, IDamageable
         if(characterAnimator.GetBool(boolNameReloading))
         {
             //재장전할 총알이 하나라도 있다면 값을 변경할 수 있습니다.
-            if (equippedWeapon.GetAmmunitionTotal() - equippedWeapon.GetAmmunitionCurrent() < 1)
+            if (equippedWeapon.GetAmmunitionTotal() - equippedWeapon.GetAmmunitionCurrent() < 1 || equippedWeapon.GetAmmunitionWeaponTotal() == 0)
             {
                 //캐릭터 애니메이터 업데이트
                 characterAnimator.SetBool(boolNameReloading, false);
@@ -1149,8 +1179,8 @@ public class Character : CharacterBehaviour, IDamageable
         TPcharacterAnimator.Play(stateName, TPlayerActions, 0.0f);
         TPcharacterAnimator.SetBool(AHashes.Reloading, reloading = true);
         TPEquipWeapon.Reload(stateName);
-        if (!PV.IsMine)
-            TPEquipWeapon.PlaySound(stateName == "Reload Open" ? equippedWeapon.GetAudioClipReloadOpen() : (stateName == "Reload" ? equippedWeapon.GetAudioClipReload() : equippedWeapon.GetAudioClipReloadEmpty()), 1.0f);
+        //if (!PV.IsMine)
+        //    TPEquipWeapon.SoundPlay(stateName == "Reload Open" ? equippedWeapon.GetAudioClipReloadOpen() : (stateName == "Reload" ? equippedWeapon.GetAudioClipReload() : equippedWeapon.GetAudioClipReloadEmpty()));
     }
 
     /// <summary>
@@ -1375,6 +1405,11 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     private bool CanPlayAnimationFire()
     {
+
+        //캐릭터가 죽었는지
+        if (isDead)
+            return false;
+
         //무기 넣기, 무기 넣는 중
         if (holstered || holstering)
             return false;
@@ -1416,6 +1451,9 @@ public class Character : CharacterBehaviour, IDamageable
         
         //탄창이 가득차 있을 때
         if (!equippedWeapon.CanReloadWhenFull() && equippedWeapon.IsFull())
+            return false;
+
+        if (equippedWeapon.GetAmmunitionWeaponTotal() == 0)
             return false;
 
         return true;
@@ -1605,6 +1643,22 @@ public class Character : CharacterBehaviour, IDamageable
 
     #region INPUT
 
+    public void OnTryEnableDashBoard(InputAction.CallbackContext context)
+    {
+        if (!cursorLocked || !PV.IsMine)
+            return;
+
+        switch(context)
+        {
+            case { phase: InputActionPhase.Started }:
+                dashBoard.SetActive(true);
+                break;
+            case{ phase: InputActionPhase.Canceled}:
+                dashBoard.SetActive(false);
+                break;
+        }
+    }
+
     //발사하기 Input
     public void OnTryFire(InputAction.CallbackContext context)
     {
@@ -1650,6 +1704,8 @@ public class Character : CharacterBehaviour, IDamageable
                 break;
         }
     }
+
+
 
     /// <summary>
     /// 재장전하기
