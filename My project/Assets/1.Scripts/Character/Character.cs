@@ -1090,7 +1090,6 @@ public class Character : CharacterBehaviour, IDamageable
     {
         //발사되는 총알의 양을 늘립니다.반동을 적용하므로 최신 상태로 유지해야합니다.
         shotsFired++;
-
         //발사 시간을 저장하여 발사 속도를 올바르게 계산할 수 있습니다.
         lastShotTime = Time.time;
         //조준하는 경우 스코프의 확산 배율도 전달해야 합니다.
@@ -1159,6 +1158,7 @@ public class Character : CharacterBehaviour, IDamageable
     {
         #region Animation
 
+        holdingButtonAim = false;
         string stateName = equippedWeapon.HasCycledReload() ? "Reload Open" : (equippedWeapon.HasAmmunition() ? "Reload" : "Reload Empty");
         //플레이
         characterAnimator.Play(stateName, layerActions, 0.0f);
@@ -1639,6 +1639,16 @@ public class Character : CharacterBehaviour, IDamageable
 
     }
 
+    private bool CanLaserToggle()
+    {
+
+        if(weaponAttachmentManager.GetEquippedLaser() == null)
+        {
+            return false;
+        }
+
+        return true;
+    }
     #endregion
 
     #region INPUT
@@ -2010,6 +2020,8 @@ public class Character : CharacterBehaviour, IDamageable
     public void OnLaser(InputAction.CallbackContext context)
     {
         if (!PV.IsMine || isDead)
+            return;
+        if (!(CanLaserToggle()))
             return;
 
         switch (context)
