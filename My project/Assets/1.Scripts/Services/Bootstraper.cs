@@ -4,6 +4,7 @@ using UnityEngine;
 
 public static class Bootstraper
 {
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void Initialize()
     {
