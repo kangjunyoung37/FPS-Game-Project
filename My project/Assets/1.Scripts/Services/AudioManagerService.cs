@@ -2,9 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.Audio;
 
 public class AudioManagerService : MonoBehaviour , IAudioManagerService
 {
+
+    private AudioMixerGroup audioMixerGroup;
+    private void Awake()
+    {
+        audioMixerGroup = (AudioMixerGroup)Resources.Load<AudioMixerGroup>("Sound/AM_Default");
+    }
+  
     /// <summary>
     /// OneShot 오디오 플레이와 연관된 데이터를 포함하고 있음
     /// </summary>
@@ -65,6 +73,8 @@ public class AudioManagerService : MonoBehaviour , IAudioManagerService
         
         var newAudioSource = newSourceObject.AddComponent<AudioSource>();
 
+        newAudioSource.outputAudioMixerGroup = audioMixerGroup;
+ 
         newAudioSource.volume = settings.Volume;
 
         newAudioSource.spatialBlend = settings.SpatialBlend;
