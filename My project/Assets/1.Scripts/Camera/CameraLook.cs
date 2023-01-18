@@ -117,6 +117,9 @@ public class CameraLook : MonoBehaviourPunCallbacks
         //프레임 입력      
         frameInput = playerCharacter.isCursorLocked() ? playerCharacter.GetInputLook() : default;
         //감도
+        float sensitivityflaot = PlayerPrefs.HasKey("MouseSensitivity") ? PlayerPrefs.GetFloat("MouseSensitivity") :1.0f;
+        sensitivity.x = sensitivityflaot;
+        sensitivity.y = sensitivityflaot;
         frameInput *= sensitivity;
         Quaternion rotationYaw = Quaternion.Euler(0.0f, frameInput.x, 0.0f);
         Quaternion rotationPitch = Quaternion.Euler(-frameInput.y, 0.0f, 0.0f);
