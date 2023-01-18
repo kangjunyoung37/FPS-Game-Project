@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIReaderBoardPlayerItem : MonoBehaviourPunCallbacks
 {
@@ -19,6 +20,9 @@ public class UIReaderBoardPlayerItem : MonoBehaviourPunCallbacks
     [SerializeField]
     TMP_Text deathCount;
 
+    [SerializeField]
+    Image backGround;
+
     #endregion
     public Player player;
 
@@ -28,6 +32,8 @@ public class UIReaderBoardPlayerItem : MonoBehaviourPunCallbacks
         playerName.text = player.NickName;
         killCount.text = player.CustomProperties["Kill"].ToString();
         deathCount.text = player.CustomProperties["Death"].ToString();
+        if (PhotonNetwork.LocalPlayer == player)
+            backGround.enabled = true;
 
     }
 
