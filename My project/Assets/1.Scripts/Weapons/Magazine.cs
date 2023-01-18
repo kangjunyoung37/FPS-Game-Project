@@ -15,10 +15,13 @@ public class Magazine : MagazineBehaviour
     [SerializeField]
     private Sprite sprite;
 
-    [Title(label: "Renderer")]
+    [Title(label:"Renderer")]
+
+    [Tooltip("ÅºÃ¢ÀÇ Renderer")]
     [SerializeField]
-    private Renderer MagazineRender;
+    private Renderer MagazineRender; 
     #endregion
+    
     #region GETTERS
     //ÃÑÅºÃ¢¼ö ¸®ÅÏ
     public override int GetAmmunitionTotal() => ammunitionTotal;
@@ -34,5 +37,11 @@ public class Magazine : MagazineBehaviour
     {
         MagazineRender.enabled = false;
     }
+
+    private void Awake()
+    {
+        MagazineRender = GetComponent<Renderer>();
+    }
+
     #endregion
 }

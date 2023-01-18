@@ -17,6 +17,7 @@ public class LowerWeapon : MonoBehaviour
     private Animator characterAnimator;
 
     [Tooltip("캐릭터가 벽을 향하고 있는지 확인하고 자동으로 무기를 내리려면 WallAvoidance 구성 요소가 필요합니다.")]
+    [SerializeField,NotNull]
     private WallAvoidance wallAvoidance;
 
     [Tooltip("캐릭터 인벤토리 컴포넌트")]
@@ -63,9 +64,9 @@ public class LowerWeapon : MonoBehaviour
         //캐릭터가 에임 중이 아니거나 ,뛰는 중이 아니거나, 검사 중이 아니거나 무기를 집어 넣지 않았으면
         lowerd = (lowerdPressed || wallAvoidance != null && wallAvoidance.HasWall) && !characterBehaviour.IsAiming() && !characterBehaviour.IsRunning()
             && !characterBehaviour.IsInspecting() && !characterBehaviour.IsHolstered();
-        
+        Debug.Log($"{wallAvoidance.HasWall}{characterBehaviour.IsAiming()}{characterBehaviour.IsRunning()}{characterBehaviour.IsInspecting()}{characterBehaviour.IsHolstered()} {characterBehaviour.isHoldingButtonFire()}");
         //발사하는 동안에는 lowerd 상태를 중지합니다.
-        if(stopWhileFiring && characterBehaviour.isHoldingButtonFire())
+        if (stopWhileFiring && characterBehaviour.isHoldingButtonFire())
         {
             lowerd = false;
         }

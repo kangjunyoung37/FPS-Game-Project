@@ -36,18 +36,27 @@ MonoBehaviour:
   RpcList:
   - ClickRpc
   - DestroyRpc
-  - DestroySpaceship
-  - Fire
-  - RespawnSpaceship
-  - UpdateAnimator
-  - CameraLotation
-  - Test
+  - EquipWeapon
   - FireAnimation
-  - TPInspect
   - Inspect
-  - PVjumping
-  - PVJumping
-  - PVAnimatorUpdate
+  - PlayTPGrenadeThrow
+  - ReloadAnimation
+  - RPC_TakeDamage
+  - Scoreup
+  - Toggle
+  - TPPlayMelee
+  - WeaponSlideBackAnimation
+  - IncreaseCurPlayercnt
+  - DecreaseCurPlayerCnt
+  - IncreaseCurPlayerCnt
+  - DecreaseCurPlayer
+  - EnterPlayer
+  - PVSetEnemyCharacterBehaviour
+  - RegisterDictionary
+  - SpawningChange
+  - GameEnd
+  - ExitGame
+  - CreateKillPeed
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

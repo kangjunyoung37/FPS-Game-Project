@@ -58,7 +58,7 @@ public class Scope : ScopeBehaviour
 
     [Title(label: "Renderer")]
 
-    [Tooltip("스코프 랜더러")]
+    [Tooltip("Scope의 Renderer")]
     [SerializeField]
     private Renderer ScopeRender;
 
@@ -73,17 +73,25 @@ public class Scope : ScopeBehaviour
     /// 기본 스코프 material입니다. 런터임에 변경되기 때문에 다시 적용할 수 있도록 저장합니다.
     /// </summary>
     private Material materialDefault;
+
+    private Camera RenCamera;
+
     #endregion
 
     #region UNITY
     private void Awake()
     {
+        //meshRenderer 가져오기
         meshRenderer = GetComponentInChildren<MeshRenderer>();
 
+        //index가 넘어가면 바로 리턴
         if (!HasMaterialIndex())
             return;
 
         materialDefault = meshRenderer.materials[materialIndex];
+
+        RenCamera = GetComponentInChildren<Camera>();
+       
     }
 
     private void Start()
@@ -141,6 +149,12 @@ public class Scope : ScopeBehaviour
     public override void FPScopeRenOff()
     {
         ScopeRender.enabled = false;
+    }
+
+    public override void RenDisable()
+    {
+        if(RenCamera != null)
+            RenCamera.enabled = false;
     }
     #endregion
 }

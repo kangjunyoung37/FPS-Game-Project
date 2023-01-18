@@ -31,7 +31,7 @@ namespace InfimaGames.LowPolyShooterPack
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 		{
 			//We need to get the character component.
-			playerCharacter ??= ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+			playerCharacter ??= ServiceLocators.Current.Get<IGameModeService>().GetPlayerCharacter();
 
 			//Get Inventory.
 			playerInventoryBehaviour ??= playerCharacter.GetInventory();

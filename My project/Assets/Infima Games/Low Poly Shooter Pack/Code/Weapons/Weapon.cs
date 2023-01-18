@@ -208,7 +208,7 @@ namespace InfimaGames.LowPolyShooterPack
             attachmentManager = GetComponent<WeaponAttachmentManagerBehaviour>();
 
             //Cache the game mode service. We only need this right here, but we'll cache it in case we ever need it again.
-            gameModeService = ServiceLocator.Current.Get<IGameModeService>();
+            gameModeService = ServiceLocators.Current.Get<IGameModeService>();
             //Cache the player character.
             characterBehaviour = gameModeService.GetPlayerCharacter();
             //Cache the world camera. We use this in line traces.
@@ -407,7 +407,7 @@ namespace InfimaGames.LowPolyShooterPack
             animator.SetBool(boolName, true);
             
             //Try Play Reload Sound.
-            ServiceLocator.Current.Get<IAudioManagerService>().PlayOneShot(HasAmmunition() ? audioClipReload : audioClipReloadEmpty, new AudioSettings(1.0f, 0.0f, false));
+            ServiceLocators.Current.Get<IAudioManagerService>().PlayOneShot(HasAmmunition() ? audioClipReload : audioClipReloadEmpty, new AudioSettings(1.0f, 0.0f, false));
             
             //Play Reload Animation.
             animator.Play(cycledReload ? "Reload Open" : (HasAmmunition() ? "Reload" : "Reload Empty"), 0, 0.0f);

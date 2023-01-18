@@ -7,6 +7,11 @@ public abstract class MuzzleBehaviour : MonoBehaviour
     #region GETTERS
 
     /// <summary>
+    /// 총소리 범위
+    /// </summary>
+    public abstract float GetShotSoundRange();
+
+    /// <summary>
     /// 총구의 위치를 리턴합니다.
     /// </summary>
     public abstract Transform GetSocket();

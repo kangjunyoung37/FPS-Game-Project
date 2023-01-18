@@ -12,14 +12,14 @@ namespace InfimaGames.LowPolyShooterPack
         /// <summary>
         /// Initialize.
         /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Initialize()
         {
             //Initialize default service locator.
-            ServiceLocator.Initialize();
+            ServiceLocators.Initialize();
             
             //Game Mode Service.
-            ServiceLocator.Current.Register<IGameModeService>(new GameModeService());
+            ServiceLocators.Current.Register<IGameModeService>(new GameModeService());
             
             #region Sound Manager Service
 
@@ -31,7 +31,7 @@ namespace InfimaGames.LowPolyShooterPack
             Object.DontDestroyOnLoad(soundManagerObject);
             
             //Register the sound manager service!
-            ServiceLocator.Current.Register<IAudioManagerService>(soundManagerService);
+            ServiceLocators.Current.Register<IAudioManagerService>(soundManagerService);
 
             #endregion
         }

@@ -19,6 +19,9 @@ public class Muzzle : MuzzleBehaviour
     [SerializeField]
     private AudioClip audioClipFire;
 
+    [SerializeField]
+    private float shotSoundRange;
+
     [Title(label: "Particles")]
 
     [Tooltip("발사 파티클")]
@@ -43,8 +46,8 @@ public class Muzzle : MuzzleBehaviour
     private Vector3 flashLightOffset;
 
     [Title(label: "Renderer")]
-
-    [Tooltip("총구 랜더러")]
+    
+    [Tooltip("총구의 Renderer")]
     [SerializeField]
     private Renderer MuzzleRender;
 
@@ -54,11 +57,15 @@ public class Muzzle : MuzzleBehaviour
     private ParticleSystem particles;
 
     private Light flashlight;
+
+  
+
     #endregion
 
     #region UNITY FUNCTIONS
     private void Awake()
     {
+        MuzzleRender = GetComponent<Renderer>();
         if(prefabFlashParticles != null)
         {
 
@@ -110,7 +117,7 @@ public class Muzzle : MuzzleBehaviour
     public override int GetParticleFireCount() => flashParticlesCount;
     public override Light GetFlashLight() => flashlight;
     public override float GetFlashLightDuration() => flashLightDuration;
-
+    public override float GetShotSoundRange() => shotSoundRange;
     #endregion
 
     #region METHODS

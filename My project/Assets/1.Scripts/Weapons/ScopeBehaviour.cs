@@ -63,5 +63,10 @@ public abstract class ScopeBehaviour : MonoBehaviour
     /// 스코프 랜더러를 끕니다.
     /// </summary>
     public abstract void FPScopeRenOff();
+
+    /// <summary>
+    /// 랜더러 카메라를 끕니다.
+    /// </summary>
+    public abstract void RenDisable();
     #endregion
 }

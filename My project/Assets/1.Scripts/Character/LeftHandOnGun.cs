@@ -8,6 +8,7 @@ public class LeftHandOnGun : MonoBehaviour
     private AimIK aim;
     private FullBodyBipedIK ik;
     private LookAtIK look;
+    private CharacterBehaviour characterBehaviour;
 
     private IKEffector leftHand => ik.solver.leftHandEffector;
     private IKEffector rightHand => ik.solver.rightHandEffector;
@@ -16,6 +17,7 @@ public class LeftHandOnGun : MonoBehaviour
 
     private void Awake()
     {
+        characterBehaviour = transform.root.GetComponent<CharacterBehaviour>();
         aim = GetComponent<AimIK>();
         ik = GetComponent<FullBodyBipedIK>();
         look = GetComponent<LookAtIK>();

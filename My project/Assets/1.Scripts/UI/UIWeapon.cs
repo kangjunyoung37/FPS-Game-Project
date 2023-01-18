@@ -8,6 +8,10 @@ using UnityEngine.EventSystems;
 
 public class UIWeapon : MonoBehaviour, IDragHandler
 {
+
+    [Title(label:"Weapon Type")]
+    public WeaponType weaponType = WeaponType.AR;
+
     [Title(label:"WeaponAttach Transform")]
     [SerializeField]
     private Transform muzzleTransform;
@@ -21,15 +25,9 @@ public class UIWeapon : MonoBehaviour, IDragHandler
     [Title(label:"Rotate Speed")]
     public float rotateSpeed = 10;
 
-    [Title(label:"Offset")]
+    [Title(label: "Offset")]
     [SerializeField]
-    private Vector3 muzzleOffset;
-    [SerializeField]
-    private Vector3 gripOffset;
-    [SerializeField]
-    private Vector3 scopeOffset;
-    [SerializeField]
-    private Vector3 laserOffset;
+    AttachmentOffset attachmentOffset;
 
     Vector3 muzzlePoint;
     Vector3 gripPoint;
@@ -38,6 +36,7 @@ public class UIWeapon : MonoBehaviour, IDragHandler
 
     private Quaternion weaponRot;
 
+
     private void Awake()
     {
         weaponRot = transform.localRotation;
@@ -45,6 +44,7 @@ public class UIWeapon : MonoBehaviour, IDragHandler
         gripPoint = Camera.main.WorldToScreenPoint(gripTransform.position);
         scopePoint = Camera.main.WorldToScreenPoint(scopeTransform.position);
         laserPoint = Camera.main.WorldToScreenPoint(laserTransform.position);
+
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -61,19 +61,19 @@ public class UIWeapon : MonoBehaviour, IDragHandler
 
     public Vector3 MuzzlePoint
     {
-        get { return muzzlePoint + muzzleOffset; }
+        get { return muzzlePoint + attachmentOffset.muzzleOffset; }
     }
     public Vector3 GripPoint
     { 
-        get { return gripPoint + gripOffset; }
+        get { return gripPoint + attachmentOffset.gripOffset; }
     }
     public Vector3 ScopePoint
     {
-        get { return scopePoint + scopeOffset; }
+        get { return scopePoint + attachmentOffset.scopeOffset; }
     }
     public Vector3 LaserPoint
     {
-        get { return laserPoint + laserOffset; }
+        get { return laserPoint + attachmentOffset.laserOffset; }
     }
     public Transform GetMuzzleTransform => muzzleTransform;
     public Transform GetGripTransform => gripTransform;

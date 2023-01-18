@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,12 +80,17 @@ public abstract class WeaponBehaviour : MonoBehaviour
     public abstract AudioClip GetAudioClipFire();
 
     /// <summary>
+    /// 현재 가지고 있는 총 탄약수를 리턴합니다
+    /// </summary>
+    public abstract int GetAmmunitionWeaponTotal();
+
+    /// <summary>
     /// 현재 가지고 있는 탄약수를 리턴합니다.
     /// </summary>
     public abstract int GetAmmunitionCurrent();
 
     /// <summary>
-    /// 가지고 있는 전체 탄약수를 리턴합니다.
+    /// 탄창에 채울 수 있는 전체 탄약수를 리턴합니다.
     /// </summary>
     public abstract int GetAmmunitionTotal();
 
@@ -162,6 +168,11 @@ public abstract class WeaponBehaviour : MonoBehaviour
     /// 무기 부착물 매니저 컴포넌트를 리턴합니다 
     /// </summary>
     public abstract WeaponAttachmentManagerBehaviour GetAttachmentManager();
+
+    /// <summary>
+    /// 무기의 총알 속도를 리턴합니다.
+    /// </summary>
+    public abstract float ProjectileSpeed();
     #endregion
 
     #region METHODS
@@ -198,6 +209,17 @@ public abstract class WeaponBehaviour : MonoBehaviour
     /// 무기 Renderer끄기
     /// </summary>
     public abstract void FPWPOff();
+
+    /// <summary>
+    /// PV전용투사체 생성
+    /// </summary>
+    public abstract void InstateProjectile(float spreadMutiplier);
+
+    /// <summary>
+    /// NetworkSync
+    /// </summary>
+    public abstract void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info);
+
 
     #endregion
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 public class KillLog : MonoBehaviour
 {
+
+    [Title(label:"Settings")]
     [SerializeField]
     private TMP_Text killID;
     [SerializeField]
@@ -12,17 +14,40 @@ public class KillLog : MonoBehaviour
     [SerializeField]
     private Image weaponImage;
 
+
+    [Title(label:"Sprites")]
+    [SerializeField]
+    private Sprite grenadeImage;
+
+    [SerializeField]
+    private Sprite[] weaponImagegroup;
+
     private float destroyTimer = 3.0f;
 
-    public void Setup(string killID,string deadID)
+    int killerTeam = 0;
+    int deadTeam = 0;
+
+    public void Setup(string killID,string deadID,int killerTeam,int deadTeam , int index)
     {
         this.killID.text = killID;
         this.deadID.text = deadID;
+        this.killerTeam = killerTeam;
+        this.deadTeam = deadTeam;
+        TextColorChange(killerTeam, this.killID);
+        TextColorChange(deadTeam, this.deadID);
+        if (index < 0)
+            weaponImage.sprite = grenadeImage;
+        else
+        {
+            weaponImage.sprite = weaponImagegroup[index];
+        }
         destroyTimer = 3.0f;
+
     }
 
     IEnumerator StartAndDestroy()
     {
+
 
         yield return new WaitForSeconds(2.0f);
 
@@ -54,12 +79,28 @@ public class KillLog : MonoBehaviour
 
     private void SetAlpha(float alpha)
     {
-        Color color = killID.color;
-        color.a = alpha;
-        killID.color = color;
-        deadID.color = color;
-        weaponImage.color = color;
+        Color killcolor = killID.color;
+        killcolor.a = alpha;
+        killID.color = killcolor;
+        Color deadcolor = deadID.color;
+        deadcolor.a = alpha;
+        deadID.color = deadcolor;
+        Color weaponColor = weaponImage.color;
+        weaponColor.a = alpha;  
+        weaponImage.color = weaponColor;
     }
 
+    private void TextColorChange(int team,TMP_Text playerName)
+    {
+        if(team == 0)
+        {
+            playerName.color = Color.blue;
+        }
+        else
+        {
+            playerName.color = Color.red;
+        }
+
+    }
 
 }

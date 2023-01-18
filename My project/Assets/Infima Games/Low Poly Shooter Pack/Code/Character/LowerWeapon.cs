@@ -38,11 +38,11 @@ namespace InfimaGames.LowPolyShooterPack
         [Tooltip("If true, the lowered state is stopped when the character starts firing.")]
         [SerializeField]
         private bool stopWhileFiring = true;
-        
+
         #endregion
-        
+
         #region FIELDS
-        
+
         /// <summary>
         /// If true, the character has their weapon lowered, and in a state where there's not many actions that
         /// can be performed.
@@ -76,7 +76,6 @@ namespace InfimaGames.LowPolyShooterPack
             //Update the lowered variable.
             lowered = (loweredPressed || wallAvoidance != null && wallAvoidance.HasWall) && !characterBehaviour.IsAiming() && !characterBehaviour.IsRunning()
                       && !characterBehaviour.IsInspecting() && !characterBehaviour.IsHolstered();
-
             //Stop the lowered state while firing if necessary.
             //We use this by default, but it could be useful to not have it if your lowered poses are different.
             if (stopWhileFiring && characterBehaviour.IsHoldingButtonFire())

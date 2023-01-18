@@ -56,12 +56,30 @@ public class CustomMenuManager : MonoBehaviour
     private Image scopeImage;
     private Image muzzleImage;
 
+    private Transform gripButtonGroup;
+    private Transform muzzleButtonGroup;
+    private Transform scopeButtonGroup;
+    private Transform laserButtonGroup;
+    private GameObject openButtonGroup;
+
+    private List<AttachmentUIButton> attachMentButtonList = new List<AttachmentUIButton>();
+    [SerializeField]
     private bool isMainWeapon = false;
+    [SerializeField]
     private bool isSubWeapon = false;
 
     #region Unity Methods
     private void Awake()
     {
+        gripButtonGroup = gripButton.GetChild(1);
+        laserButtonGroup = laserButton.GetChild(1);
+        muzzleButtonGroup = muzzleButton.GetChild(1);
+        scopeButtonGroup = scopeButton.GetChild(1);
+        GetAttachMentList(gripButtonGroup);
+        GetAttachMentList(laserButtonGroup);
+        GetAttachMentList(muzzleButtonGroup);
+        GetAttachMentList(scopeButtonGroup);
+
         gripImage = gripButton.GetChild(0).GetComponent<Image>();
         laserImage = laserButton.GetChild(0).GetComponent<Image>();
         scopeImage = scopeButton.GetChild(0).GetComponent<Image>();
@@ -81,12 +99,12 @@ public class CustomMenuManager : MonoBehaviour
         equipMainWeapon = uiWeapons[(int)playerHashTable["MainWeapon"]];
         equipSubWeapon = uiWeapons[(int)playerHashTable["SubWeapon"]];
         equipMainWeapon.gameObject.SetActive(true);
-        isMainWeapon = true;
     }
 
     private void OnEnable()
     {
         DOF.active = true;
+        isMainWeapon = true;
         playerHashTable = PhotonNetwork.LocalPlayer.CustomProperties;
         equipSubWeapon = uiWeapons[(int)playerHashTable["SubWeapon"]];
         if (equipMainWeapon != uiWeapons[(int)playerHashTable["MainWeapon"]])
@@ -96,8 +114,18 @@ public class CustomMenuManager : MonoBehaviour
         }
         else
             equipMainWeapon.gameObject.SetActive(true);
+        
+        //MainWeapon AttachMent Check
+        AttachMentCheck(laserButtonGroup, equipMainWeapon, "MainLaser");
+        AttachMentCheck(gripButtonGroup, equipMainWeapon, "MainGrip");
+        AttachMentCheck(muzzleButtonGroup, equipMainWeapon, "MainMuzzle");
+        AttachMentCheck(scopeButtonGroup, equipMainWeapon, "MainScope");
+        
         CreateAttachmentButton(equipMainWeapon);
+        EnableAttachMentButton(equipMainWeapon);
+        
         UpdateAttachMentAllButtons(true);
+        UpdateAllAttachMentWepaon(true);
     }
 
     #endregion
@@ -179,14 +207,49 @@ public class CustomMenuManager : MonoBehaviour
 
     private void UpdateAttachMentWeapon(Transform attchMentTransform , int index)
     {
-        if (index < 0)
-            return;
-        foreach(Transform child in attchMentTransform)
+        foreach (Transform child in attchMentTransform)
         {
             child.gameObject.SetActive(false);
         }
+        if (index < 0)
+            return;
         attchMentTransform.GetChild(index).gameObject.SetActive(true);
 
+    }
+    private void GetAttachMentList(Transform attchMentTransform)
+    {
+        foreach(Transform child in attchMentTransform)
+        {
+            attachMentButtonList.Add(child.GetComponent<AttachmentUIButton>());
+        }
+    }
+
+    private void EnableAttachMentButton(UIWeapon uIWeapon)
+    {
+        foreach(AttachmentUIButton attachmentUIButton in attachMentButtonList)
+        {
+            attachmentUIButton.gameObject.SetActive(attachmentUIButton.CheckEquip(uIWeapon.weaponType));
+        }
+    }
+
+    private void AttachMentCheck(Transform attachMentTransform,UIWeapon equipWeapon,string attachMenttype)
+    {
+        if ((int)playerHashTable[attachMenttype] == -1)
+            return;
+        //+1 Because of default Attachment 
+        if (!attachMentTransform.GetChild((int)playerHashTable[attachMenttype]+1).GetComponent<AttachmentUIButton>().CheckEquip(equipWeapon.weaponType))
+        {
+            playerHashTable[attachMenttype] = -1;
+        }
+    }
+
+    private void CloseButtonGrop()
+    {
+        if (openButtonGroup != null)
+        {
+            openButtonGroup.SetActive(false);
+            openButtonGroup = null;
+        }
     }
 
     #endregion
@@ -195,10 +258,16 @@ public class CustomMenuManager : MonoBehaviour
 
     public void ExitMenu()
     {
+
         DOF.active = false;
         equipMainWeapon.gameObject.SetActive(false);
         equipSubWeapon.gameObject.SetActive(false);
+        isSubWeapon = false;
+        isMainWeapon = false;
+        CloseButtonGrop();
         MenuManager.Instance.OpenMenu("Title");
+        
+
     }
 
     public void MainWeaponButton()
@@ -211,6 +280,9 @@ public class CustomMenuManager : MonoBehaviour
         equipMainWeapon.gameObject.SetActive(true);
         CreateAttachmentButton(equipMainWeapon);
         UpdateAttachMentAllButtons(true);
+        CloseButtonGrop();
+        EnableAttachMentButton(equipMainWeapon);
+
     }
 
     public void SubWeaponButton()
@@ -223,6 +295,90 @@ public class CustomMenuManager : MonoBehaviour
         equipSubWeapon.gameObject.SetActive(true);
         CreateAttachmentButton(equipSubWeapon);
         UpdateAttachMentAllButtons(false);
+        UpdateAllAttachMentWepaon(false);
+        CloseButtonGrop();
+        EnableAttachMentButton(equipSubWeapon);
+    }
+
+    public void ButtonGropOpenOrClose(GameObject gameObject)
+    {
+        if (openButtonGroup == null)
+        {
+            openButtonGroup = gameObject;
+            openButtonGroup.SetActive(true);
+        }
+        else
+        {
+            if(openButtonGroup == gameObject)
+            {
+                openButtonGroup.SetActive(false);
+                openButtonGroup = null;
+            }
+            else
+            {
+                openButtonGroup.SetActive(false);
+                openButtonGroup = gameObject;
+                openButtonGroup.SetActive(true);
+            }
+        }
+    }
+
+    public void ClickAttachMentButton(AttachmentUIButton attachmentUIButton)
+    {
+        if(isMainWeapon)
+        {
+            switch(attachmentUIButton.type)
+            {
+                case AttachmentType.Scope:
+                    playerHashTable["MainScope"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(scopeImage, attachmentUIButton.index, scopeSprites);
+                    UpdateAttachMentWeapon(equipMainWeapon.GetScopeTransform, attachmentUIButton.index);
+                    break;
+                case AttachmentType.Grip:
+                    playerHashTable["MainGrip"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(gripImage, attachmentUIButton.index, gripSprites);
+                    UpdateAttachMentWeapon(equipMainWeapon.GetGripTransform, attachmentUIButton.index);
+                    break;
+                case AttachmentType.Muzzle:
+                    playerHashTable["MainMuzzle"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(muzzleImage, attachmentUIButton.index, muzzleSprites);
+                    UpdateAttachMentWeapon(equipMainWeapon.GetMuzzleTransform, attachmentUIButton.index);
+
+                    break;
+                case AttachmentType.LaserSight:
+                    playerHashTable["MainLaser"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(laserImage, attachmentUIButton.index, laserSprites);
+                    UpdateAttachMentWeapon(equipMainWeapon.GetLaserTransform, attachmentUIButton.index);
+                    break;
+
+            }
+        }
+        else
+        {
+            switch (attachmentUIButton.type)
+            {
+                case AttachmentType.Scope:
+                    playerHashTable["SubScope"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(scopeImage, attachmentUIButton.index, scopeSprites);
+                    UpdateAttachMentWeapon(equipSubWeapon.GetScopeTransform, attachmentUIButton.index);
+                    break;
+
+                case AttachmentType.Muzzle:
+                    playerHashTable["SubMuzzle"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(muzzleImage, attachmentUIButton.index, muzzleSprites);
+                    UpdateAttachMentWeapon(equipSubWeapon.GetMuzzleTransform, attachmentUIButton.index);
+
+                    break;
+                case AttachmentType.LaserSight:
+                    playerHashTable["SubLaser"] = attachmentUIButton.index;
+                    UpdateAttachMentButton(laserImage, attachmentUIButton.index, laserSprites);
+                    UpdateAttachMentWeapon(equipSubWeapon.GetLaserTransform, attachmentUIButton.index);
+                    break;
+
+            }
+        }
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerHashTable);
     }
 
     #endregion

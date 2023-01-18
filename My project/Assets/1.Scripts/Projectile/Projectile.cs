@@ -3,6 +3,8 @@ using System.Collections;
 using InfimaGames.LowPolyShooterPack.Legacy;
 using Random = UnityEngine.Random;
 using Photon.Pun;
+using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 
 public class Projectile : MonoBehaviour
 {
@@ -29,12 +31,16 @@ public class Projectile : MonoBehaviour
 
     #region FIELDS
 
+
     private CharacterBehaviour chbehaviour;
     private PhotonView PV;
     private bool IsLocalPlayer;
     private int team;
     private int damage;
     private float totalDamage;
+    private string playerName;
+    private int index;
+    private Coroutine coroutine;
     #endregion
 
     #region SERIALZED FIELDS
@@ -45,22 +51,19 @@ public class Projectile : MonoBehaviour
 
     #region SETUP
 
-    public void Setup(CharacterBehaviour characterBehaviour, int damage)
+    public void Setup(CharacterBehaviour characterBehaviour, int damage, int index)
     {
         chbehaviour = characterBehaviour;
         PV = characterBehaviour.GetPhotonView();
         IsLocalPlayer = PV.IsMine;
         team = characterBehaviour.GetPlayerTeam();
         this.damage = damage;
+        this.index = index;
+        playerName = characterBehaviour.GetPlayerName();
+        
     }
 
     #endregion
-
-    private void Start()
-    {
-        //Start destroy timer
-        StartCoroutine(DestroyAfter());
-    }
 
     //If the bullet collides with anything
     private void OnCollisionEnter(Collision collision)
@@ -69,8 +72,8 @@ public class Projectile : MonoBehaviour
         if (collision.gameObject.GetComponent<Projectile>() != null)
             return;
 
-        //If destroy on impact is false, start 
-        //coroutine with random destroy timer
+        ////If destroy on impact is false, start 
+        ////coroutine with random destroy timer
         if (!destroyOnImpact)
         {
             StartCoroutine(DestroyTimer());
@@ -78,7 +81,7 @@ public class Projectile : MonoBehaviour
         //Otherwise, destroy bullet on impact
         else
         {
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "Blood" tag
@@ -86,16 +89,18 @@ public class Projectile : MonoBehaviour
         {
             if(!IsLocalPlayer || team == collision.transform.root.GetComponent<CharacterBehaviour>().GetPlayerTeam())
             {
-                Destroy(gameObject);
+                InGame.Instance.DeactivatePoolItem(gameObject);
                 return;
             }
-            totalDamage = damage * collision.transform.GetComponent<HitBox>().GetDamagePercent();            
-            collision.transform.root.GetComponent<Character>().TakeDamage((int)totalDamage, transform.position, Quaternion.LookRotation(collision.contacts[0].normal),team, PV.ViewID);
+
+            totalDamage = damage * collision.transform.GetComponent<HitBox>().GetDamagePercent();
+            chbehaviour.CreateHitEffect();
+            collision.transform.root.GetComponent<Character>().TakeDamage((int)totalDamage, transform.position, Quaternion.LookRotation(collision.contacts[0].normal),team, PV.ViewID,true, playerName , index);
             //Instantiate random impact prefab from array
             //Instantiate(bloodImpactPrefabs[Random.Range (0, bloodImpactPrefabs.Length)], transform.position,
             //    Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "Metal" tag
@@ -106,7 +111,7 @@ public class Projectile : MonoBehaviour
                     (0, bloodImpactPrefabs.Length)], transform.position,
                 Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "Dirt" tag
@@ -117,7 +122,7 @@ public class Projectile : MonoBehaviour
                     (0, bloodImpactPrefabs.Length)], transform.position,
                 Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "Concrete" tag
@@ -128,7 +133,7 @@ public class Projectile : MonoBehaviour
                     (0, bloodImpactPrefabs.Length)], transform.position,
                 Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "Target" tag
@@ -138,7 +143,7 @@ public class Projectile : MonoBehaviour
             collision.transform.gameObject.GetComponent
                 <TargetScript>().isHit = true;
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "ExplosiveBarrel" tag
@@ -148,7 +153,7 @@ public class Projectile : MonoBehaviour
             collision.transform.gameObject.GetComponent
                 <ExplosiveBarrelScript>().explode = true;
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
         //If bullet collides with "GasTank" tag
@@ -158,8 +163,21 @@ public class Projectile : MonoBehaviour
             collision.transform.gameObject.GetComponent
                 <GasTankScript>().isHit = true;
             //Destroy bullet object
-            Destroy(gameObject);
+            InGame.Instance.DeactivatePoolItem(gameObject);
+
         }
+
+    }
+
+    private void OnEnable()
+    {
+        coroutine = StartCoroutine(DestroyAfter());
+    }
+
+    private void OnDisable()
+    {
+        if(coroutine != null)
+            StopCoroutine(coroutine);
     }
 
     private IEnumerator DestroyTimer()
@@ -168,7 +186,7 @@ public class Projectile : MonoBehaviour
         yield return new WaitForSeconds
             (Random.Range(minDestroyTime, maxDestroyTime));
         //Destroy bullet object
-        Destroy(gameObject);
+        InGame.Instance.DeactivatePoolItem(gameObject);
     }
 
     private IEnumerator DestroyAfter()
@@ -176,7 +194,7 @@ public class Projectile : MonoBehaviour
         //Wait for set amount of time
         yield return new WaitForSeconds(destroyAfter);
         //Destroy bullet object
-        Destroy(gameObject);
+        InGame.Instance.DeactivatePoolItem(gameObject);
     }
 }
 

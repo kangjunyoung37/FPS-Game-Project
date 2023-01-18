@@ -13,10 +13,18 @@ public static class Bootstraper
 
         #region Sound Manager Service
 
+        var roomMagaerObjecet = new GameObject("Room Manager");
+        roomMagaerObjecet.AddComponent<RoomManager>();
+
         var soundManagerObject = new GameObject("Sound Manager");
         var soundManagerService = soundManagerObject.AddComponent<AudioManagerService>();
 
+        var gameManagerObject = new GameObject("Game Manager");
+        gameManagerObject.AddComponent<GameManager>();
+        
+        Object.DontDestroyOnLoad(gameManagerObject);
         Object.DontDestroyOnLoad(soundManagerObject);
+        Object.DontDestroyOnLoad(roomMagaerObjecet);
 
         ServiceLocator.Current.Register<IAudioManagerService>(soundManagerService);
         #endregion

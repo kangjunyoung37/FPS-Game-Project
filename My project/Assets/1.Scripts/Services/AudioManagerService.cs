@@ -62,7 +62,34 @@ public class AudioManagerService : MonoBehaviour , IAudioManagerService
         if (clip == null)
             return;
         var newSourceObject = new GameObject($"Audio Source -> {clip.name}");
+        
         var newAudioSource = newSourceObject.AddComponent<AudioSource>();
+
+        newAudioSource.volume = settings.Volume;
+
+        newAudioSource.spatialBlend = settings.SpatialBlend;
+
+        newAudioSource.PlayOneShot(clip);
+
+        if (settings.AutomaticCleanup)
+            StartCoroutine(nameof(DestroySourceWhenFinished), newAudioSource);
+    }
+
+    private void PlayOneShotLocation(AudioClip clip, Vector3 position ,AudioSettings settings)
+    {
+        if (clip == null)
+            return;
+        var newSourceObject = new GameObject($"Audio Source -> {clip.name}");
+        
+        newSourceObject.transform.position = position;
+
+        var newAudioSource = newSourceObject.AddComponent<AudioSource>();
+
+        newAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+
+        newAudioSource.minDistance = 1.0f;
+
+        newAudioSource.maxDistance = 300.0f;
 
         newAudioSource.volume = settings.Volume;
 
@@ -85,5 +112,12 @@ public class AudioManagerService : MonoBehaviour , IAudioManagerService
     {
         StartCoroutine(nameof(PlayOneShotAfterDelay), new OneShotCoroutine(clip, settings, delay));
     }
+
+    
+    public void PlayOneShotPosition(AudioClip clip, Vector3 position = default, AudioSettings settings = default)
+    {
+        PlayOneShotLocation(clip, position, settings);
+    }
+
     #endregion
 }

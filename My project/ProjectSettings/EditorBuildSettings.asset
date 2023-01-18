@@ -17,12 +17,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Infima Games/Low Poly Shooter Pack/Scenes/S_Demo_Warzone.unity
     guid: 93c22658146787c41b6cf6e8e031097c
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
     path: Assets/Scenes/Main Scene.unity
     guid: 35331daaf28391d48a07f415ba9ef6d9
   - enabled: 1
-    path: Assets/Scenes/Game.unity
+    path: Assets/Scenes/Map_1.unity
     guid: cbf31c00e56a1e34c988b1076ef1d02f
+  - enabled: 1
+    path: Assets/Scenes/LoadingScene.unity
+    guid: da477c882d51c154aacb657d499c5ab9
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9eb07e2d669e9c94e9d7d3c782a916f7,
       type: 2}

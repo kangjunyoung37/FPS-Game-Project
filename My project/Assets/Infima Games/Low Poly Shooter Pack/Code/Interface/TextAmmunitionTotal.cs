@@ -20,7 +20,7 @@ namespace InfimaGames.LowPolyShooterPack.Interface
             float ammunitionTotal = equippedWeaponBehaviour.GetAmmunitionTotal();
             
             //Update Text.
-            textMesh.text = ammunitionTotal.ToString(CultureInfo.InvariantCulture);
+            textMesh.text = ammunitionTotal.ToString();
         }
         
         #endregion

@@ -75,7 +75,7 @@ namespace InfimaGames.LowPolyShooterPack
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             //We need to get the character component.
-            playerCharacter ??= ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+            playerCharacter ??= ServiceLocators.Current.Get<IGameModeService>().GetPlayerCharacter();
 
             //Get Inventory.
             playerInventory ??= playerCharacter.GetInventory();
@@ -85,7 +85,7 @@ namespace InfimaGames.LowPolyShooterPack
                 return;
             
             //Try grab a reference to the sound managing service.
-            audioManagerService ??= ServiceLocator.Current.Get<IAudioManagerService>();
+            audioManagerService ??= ServiceLocators.Current.Get<IAudioManagerService>();
 
             #region Select Correct Clip To Play
 

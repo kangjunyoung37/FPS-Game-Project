@@ -1,8 +1,10 @@
 using InfimaGames.LowPolyShooterPack;
 using Photon.Pun;
+using RootMotion.FinalIK;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class TPWeapon : MonoBehaviour
@@ -17,6 +19,13 @@ public class TPWeapon : MonoBehaviour
 
     [SerializeField , ShowIf(nameof(ChangeTransform), true)]
     private Transform ParentTransform;
+
+    [SerializeField, ShowIf(nameof(ChangeTransform), true)]
+    private AimIK aimik;
+
+    [SerializeField, ShowIf(nameof(ChangeTransform), true)]
+    private LeftHandOnGun leftHandOnGun;
+
 
     [Title("RuntimeAnimator")]
     
@@ -33,15 +42,16 @@ public class TPWeapon : MonoBehaviour
 
     private PhotonView PV;
 
+    private AudioSource audioSource;
+
+    private AudioSource weaponAudioSource;
+
+    private AudioClip audioClip;
+
     private int ScopeIndex = -1;
     private int LaserIndex = -1;
     private int MuzzleIndex = 0;
     private int GripIndex = -1;
-
-    private int TPScopeIndex = -1;
-    private int TPLaserIndex = -1;
-    private int TPMuzzleIndex = 0;
-    private int TPGripIndex = -1;
 
     [Title("Weapon AttachMent")]
 
@@ -60,48 +70,66 @@ public class TPWeapon : MonoBehaviour
     [Title(label:"Renderer")]
     [SerializeField]
     private List<Renderer> renderers = new List<Renderer>();
-   
+
     private GameObject[] ScopeGameObjects = new GameObject[8];
-
     private GameObject[] LaserGameObjects = new GameObject[2];
-
     private GameObject[] MuzzleGameObjects = new GameObject[4];
-
     private GameObject[] GripGameObjects = new GameObject[3];
 
-    private bool isgo = false;
-
     private MuzzleBehaviour muzzle;
+
+    private IAudioManagerService audioManagerService;
+
+    private AudioSettings audioSettings = new AudioSettings(1.0f, 1.0f, true);
 
     #region UNITY METHODS
     private void Awake()
     {
-
+  
         Init();
         if (ChangeTransform)
         {
             transform.SetParent(ParentTransform, false);
+            aimik.enabled = true;
+            leftHandOnGun.enabled = false;
         }
-        
+        //Character.OnCharacterDie += CharacterDie;
+
     }
 
-    private void Update()
+    private void CharacterDie()
     {
-        if(!isgo&&EquipWeaponAttachmentManager.Getreceive()&&!PV.IsMine)
-        {
-            TPScopeIndex = EquipWeaponAttachmentManager.GetEquippedScopePVIndex();
-            TPLaserIndex = EquipWeaponAttachmentManager.GetEquippedLaserPVIndex();
-            TPMuzzleIndex = EquipWeaponAttachmentManager.GetEquippedMuzzlePVIndex();
-            TPGripIndex = EquipWeaponAttachmentManager.GetEquippedGripPVIndex();
+        transform.parent = null;
+    }
 
-            SetActiveIndex(ScopeGameObjects, TPScopeIndex);
-            SetActiveIndex(GripGameObjects, TPGripIndex);
-            SetActiveIndex(LaserGameObjects, TPLaserIndex);
-            SetActiveIndex(MuzzleGameObjects, TPMuzzleIndex);
-            isgo = true;
+    private void OnEnable()
+    {
+        if(ChangeTransform)
+        {
+            aimik.enabled = true;
+            leftHandOnGun.enabled = false;
+            for (int i = 3; i < 7; i++)
+            {
+                aimik.solver.bones[i].weight = 0.0f;
+            }
+
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (ChangeTransform)
+        {
+            aimik.enabled = false;
+            leftHandOnGun.enabled = true;
+            for (int i = 3; i < 7; i++)
+            {
+                aimik.solver.bones[i].weight = 1.0f;
+            }
         }
 
     }
+
 
     #endregion
 
@@ -109,6 +137,10 @@ public class TPWeapon : MonoBehaviour
 
     private void Init()
     {
+        
+        audioManagerService = ServiceLocator.Current.Get<IAudioManagerService>();
+        weaponAudioSource = GetComponent<AudioSource>();
+        audioSource = transform.parent.GetComponent<AudioSource>();
         WeaponAnimator = transform.GetComponent<Animator>();
         Character = transform.parent.GetComponent<TPInventory>().GetCharacterBehaviour();
         PV = Character.transform.GetComponent<PhotonView>();
@@ -119,19 +151,19 @@ public class TPWeapon : MonoBehaviour
         LaserIndex = EquipWeaponAttachmentManager.GetEquippedLaserIndex();
         MuzzleIndex = EquipWeaponAttachmentManager.GetEquippedMuzzleIndex();
         GripIndex = EquipWeaponAttachmentManager.GetEquippedGripIndex();
+        muzzle = EquipWeaponAttachmentManager.GetEquippedMuzzle();
+        audioClip = muzzle.GetAudioClipFire();
 
         SetActive(ScopeGameObjects, Scopes);
         SetActive(LaserGameObjects, Lasers);
         SetActive(MuzzleGameObjects,Muzzles);
         SetActive(GripGameObjects, Grips);
 
-        muzzle = MuzzleGameObjects[MuzzleIndex].GetComponent<MuzzleBehaviour>();
 
-
-        SetActiveIndex(ScopeGameObjects, TPScopeIndex);
-        SetActiveIndex(GripGameObjects, TPGripIndex);
-        SetActiveIndex(LaserGameObjects, TPLaserIndex);
-        SetActiveIndex(MuzzleGameObjects, TPMuzzleIndex);
+        SetActiveIndex(ScopeGameObjects, ScopeIndex);
+        SetActiveIndex(GripGameObjects, GripIndex);
+        SetActiveIndex(LaserGameObjects, LaserIndex);
+        SetActiveIndex(MuzzleGameObjects, MuzzleIndex);
 
        
     }
@@ -156,25 +188,49 @@ public class TPWeapon : MonoBehaviour
         WeaponAnimator.SetBool(boolName, back != 0);
     }
 
-    public void TPWeaponOff()
+    public void TPWPRendererControl(ShadowCastingMode shadowCastingMode)
     {
         foreach (Renderer renderer in renderers)
         {
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+            renderer.shadowCastingMode = shadowCastingMode;
         }
     }
 
     public void MuzzleFire()
     {
+        if (muzzle == null)
+            return;
         muzzle.Effect();
-        
+        PlaySound(audioClip, muzzle.GetShotSoundRange());
     }
+
+    public void SoundPlay(AudioClip audioClip)
+    {
+        audioSource.PlayOneShot(audioClip);
+    }
+    
+    public void PlaySound(AudioClip audioClip,float soundRange)
+    {
+
+        weaponAudioSource.maxDistance = soundRange;
+        weaponAudioSource.PlayOneShot(audioClip);
+
+    }
+    
 
     #endregion
 
     #region GETTERS
 
     public Animator GetAnimator() => WeaponAnimator;
+
+    public PhotonView GetPhotonView() => PV;
+
+    public AudioSource GetTPAudiosorce() => audioSource;
+
+    public WeaponBehaviour GetEquippedWeaponBehaviour() => EquipWeapon;
+
+    public List<Renderer> GetTPWeaponRenderer() => renderers;
 
     #endregion
 
@@ -197,6 +253,7 @@ public class TPWeapon : MonoBehaviour
     
     private void SetActiveIndex(GameObject[] array, int index)
     {
+
         if (index < 0)
             return;
         for(int i = 0; i < array.Length;i++)

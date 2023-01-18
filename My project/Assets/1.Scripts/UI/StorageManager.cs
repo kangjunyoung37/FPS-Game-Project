@@ -99,13 +99,9 @@ public class StorageManager : MonoBehaviour
     private void Start()
     {
         playerHashTable = PhotonNetwork.LocalPlayer.CustomProperties;
-        //equipMainWeapon = uIWeapons[(int)playerHashTable["MainWeapon"]];
-        //equipSubWeapon = uIWeapons[(int)playerHashTable["SubWeapon"]];
         SetActiveMainWeapon();
         UpdateMyWeapon(true);
         UpdateMyWeapon(false);
-        //Vector3 pos = UIcamera.WorldToScreenPoint(equipMainWeapon.GetMuzzleTransform().position);
-        //ButtonTransform.anchoredPosition = pos;
     }
 
     #endregion

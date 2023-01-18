@@ -116,7 +116,6 @@ public class CameraLook : MonoBehaviourPunCallbacks
     {
         //프레임 입력      
         frameInput = playerCharacter.isCursorLocked() ? playerCharacter.GetInputLook() : default;
-
         //감도
         frameInput *= sensitivity;
         Quaternion rotationYaw = Quaternion.Euler(0.0f, frameInput.x, 0.0f);

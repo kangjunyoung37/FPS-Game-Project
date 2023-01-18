@@ -36,6 +36,7 @@ public class MotionApplier : MonoBehaviour
     /// </summary>
     private Transform thisTransform;
 
+    private CharacterBehaviour characterBehaviour;
     #endregion
 
     #region METHODS
@@ -44,10 +45,15 @@ public class MotionApplier : MonoBehaviour
     {
         //캐싱
         thisTransform = transform;
+        characterBehaviour = transform.root.GetComponent<CharacterBehaviour>();
     }
 
     private void LateUpdate()
     {
+        //캐릭터가 죽었으면 모션적용을 해제한다.
+        if (characterBehaviour.GetPlayerDead())
+            return;
+
         //마지막 위치(결과)
         Vector3 finalLocation = default;
 
@@ -74,13 +80,16 @@ public class MotionApplier : MonoBehaviour
         //오버라이드 모드(덮어 씌우기)
         if(applyMode == ApplyMode.Override)
         {
+            
             //로케이션 값 집어넣기
             thisTransform.localPosition = finalLocation;
 
             //EulerAngles 값 집어넣기
             thisTransform.localEulerAngles = finalEulerAngles;
         }
-        else if(applyMode == ApplyMode.Add)
+
+        //더하기 모드(더하기)
+        else if (applyMode == ApplyMode.Add)
         {
             //로케이션 값 더하기
             thisTransform.localPosition += finalLocation;
@@ -90,7 +99,7 @@ public class MotionApplier : MonoBehaviour
 
         }
 
-        //더하기 모드(더하기)
+        
     }
 
     /// <summary>

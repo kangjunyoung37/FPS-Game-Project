@@ -52,9 +52,9 @@ public class Laser : LaserBehaviour
     [SerializeField]
     private float beamMaxDistance = 500.0f;
 
-    [Title(label: "Renderer")]
+    [Title(label:"Renderer")]
 
-    [Tooltip("레이저 렌더러")]
+    [Tooltip("Laser의 Renderer")]
     [SerializeField]
     private Renderer LaserRender;
 
@@ -114,7 +114,6 @@ public class Laser : LaserBehaviour
     public override void FPLaserOff()
     {
         LaserRender.enabled = false;
-
         if (beam != null)
             beam.enabled = false;
 
@@ -126,6 +125,7 @@ public class Laser : LaserBehaviour
 
     private void Awake()
     {
+
         if (laserTransform == null)
             return;
         beamParent = laserTransform.parent;
@@ -138,7 +138,7 @@ public class Laser : LaserBehaviour
         if (laserTransform == null)
             return;
         float targetScale = beamMaxDistance;
-        if (Physics.Raycast(new Ray(laserTransform.position,beamParent.forward),out RaycastHit hit,beamMaxDistance))
+        if (Physics.Raycast(new Ray(laserTransform.position,beamParent.forward),out RaycastHit hit,beamMaxDistance,8))
         {
             targetScale = hit.distance * 5.0f;
         }

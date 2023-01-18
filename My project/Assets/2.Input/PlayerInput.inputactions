@@ -220,6 +220,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "MainWeapon",
+                    "type": "Button",
+                    "id": "2a3c2cea-e041-400f-9ea3-223b9cd6b8f8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SubWeapon",
+                    "type": "Button",
+                    "id": "8c283553-41bd-4142-88ae-50b45d6a9a13",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeaderBoard",
+                    "type": "Button",
+                    "id": "666f40de-a170-4259-bed2-901845a220f1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -572,6 +599,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "LeaningLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "13dc9427-dcc2-48a0-9624-757f315065ac",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MainWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a228eb9-c8dc-4d27-8315-307d4a4d1549",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SubWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4a6f5fbd-3f5d-4b48-813b-18095509c135",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeaderBoard",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

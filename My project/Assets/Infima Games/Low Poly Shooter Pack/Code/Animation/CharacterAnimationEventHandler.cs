@@ -23,7 +23,7 @@ namespace InfimaGames.LowPolyShooterPack
 		private void Awake()
 		{
 			//Grab a reference to the character component.
-			playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();
+			playerCharacter = ServiceLocators.Current.Get<IGameModeService>().GetPlayerCharacter();
 		}
 
 		#endregion

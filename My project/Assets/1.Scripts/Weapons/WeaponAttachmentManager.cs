@@ -1,9 +1,11 @@
+using InfimaGames.LowPolyShooterPack;
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UIElements;
+using HashTable = ExitGames.Client.Photon.Hashtable;
 
 public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
 {
@@ -22,13 +24,6 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     [SerializeField]
     private int scopeIndex = -1;
 
-    [Tooltip("랜덤 스코프를 사용할 때 첫번째 스코프 인텍스")]
-    [SerializeField]
-    private int scopeIndexFirst = -1;
-
-    [Tooltip("게임이 시작되면 랜덤 스코프를 사용할 것인지")]
-    [SerializeField]
-    private bool scopeIndexRandom;
 
     [Tooltip("이 무기가 사용할 수 있는 스코프들")]
     [SerializeField]
@@ -40,10 +35,6 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     [SerializeField]
     private int muzzleIndex;
 
-    [Tooltip("게임이 시작되면 랜덤 총구를 사용할 것인지")]
-    [SerializeField]
-    private bool muzzleIndexRandom = true;
-
     [Tooltip("이 무기가 사용할 수 있는 모든 총구 부착물들")]
     [SerializeField]
     private MuzzleBehaviour[] muzzleArray;
@@ -53,10 +44,6 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     [Tooltip("선택된 레이저 인덱스")]
     [SerializeField]
     private int laserIndex = -1;
-
-    [Tooltip("게임이 시작되면 랜덤 레이저를 사용할 것인지")]
-    [SerializeField]
-    private bool laserIndexRandom = true;
 
     [Tooltip("이 무기에 사용할 수 있는 레이저 배열")]
     [SerializeField]
@@ -68,10 +55,6 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     [SerializeField]
     private int gripIndex = -1;
 
-    [Tooltip("게임이 시작되면 랜덤 그립을 사용할 것인지")]
-    [SerializeField]
-    private bool gripIndexRandom = true;
-
     [Tooltip("이 무기에 사용할 수 있는 그립 배열")]
     [SerializeField]
     private GripBehaviour[] gripArray;
@@ -82,13 +65,14 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     [SerializeField]
     private int magazineIndex;
 
-    [Tooltip("게임이 시작되면 랜덤 탄창을 사용할 것인지")]
-    [SerializeField]
-    private bool magazineIndexRandom = true;
-
     [Tooltip("이 무기에 사용할 수 있는 탄창 배열")]
     [SerializeField]
     private Magazine[] magazineArray;
+
+    [Title(label: "External Attachment")]
+    [SerializeField]
+    private Renderer[] externalAttachment;
+
     #endregion
     #region FIELDS
 
@@ -117,7 +101,18 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     /// </summary>
     private MagazineBehaviour magazineBehaviour;
 
-    [SerializeField]
+    /// <summary>
+    /// CharacterBehaviour
+    /// </summary>
+    private CharacterBehaviour characterBehaviour;
+
+    /// <summary>
+    /// 부착물이 장착될 무기
+    /// </summary>
+    private Weapon weapon;
+
+    private HashTable playerHashTable;
+
     private PhotonView PV;
 
     private int PVScopeIndex = -1;
@@ -125,7 +120,12 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
     private int PVGripIndex = -1;
     private int PVMuzzleIndex = 0;
 
-    [SerializeField]
+    //주무기인지
+    private bool isMainWeapon;
+
+    /// <summary>
+    /// 데이터를 받았는지 
+    /// </summary>
     private bool isreceive = false;
 
     #endregion
@@ -134,10 +134,33 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
 
     protected override void Awake()
     {
-                 
-        //랜덤 스코프라면
-        if (scopeIndexRandom)
-            scopeIndex = Random.Range(scopeIndexFirst, scopeArray.Length);
+        //캐싱
+        characterBehaviour = transform.root.GetComponent<CharacterBehaviour>();
+        PV = characterBehaviour.GetPhotonView();
+        playerHashTable = PV.Owner.CustomProperties;
+        weapon = transform.GetComponent<Weapon>();
+        
+        if(weapon.weaponType != WeaponType.HG)
+        {
+            isMainWeapon = true;
+        }
+
+        if(isMainWeapon)
+        {
+            scopeIndex = (int)playerHashTable["MainScope"];
+            gripIndex = (int)playerHashTable["MainGrip"];
+            laserIndex = (int)playerHashTable["MainLaser"];
+            muzzleIndex = (int)playerHashTable["MainMuzzle"] + 1;
+        }
+
+        else
+        {
+            scopeIndex = (int)playerHashTable["SubScope"];
+            laserIndex = (int)playerHashTable["SubLaser"];
+            muzzleIndex = (int)playerHashTable["SubMuzzle"] + 1;
+        }
+
+  
 
         //스코프 선택
         scopeBehaviour = scopeArray.SelectAndSetActive(scopeIndex);
@@ -148,27 +171,19 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
             scopeBehaviour = scopeDefaultBehaviour;
             scopeBehaviour.gameObject.SetActive(scopeDefaultShow);
         }
-        //랜덤 총구
-        if (muzzleIndexRandom)
-            muzzleIndex = Random.Range(0, muzzleArray.Length);
-        //총구 선택
+
+        //총구가 없다면
         muzzleBehaviour = muzzleArray.SelectAndSetActive(muzzleIndex);
-        //랜덤 레이저라면
-        if (laserIndexRandom)
-            laserIndex = Random.Range(0, laserArray.Length);
+
         //레이저 선택
         laserBehaviour = laserArray.SelectAndSetActive(laserIndex);
 
-        //랜덤 그립이라면
-        if(gripIndexRandom)
-            gripIndex = Random.Range(0, gripArray.Length);
         //그립 선택
         gripBehaviour = gripArray.SelectAndSetActive(gripIndex);
-        //랜덤 탄창이라면
-        if(magazineIndexRandom)
-            magazineIndex = Random.Range(0, magazineArray.Length);
+
         //탄창 선택
         magazineBehaviour = magazineArray.SelectAndSetActive(magazineIndex);
+
     }
 
     #endregion
@@ -212,6 +227,7 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
         for(int i = 0; i < scopeArray.Length;i++)
         {
             scopeArray[i].FPScopeRenOff();
+            scopeArray[i].RenDisable();
         }
         scopeDefaultBehaviour.FPScopeRenOff();
     }
@@ -230,6 +246,7 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
         {
             laserArray[i].FPLaserOff();
         }
+        
     }
 
     public override void FPMagazinesOff()
@@ -239,6 +256,14 @@ public class WeaponAttachmentManager : WeaponAttachmentManagerBehaviour
             magazineArray[i].FPMagazineOff();
 
         }
+    }
+
+    public override void FPexternalAttachmentOff()
+    {
+        if (externalAttachment.Length == 0)
+            return;
+        for (int i = 0; i < externalAttachment.Length; i++)
+            externalAttachment[i].enabled = false;
     }
 
     public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)

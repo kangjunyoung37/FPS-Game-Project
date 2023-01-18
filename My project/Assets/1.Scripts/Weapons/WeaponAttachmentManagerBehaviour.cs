@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -69,6 +70,26 @@ public abstract class WeaponAttachmentManagerBehaviour : MonoBehaviour
     public abstract int GetEquippedGripIndex();
 
     /// <summary>
+    /// 총구 PV인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedMuzzlePVIndex();
+
+    /// <summary>
+    /// 총 스코프 PV인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedScopePVIndex();
+
+    /// <summary>
+    /// 레이저 PV인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedLaserPVIndex();
+
+    /// <summary>
+    /// 그립 PV인덱스를 리턴합니다.
+    /// </summary>
+    public abstract int GetEquippedGripPVIndex();
+
+    /// <summary>
     /// 모든 그립 Renderer를 끕니다.
     /// </summary>
     public abstract void FPGripsOff();
@@ -93,6 +114,14 @@ public abstract class WeaponAttachmentManagerBehaviour : MonoBehaviour
     /// </summary>
     public abstract void FPMagazinesOff();
 
+    /// <summary>
+    /// 탄띠,외부부착물 Renderer를 끕니다.
+    /// </summary>
+    public abstract void FPexternalAttachmentOff();
+
+    public abstract void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info);
+
+    public abstract bool Getreceive();
     #endregion
 }
 

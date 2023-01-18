@@ -96,7 +96,7 @@ public class RecoilMotion : Motion
             //세가지의 곡선을 가지고 있어야 합니다.
             if(recoilCurves.LocationCurves.Length == 3)
             {
-                //정확한 시간에 반동 곡선을 평가하여 반동 위치를 계산합니다.
+                //정확한 시간에 반동 곡선을 계산하여 반동 위치를 계산합니다.
                 //정확한 시간은 방금 발사한 총알의 양이므로 특정 탄약 수를 고려해야합니다.
                 recoilLocation.x = recoilCurves.LocationCurves[0].Evaluate(shotsFired);
                 recoilLocation.y = recoilCurves.LocationCurves[1].Evaluate(shotsFired);

@@ -12,7 +12,9 @@ public class Grip : GripBehaviour
     [SerializeField]
     private Sprite sprite;
 
-    [Title(label: "Renderer")]
+    [Title(label:"Renderer")]
+
+    [Tooltip("±×¸³ÀÇ Renderer")]
     [SerializeField]
     private Renderer GripRender;
     #endregion

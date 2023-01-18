@@ -35,7 +35,7 @@ namespace InfimaGames.LowPolyShooterPack
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             //Try grab a reference to the sound managing service.
-            audioManagerService ??= ServiceLocator.Current.Get<IAudioManagerService>();
+            audioManagerService ??= ServiceLocators.Current.Get<IAudioManagerService>();
 
             //Play!
             audioManagerService?.PlayOneShot(clip, settings);

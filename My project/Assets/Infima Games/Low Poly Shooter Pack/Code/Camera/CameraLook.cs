@@ -63,7 +63,7 @@ namespace InfimaGames.LowPolyShooterPack
         private void Start()
         {
             //Get Player Character.
-            playerCharacter = ServiceLocator.Current.Get<IGameModeService>().GetPlayerCharacter();       
+            playerCharacter = ServiceLocators.Current.Get<IGameModeService>().GetPlayerCharacter();       
             
             //Cache the character's initial rotation.
             rotationCharacter = playerCharacter.transform.localRotation;

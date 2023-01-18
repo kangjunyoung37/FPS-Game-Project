@@ -75,6 +75,17 @@ public abstract class MovementBehaviour : MonoBehaviour
     /// 캐릭터가 웅크리고 있는 중이라면 true를 리턴합니다.
     /// </summary>
     public abstract bool IsCrouching();
+
+    /// <summary>
+    /// 캐릭터의 PVVelocity값을 가져옵니다.
+    /// </summary>
+    public abstract Vector3 GetPVVelocity();
+
+    /// <summary>
+    /// 캐릭터의 PVIsGrounded값을 가져옵니다.
+    /// </summary>
+    public abstract bool GetPVIsGrounded();
+
     #endregion
 
     #region METHODS

@@ -20,5 +20,6 @@ public abstract class MagazineBehaviour : MonoBehaviour
     /// MagazineRenderer¸¦ ²ü´Ï´Ù.
     /// </summary>
     public abstract void FPMagazineOff();
+
     #endregion
 }

@@ -1,4 +1,5 @@
 using InfimaGames.LowPolyShooterPack;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,6 +48,12 @@ public class PlaySoundCharacterBehaviour : StateMachineBehaviour
     /// </summary>
     private CharacterBehaviour playerCharacter;
 
+
+    /// <summary>
+    /// 플레이어의 PhotonView
+    /// </summary>
+    private PhotonView PV;
+
     /// <summary>
     /// 플레이어 인벤토리
     /// </summary>
@@ -63,8 +70,13 @@ public class PlaySoundCharacterBehaviour : StateMachineBehaviour
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+
         //캐릭터 컴포넌트를 가져온다.
         playerCharacter = animator.GetComponentInParent<CharacterBehaviour>();
+
+        //포톤 뷰 가져오기
+        PV = playerCharacter.GetPhotonView();
+
         //인벤토리 가져오기
         playerInventory ??= playerCharacter.GetInventory();
 

@@ -1,16 +1,28 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Weapon : WeaponBehaviour
 {
     #region FIELDS SERIALIZED
 
     [Title(label: "Settings")]
-
+    
     [Tooltip("무기명, 픽업용으로 사용할 예정")]
     [SerializeField]
     private string weaponName;
+
+    [Tooltip("무기 종류")]
+    [SerializeField]
+    public WeaponType weaponType = WeaponType.AR;
+
+    [Tooltip("샷건인지")]
+    [SerializeField]
+    private bool isShotGun = false;
+
+    [Tooltip("무기의 데미지")]
+    [SerializeField]
+    private int damage;
 
     [Tooltip("이 무기를 사용할 때 이 캐릭터의 이동 속도가 몇 배 증가하는지")]
     [SerializeField]
@@ -62,7 +74,7 @@ public class Weapon : WeaponBehaviour
 
     [Title(label: "Animation")]
 
-    [Tooltip("무기가 발사되는 부분을 의미합니다")]
+    [Tooltip("탄피가 배출되는 곳을 의미합니다")]
     [SerializeField]
     private Transform socketEjection;
 
@@ -80,7 +92,7 @@ public class Weapon : WeaponBehaviour
     [SerializeField]
     private GameObject prefabProjectile;
 
-    [Tooltip("플레이어 캐릭터가 무기를 휘두리는데 사용해야하는 컴포넌트")]
+    [Tooltip("플레이어 캐릭터가 무기를 사용할 때 사용해야하는 애니메이터 컨트롤러")]
     [SerializeField]
     public RuntimeAnimatorController controller;
 
@@ -137,6 +149,7 @@ public class Weapon : WeaponBehaviour
     [Tooltip("무기 Renderer")]
     [SerializeField]
     private Renderer WeaponRenderer;
+
     #endregion
 
     #region FIELDS
@@ -155,6 +168,11 @@ public class Weapon : WeaponBehaviour
     /// 남은 탄약량
     /// </summary>
     private int ammunitionCurrent;
+
+    /// <summary>
+    /// 총 탄약량
+    /// </summary>
+    private int ammunitionTotal;
 
     #region Attachment Behaviours
 
@@ -200,6 +218,26 @@ public class Weapon : WeaponBehaviour
     /// </summary>
     private Transform playerCamera;
 
+    /// <summary>
+    /// 플레이어의 PhotonView
+    /// </summary>
+    private PhotonView PV;
+
+    /// <summary>
+    /// TPRenderer 컨트롤러
+    /// </summary>
+    private TPRenController tPRenController;
+
+    /// <summary>
+    /// 자기 자신의 collider
+    /// </summary>
+    private Collider[] colliders;
+
+    /// <summary>
+    /// 무기의 순서
+    /// </summary>
+    private int index;
+
     #endregion
 
     #region UNITY
@@ -207,25 +245,30 @@ public class Weapon : WeaponBehaviour
 
     protected override void Awake()
     {
+      
         animator = GetComponent<Animator>();
         attachMentManager = GetComponent<WeaponAttachmentManagerBehaviour>();
         gameModeService = ServiceLocator.Current.Get<IGameModeService>();
         characterBehaviour = transform.parent.GetComponent<Inventory>().GetCharacterBehaviour();
+        PV = characterBehaviour.GetPhotonView();
+        tPRenController = characterBehaviour.GetTPRenController();
         playerCamera = characterBehaviour.GetCameraWold().transform;
-
+        index = transform.GetSiblingIndex();
     }
 
     protected override void Start()
     {
+        colliders = tPRenController.GetColliders();
         scopeBehaviour = attachMentManager.GetEquippedScope();
         magazineBehaviour = attachMentManager.GetEquippedMagazine();
         muzzleBehaviour = attachMentManager.GetEquippedMuzzle();
         laserBehaviour = attachMentManager.GetEquippedLaser();
         gripBehaviour = attachMentManager.GetEquippedGrip();
         ammunitionCurrent = magazineBehaviour.GetAmmunitionTotal();
-
+        ammunitionTotal = magazineBehaviour.GetAmmunitionTotal() * 3;
 
     }
+    
     #endregion
 
     #region GETTERS
@@ -283,7 +326,9 @@ public class Weapon : WeaponBehaviour
     public override AudioClip GetAudioClipBoltAction() => audioClipBoltAction;
     
     public override AudioClip GetAudioClipFire() => muzzleBehaviour.GetAudioClipFire();
-    
+
+    public override int GetAmmunitionWeaponTotal() => ammunitionTotal;
+
     public override int GetAmmunitionCurrent() => ammunitionCurrent;
 
     public override int GetAmmunitionTotal() => magazineBehaviour.GetAmmunitionTotal();
@@ -309,6 +354,8 @@ public class Weapon : WeaponBehaviour
     public override RuntimeAnimatorController GetAnimatorController() => controller;
 
     public override WeaponAttachmentManagerBehaviour GetAttachmentManager() => attachMentManager;
+
+    public override float ProjectileSpeed() => projectileImpulse;
 
     #endregion
 
@@ -356,30 +403,87 @@ public class Weapon : WeaponBehaviour
 
         //많은 발사체를 발사해야하는 경우
         for(var i = 0; i < shotCount; i++)
-        {
+        {            
+            
             //무작위 스프레드 값 
-            Vector3 spreadValue = Random.insideUnitSphere * (spread * spreadMutiplier);
-
+            Vector3 spreadValue = Random.insideUnitSphere * ( isShotGun ? spread : spread * spreadMutiplier);
             spreadValue.z = 0;
             //월드 좌표로 변환하기
             spreadValue = playerCamera.TransformDirection(spreadValue);
             //발사체 소환
-            GameObject projectile = Instantiate(prefabProjectile, playerCamera.position, Quaternion.Euler(playerCamera.eulerAngles + spreadValue));
-            Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(),projectile.GetComponent<Collider>());
+            GameObject projectile = InGame.Instance.ActivatePoolItem();
+            projectile.transform.position = playerCamera.position;
+            projectile.transform.localRotation = Quaternion.Euler(playerCamera.eulerAngles + spreadValue);
+            Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(), projectile.GetComponent<Collider>(), true);
+            if (colliders == null)
+                return;
+            foreach (Collider col in colliders)
+            {
+                Physics.IgnoreCollision(col, projectile.GetComponent<Collider>(), true);
+            }
+
+            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.SetActive(true);
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
+
 
         }
     }
 
     public override void InstateProjectile(float spreadMutiplier = 1)
     {
- 
+        for (var i = 0; i < shotCount; i++)
+        {
+            //무작위 스프레드 값 
+            Vector3 spreadValue = Random.insideUnitSphere * (isShotGun ? spread : spread * spreadMutiplier);
+
+            spreadValue.z = 0;
+            //월드 좌표로 변환하기
+            spreadValue = playerCamera.TransformDirection(spreadValue);
+            //발사체 소환
+            GameObject projectile = InGame.Instance.ActivatePoolItem();
+            projectile.transform.position = playerCamera.position;
+            projectile.transform.localRotation = Quaternion.Euler(playerCamera.eulerAngles + spreadValue);
+            Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(), projectile.GetComponent<Collider>(), true);
+            if (colliders == null)
+                return;
+            foreach (Collider col in colliders)
+            {
+                Physics.IgnoreCollision(col, projectile.GetComponent<Collider>(), true);
+            }
+
+            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.SetActive(true);
+            projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
+
+        }
     }
 
     //탄약 채우기
     public override void FillAmmunition(int amount)
-    {
-        ammunitionCurrent = amount != 0 ? Mathf.Clamp(ammunitionCurrent + amount, 0, GetAmmunitionTotal()) : magazineBehaviour.GetAmmunitionTotal();
+    {   if (ammunitionTotal == 0)
+            return;
+
+        if(amount == 0)
+        {
+            int ammoToFill = magazineBehaviour.GetAmmunitionTotal() - ammunitionCurrent;
+            if(ammoToFill >= ammunitionTotal)
+            {
+                ammunitionCurrent += ammunitionTotal; 
+                ammunitionTotal = 0;
+            }
+            else
+            {
+                ammunitionCurrent = magazineBehaviour.GetAmmunitionTotal();
+                ammunitionTotal -= ammoToFill;
+            }
+        }
+        else
+        {
+            ammunitionCurrent = Mathf.Clamp(ammunitionCurrent+ amount,0,GetAmmunitionTotal());
+            ammunitionTotal -= amount;
+        }
+            
     }
 
     //탄약이 없을 경우 
@@ -399,17 +503,29 @@ public class Weapon : WeaponBehaviour
 
     public override void FPWPOff()
     {
-
         attachMentManager.FPGripsOff();
         attachMentManager.FPScopesOff();
         attachMentManager.FPMuzzlesOff();
         attachMentManager.FPLasersOff();
         attachMentManager.FPMagazinesOff();
+        attachMentManager.FPexternalAttachmentOff();
         WeaponRenderer.enabled = false;
         
     }
 
 
+    public override void OnPhotonSerializeView(PhotonStream stream, Photon.Pun.PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(ammunitionCurrent);
+        }
+        else
+        {
+            ammunitionCurrent = (int)stream.ReceiveNext();
+  
+        }
+    }
 
 
 
