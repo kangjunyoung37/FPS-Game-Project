@@ -188,7 +188,6 @@ public class Character : CharacterBehaviour, IDamageable
     [SerializeField]
     private GameObject dashBoard;
 
-
     #endregion
 
     #region FIELDS
@@ -952,7 +951,7 @@ public class Character : CharacterBehaviour, IDamageable
         yield return new WaitForSeconds(3.0f);
         respawnUnbeatable = false;
     }
-    
+
     private void KillCountUp(PhotonView photonView)
     {
         if (photonView == PV)
@@ -1982,6 +1981,8 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     public void OnLockCursor(InputAction.CallbackContext context)
     {
+        if (!PV.IsMine)
+            return;
         switch(context.phase)
         {
             case InputActionPhase.Performed:
@@ -1989,6 +1990,11 @@ public class Character : CharacterBehaviour, IDamageable
                 cursorLocked = !cursorLocked;
                 //커서 상태 업데이트
                 UpdateCursorState();
+                //설정 창 열기
+                if (!cursorLocked)
+                    InGame.Instance.GetSettingMenu().OpenSettings();
+                else
+                    InGame.Instance.GetSettingMenu().CloseSettings();
                 break;
         }
     }
