@@ -8,6 +8,7 @@ namespace InfimaGames.LowPolyShooterPack.Legacy
 	public class ImpactScript : MonoBehaviour
 	{
 
+		private ParticleSystem particle;
 		[Header("Impact Despawn Timer")]
 		//How long before the impact is destroyed
 		public float despawnTimer = 10.0f;
@@ -17,7 +18,7 @@ namespace InfimaGames.LowPolyShooterPack.Legacy
 
 		public AudioSource audioSource;
 
-		private void Start()
+        private void Start()
 		{
 			// Start the despawn timer
 			StartCoroutine(DespawnTimer());
