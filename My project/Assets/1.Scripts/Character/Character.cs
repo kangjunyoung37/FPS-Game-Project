@@ -1302,6 +1302,8 @@ public class Character : CharacterBehaviour, IDamageable
         Cursor.visible = !cursorLocked;
         //커서상태 업데이트 합니다.
         Cursor.lockState = cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
+        InGame.Instance.SetActiveSettingMenu();
+
     }
 
     /// <summary>
@@ -1991,10 +1993,6 @@ public class Character : CharacterBehaviour, IDamageable
                 //커서 상태 업데이트
                 UpdateCursorState();
                 //설정 창 열기
-                if (!cursorLocked)
-                    InGame.Instance.GetSettingMenu().OpenSettings();
-                else
-                    InGame.Instance.GetSettingMenu().CloseSettings();
                 break;
         }
     }
