@@ -423,6 +423,7 @@ public class Weapon : WeaponBehaviour
             }
 
             projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.GetComponent<Rigidbody>().velocity = Vector3.zero;
             projectile.SetActive(true);
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
 
@@ -453,6 +454,7 @@ public class Weapon : WeaponBehaviour
             }
 
             projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.GetComponent<Rigidbody>().velocity = Vector3.zero;
             projectile.SetActive(true);
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
 
