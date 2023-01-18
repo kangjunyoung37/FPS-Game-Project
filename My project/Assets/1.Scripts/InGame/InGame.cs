@@ -66,11 +66,15 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     GameObject killLogGameObject;
 
     [SerializeField]
+    private SettingMenu settingMenu;
+
+    [SerializeField]
     private Transform projectileParent;
 
     [SerializeField]
     private GameObject poolObject;
 
+    
     private DamageIndicatorSystem indicatorSystem;
 
     public float lerpTime = 10.0f;
@@ -337,7 +341,6 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
             PhotonNetwork.DestroyAll();
         PhotonNetwork.LeaveRoom();
 
-        //ExitGame();
 
     }
 
@@ -612,6 +615,14 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
 
     }
 
+    public void SetActiveSettingMenu()
+    {
+        if (Cursor.lockState == CursorLockMode.None)
+            InGame.Instance.GetSettingMenu().OpenSettings();
+        else
+            InGame.Instance.GetSettingMenu().CloseSettings();
+    }
+
     #endregion
 
     #region Getters
@@ -625,6 +636,8 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     public MapMode GetMapMode() => mapMode;
 
     public DamageIndicatorSystem GetdamageIndicator() => indicatorSystem;
+
+    public SettingMenu GetSettingMenu() => settingMenu;
 
     #endregion
 }
