@@ -22,6 +22,7 @@ public class Projectile : MonoBehaviour
     [Tooltip("Maximum time after impact that the bullet is destroyed")]
     public float maxDestroyTime;
 
+    public ParticleSystem particleSystem;
 
     [Title(label: "Effect Prefabs")]
     public Transform[] bloodImpactPrefabs;
@@ -41,6 +42,7 @@ public class Projectile : MonoBehaviour
     private string playerName;
     private int index;
     private Coroutine coroutine;
+    
     #endregion
 
     #region SERIALZED FIELDS
@@ -172,12 +174,14 @@ public class Projectile : MonoBehaviour
     private void OnEnable()
     {
         coroutine = StartCoroutine(DestroyAfter());
+        particleSystem.Play();
     }
 
     private void OnDisable()
     {
         if(coroutine != null)
             StopCoroutine(coroutine);
+        particleSystem.Stop();
     }
 
     private IEnumerator DestroyTimer()
