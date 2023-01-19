@@ -412,7 +412,7 @@ public class Weapon : WeaponBehaviour
             spreadValue = playerCamera.TransformDirection(spreadValue);
             //발사체 소환
             GameObject projectile = InGame.Instance.ActivatePoolItem();
-            projectile.transform.position = playerCamera.position;
+            projectile.transform.position = playerCamera.position + playerCamera.forward * 0.3f;
             projectile.transform.localRotation = Quaternion.Euler(playerCamera.eulerAngles + spreadValue);
             Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(), projectile.GetComponent<Collider>(), true);
             if (colliders == null)
@@ -460,6 +460,40 @@ public class Weapon : WeaponBehaviour
 
         }
     }
+
+    //private Vector3 CalculateDirection()
+    //{
+    //    Ray ray = new Ray();
+    //    RaycastHit[] raycastHit;
+    //    Vector3 targetPoint = Vector3.zero;
+
+    //    ray.origin = playerCamera.position;
+    //    ray.direction = playerCamera.forward;
+    //    raycastHit = Physics.RaycastAll(playerCamera.position, playerCamera.forward, 300);
+        
+    //    for(int i = 0; i < raycastHit.Length; i++)
+    //    {
+    //        RaycastHit hit = raycastHit[i];
+    //        if (hit.collider.transform.root == characterBehaviour.transform)
+    //            continue;
+    //        else
+    //        {
+    //            targetPoint = hit.point;
+    //            Debug.DrawRay(playerCamera.position, playerCamera.forward, Color.blue, 3.0f);
+    //            break;
+    //        }
+        
+    //    }
+    //    if(targetPoint == Vector3.zero)
+    //        targetPoint = playerCamera.position + playerCamera.forward * 300;
+
+    //    Vector3 test = muzzleBehaviour.GetSocket().position - targetPoint;
+    //    Debug.Log(test.normalized + " " + test.magnitude);
+
+    //    Debug.DrawRay(muzzleBehaviour.GetSocket().position, (targetPoint - muzzleBehaviour.GetSocket().position).normalized, Color.red, 5f);
+    //    return (targetPoint - muzzleBehaviour.GetSocket().position).normalized;
+
+    //}
 
     //탄약 채우기
     public override void FillAmmunition(int amount)
