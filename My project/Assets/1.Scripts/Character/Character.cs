@@ -536,6 +536,7 @@ public class Character : CharacterBehaviour, IDamageable
         {
             InGame.Instance.GetdamageIndicator().Player = transform;
             InGame.Instance.GetdamageIndicator().PlayerCamera = cameraWorld;
+            InGame.Instance.miniMapCameraCopyTransform.Target = transform;
         }
         audioSource = GetComponent<AudioSource>();
         footstepPlayer = GetComponent<FootstepPlayer>();
