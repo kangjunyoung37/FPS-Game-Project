@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc56f57d60a6d894dabcf52b62aa7383, type: 3}
   m_Name: SN_03
   m_EditorClassIdentifier: 
-  damage: 0
-  rpm: 0
-  recoil: 0
-  mobility: 0
-  magazine: 0
+  damage: 0.85
+  rpm: 0.125
+  recoil: 0.85
+  mobility: 0.6
+  magazine: 5

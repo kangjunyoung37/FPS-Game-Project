@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc56f57d60a6d894dabcf52b62aa7383, type: 3}
   m_Name: AR_01
   m_EditorClassIdentifier: 
-  damage: 0.35
-  rpm: 0.61
-  recoil: 0.4
-  mobility: 0.6
+  damage: 0.3
+  rpm: 0.65
+  recoil: 0.85
+  mobility: 0.7
   magazine: 30
