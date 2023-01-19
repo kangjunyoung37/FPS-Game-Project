@@ -26,23 +26,48 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
 
     #region SERIALZIED FIELDS
 
-    [SerializeField]
-    private MapMode mapMode = MapMode.DeathMatch;
+    [Title(label:"InGame Settings")]
+
+    [Header("Map Mode")]
     
     [SerializeField]
-    private TMP_Text scoreText;
+    private MapMode mapMode = MapMode.DeathMatch;
 
+    [Header("Score")]
+    
+    [SerializeField]
+    private TMP_Text blueScoreText;
+    
+    [SerializeField]
+    private TMP_Text redScoreText;
+    
+    [SerializeField]
+    private TMP_Text toalScoreText;
+
+
+    [Header("Mini Map")]
+    
     [SerializeField]
     private TMP_Text timeText;
 
+    public CopyPosition miniMapCameraCopyTransform;
+
+    [Header("Spawn Point")]
     [SerializeField]
     private SpawnPoint[] redSpawnPoints;
 
     [SerializeField]
     private SpawnPoint[] blueSpawnPoints;
 
+    [Header("Game End Text")]
+    
     [SerializeField]
     private TMP_Text gameEndText;
+
+    [SerializeField]
+    private TMP_Text winOrLose;
+
+    [Header("Post Proecessing")]
 
     [SerializeField , NotNull]
     private PostProcessVolume PPV;
@@ -50,14 +75,17 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField, NotNull]
     private PostProcessVolume weaponPPV;
 
+    [Header("Blood Frame")]
     [SerializeField]
     private Image bloodFrame;
+
+    [Header("DashBoard")]
 
     [SerializeField]
     private GameObject leaderBoard;
 
-    [SerializeField]
-    private TMP_Text winOrLose;
+
+    [Header("Kill Log")]
 
     [SerializeField]
     private Transform killPeedTrnasform;
@@ -65,15 +93,18 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField]
     GameObject killLogGameObject;
 
+    [Header("Setting Menu")]
+
     [SerializeField]
     private SettingMenu settingMenu;
+
+    [Header("Memory Pool")]
 
     [SerializeField]
     private Transform projectileParent;
 
     [SerializeField]
     private GameObject poolObject;
-
     
     private DamageIndicatorSystem indicatorSystem;
 
@@ -180,7 +211,10 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
         currentRoom = PhotonNetwork.CurrentRoom;
         instance = this;
         PV = GetComponent<PhotonView>();
-        scoreText.text = $" Blue :{blueTeamPoint} , Red : {RedTeamPoint}";
+        toalScoreText.text = winPoint.ToString();
+        blueScoreText.text = blueTeamPoint.ToString();
+        redScoreText.text = redTeamPoint.ToString();
+
     }
 
     private void Start()
@@ -269,7 +303,7 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
                 activeCount--;
                 poolItem.isActive = false;
                 poolItem.gameObject.SetActive(false);
-
+                poolItem.gameObject.transform.localRotation = Quaternion.Euler(Vector3.zero);
                 return;
             }
         }
@@ -442,12 +476,17 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
         {
             //점수 올리기
             if (team == 0)
+            {
                 blueTeamPoint += 1;
+                blueScoreText.text = blueTeamPoint.ToString();
+            }
+                          
             else
-                redTeamPoint += 1;              
+            {
+                redTeamPoint += 1;
+                redScoreText.text = redTeamPoint.ToString();
+            }                  
         }
-
-        scoreText.text = "Blue :" + blueTeamPoint.ToString() + "Red :" + redTeamPoint.ToString();
     }
 
     private void TimeUpdate()
@@ -602,7 +641,8 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
             gameStart = (bool)stream.ReceiveNext();
             gameEnd = (bool)stream.ReceiveNext();
             startTime = (float)stream.ReceiveNext();
-            scoreText.text = "Blue :" + blueTeamPoint.ToString() + "Red :" + redTeamPoint.ToString();
+            blueScoreText.text = blueTeamPoint.ToString();
+            redScoreText.text = redTeamPoint.ToString();
         }
         foreach(SpawnPoint spawnPoint in redSpawnPoints)
         {
