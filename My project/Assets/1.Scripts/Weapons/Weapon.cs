@@ -238,6 +238,8 @@ public class Weapon : WeaponBehaviour
     /// </summary>
     private int index;
 
+    private MemeoryPool memeoryPool;
+
     #endregion
 
     #region UNITY
@@ -254,6 +256,7 @@ public class Weapon : WeaponBehaviour
         tPRenController = characterBehaviour.GetTPRenController();
         playerCamera = characterBehaviour.GetCameraWold().transform;
         index = transform.GetSiblingIndex();
+        
     }
 
     protected override void Start()
@@ -266,6 +269,7 @@ public class Weapon : WeaponBehaviour
         gripBehaviour = attachMentManager.GetEquippedGrip();
         ammunitionCurrent = magazineBehaviour.GetAmmunitionTotal();
         ammunitionTotal = magazineBehaviour.GetAmmunitionTotal() * 3;
+
 
     }
     
@@ -383,6 +387,7 @@ public class Weapon : WeaponBehaviour
     /// </summary>
     public override void Fire(float spreadMutiplier = 1)
     {
+        
         //발사를 하기 위해서는 총구가 필요합니다.
         if (muzzleBehaviour == null)
             return;
@@ -422,7 +427,7 @@ public class Weapon : WeaponBehaviour
                 Physics.IgnoreCollision(col, projectile.GetComponent<Collider>(), true);
             }
 
-            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index,colliders);
             projectile.GetComponent<Rigidbody>().velocity = Vector3.zero;
             projectile.SetActive(true);
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
@@ -442,7 +447,7 @@ public class Weapon : WeaponBehaviour
             //월드 좌표로 변환하기
             spreadValue = playerCamera.TransformDirection(spreadValue);
             //발사체 소환
-            GameObject projectile = InGame.Instance.ActivatePoolItem();
+            GameObject projectile = InGame.Instance.ActivatePoolItem(); ;
             projectile.transform.position = playerCamera.position;
             projectile.transform.localRotation = Quaternion.Euler(playerCamera.eulerAngles + spreadValue);
             Physics.IgnoreCollision(characterBehaviour.transform.GetComponent<Collider>(), projectile.GetComponent<Collider>(), true);
@@ -453,7 +458,7 @@ public class Weapon : WeaponBehaviour
                 Physics.IgnoreCollision(col, projectile.GetComponent<Collider>(), true);
             }
 
-            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index);
+            projectile.GetComponent<Projectile>().Setup(characterBehaviour, damage, index,colliders);
             projectile.GetComponent<Rigidbody>().velocity = Vector3.zero;
             projectile.SetActive(true);
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * projectileImpulse;
