@@ -21,6 +21,11 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
     #region GETTER
 
     /// <summary>
+    /// 플레이 매니저를 리턴합니다.
+    /// </summary>
+    public abstract PlayerManager GetPlayerManager();
+
+    /// <summary>
     /// 플레이어의 HP를 리턴합니다.
     /// </summary>
     public abstract int GetPlayerHP();
@@ -267,6 +272,9 @@ public abstract class CharacterBehaviour : MonoBehaviourPunCallbacks, IPunObserv
 
     #region Methods
 
+    /// <summary>
+    /// HitEffect생성
+    /// </summary>
     public abstract void CreateHitEffect();
 
     #endregion

@@ -215,6 +215,7 @@ public class Character : CharacterBehaviour, IDamageable
     /// <summary>
     /// 캐릭터가 죽었는지
     /// </summary>
+    [SerializeField]
     private bool isDead;
 
     /// <summary>
@@ -512,6 +513,11 @@ public class Character : CharacterBehaviour, IDamageable
     /// </summary>
     private string playerName;
 
+    /// <summary>
+    /// 플레이어 매니저
+    /// </summary>
+    private PlayerManager playerManager;
+
     #endregion
 
     #region UNITY
@@ -770,6 +776,11 @@ public class Character : CharacterBehaviour, IDamageable
     #region GETTERS
 
     /// <summary>
+    /// PlayerManager를 리턴합니다.
+    /// </summary>
+    public override PlayerManager GetPlayerManager() => playerManager;
+
+    /// <summary>
     /// 플레이어의 HP를 리턴합니다.
     /// </summary>
     public override int GetPlayerHP() => hp;
@@ -942,6 +953,7 @@ public class Character : CharacterBehaviour, IDamageable
     #endregion
 
     #region METHODS
+
 
     IEnumerator unbeatable()
     {
@@ -1682,6 +1694,8 @@ public class Character : CharacterBehaviour, IDamageable
         {
             //실행 시작 시 호출
             case { phase: InputActionPhase.Started }:
+                if (holdingButtonRun)
+                    holdingButtonRun = false;
                 holdingButtonFire = true;
                 shotsFired = 0;
                 break;
@@ -1874,12 +1888,15 @@ public class Character : CharacterBehaviour, IDamageable
                 //만약 토글을 사용할 경우 사용합니다.
                 if (!holdToRun)
                     holdingButtonRun = !holdingButtonRun;
+                else
+                    holdingButtonRun = true;
+                
                 break;
 
-            case InputActionPhase.Started:
-                if (holdToRun)
-                    holdingButtonRun = true;
-                break;
+            //case InputActionPhase.Started:
+            //    if (holdToRun)
+            //        holdingButtonRun = true;
+            //    break;
             
             case InputActionPhase.Canceled:
                 if (holdToRun)
