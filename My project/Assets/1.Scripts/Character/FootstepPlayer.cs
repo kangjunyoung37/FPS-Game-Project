@@ -38,6 +38,14 @@ public class FootstepPlayer : MonoBehaviour
     [SerializeField]
     private AudioClip audioClipRunning;
 
+    [Tooltip("앉아서 갈때 사운드 볼륨")]
+    [SerializeField]
+    private float crouchingSoundVolume;
+   
+    [Tooltip("걸어서 갈때 사운드 볼륨")]
+    [SerializeField]
+    private float walkingSoundVolume;
+   
     #endregion
 
     #region FIELD
@@ -61,8 +69,8 @@ public class FootstepPlayer : MonoBehaviour
 
     private void Update()
     {
-
-        if(characterAnimator == null || movementBehaviour == null || audioSource == null)
+        PlayerSoundVoulmeChange();
+        if (characterAnimator == null || movementBehaviour == null || audioSource == null)
         {
             Debug.LogError($"{this.gameObject}에 characterAnimator = {characterAnimator} ,movementBehaviour = {movementBehaviour},audioSource = {audioSource}입니다");
 
@@ -97,14 +105,30 @@ public class FootstepPlayer : MonoBehaviour
         if (IsGrounded && charactervelocity.sqrMagnitude > minVelocityMagnitude)
         {
             audioSource.clip = characterAnimator.GetBool(AHashes.Running) ? audioClipRunning : audioClipWalking;
+           
             if (!audioSource.isPlaying)
                 audioSource.Play();
 
         }
         else if (audioSource.isPlaying)
             audioSource.Pause();
+       
 
     }
 
+    private void PlayerSoundVoulmeChange()
+    {
+        if(movementBehaviour.IsCrouching())
+        {
+            audioSource.volume = crouchingSoundVolume;
+            audioSource.maxDistance = 3;
+              
+        }
+        else 
+        {
+            audioSource.volume = walkingSoundVolume;
+            audioSource.maxDistance = 15;
+        }
+    }
     #endregion
 }
