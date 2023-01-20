@@ -22,7 +22,7 @@ public class Projectile : MonoBehaviour
     [Tooltip("Maximum time after impact that the bullet is destroyed")]
     public float maxDestroyTime;
 
-    public ParticleSystem particleSystem;
+    //public ParticleSystem particleSystem;
 
     [Title(label: "Effect Prefabs")]
     public Transform[] bloodImpactPrefabs;
@@ -42,7 +42,9 @@ public class Projectile : MonoBehaviour
     private string playerName;
     private int index;
     private Coroutine coroutine;
-    
+    public ParticleSystem particle;
+
+    private Collider[] colliders;
     #endregion
 
     #region SERIALZED FIELDS
@@ -53,7 +55,18 @@ public class Projectile : MonoBehaviour
 
     #region SETUP
 
-    public void Setup(CharacterBehaviour characterBehaviour, int damage, int index)
+
+    public void SetIgnoreCollision(Collider[] colliders)
+    {
+        if (colliders == null)
+            return;
+        foreach (Collider col in colliders)
+        {
+            Physics.IgnoreCollision(col, GetComponent<Collider>(), false);
+        }
+    }
+
+    public void Setup(CharacterBehaviour characterBehaviour, int damage, int index, Collider[] colliders)
     {
         chbehaviour = characterBehaviour;
         PV = characterBehaviour.GetPhotonView();
@@ -62,6 +75,7 @@ public class Projectile : MonoBehaviour
         this.damage = damage;
         this.index = index;
         playerName = characterBehaviour.GetPlayerName();
+        this.colliders = colliders;
         
     }
 
@@ -83,6 +97,7 @@ public class Projectile : MonoBehaviour
         //Otherwise, destroy bullet on impact
         else
         {
+           
             InGame.Instance.DeactivatePoolItem(gameObject);
         }
 
@@ -91,6 +106,7 @@ public class Projectile : MonoBehaviour
         {
             if(!IsLocalPlayer || team == collision.transform.root.GetComponent<CharacterBehaviour>().GetPlayerTeam())
             {
+                
                 InGame.Instance.DeactivatePoolItem(gameObject);
                 return;
             }
@@ -98,11 +114,10 @@ public class Projectile : MonoBehaviour
             totalDamage = damage * collision.transform.GetComponent<HitBox>().GetDamagePercent();
             chbehaviour.CreateHitEffect();
             collision.transform.root.GetComponent<Character>().TakeDamage((int)totalDamage, transform.position, Quaternion.LookRotation(collision.contacts[0].normal),team, PV.ViewID,true, playerName , index);
-            //Instantiate random impact prefab from array
-            //Instantiate(bloodImpactPrefabs[Random.Range (0, bloodImpactPrefabs.Length)], transform.position,
-            //    Quaternion.LookRotation(collision.contacts[0].normal));
+            
             //Destroy bullet object
             InGame.Instance.DeactivatePoolItem(gameObject);
+           
         }
 
         //If bullet collides with "Metal" tag
@@ -114,6 +129,7 @@ public class Projectile : MonoBehaviour
                 Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
             InGame.Instance.DeactivatePoolItem(gameObject);
+           
         }
 
         //If bullet collides with "Dirt" tag
@@ -125,6 +141,7 @@ public class Projectile : MonoBehaviour
                 Quaternion.LookRotation(collision.contacts[0].normal));
             //Destroy bullet object
             InGame.Instance.DeactivatePoolItem(gameObject);
+          
         }
 
         //If bullet collides with "Concrete" tag
@@ -174,14 +191,15 @@ public class Projectile : MonoBehaviour
     private void OnEnable()
     {
         coroutine = StartCoroutine(DestroyAfter());
-        particleSystem.Play();
+        particle.Play();
     }
 
     private void OnDisable()
     {
-        if(coroutine != null)
+        SetIgnoreCollision(colliders);
+        if (coroutine != null)
             StopCoroutine(coroutine);
-        particleSystem.Stop();
+        particle.Stop();
     }
 
     private IEnumerator DestroyTimer()
