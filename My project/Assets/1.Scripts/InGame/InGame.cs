@@ -508,6 +508,7 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
 
     public void ExitGame()
     {
+        DestroyObjects();
         PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
         PhotonNetwork.LeaveRoom();       
     }
