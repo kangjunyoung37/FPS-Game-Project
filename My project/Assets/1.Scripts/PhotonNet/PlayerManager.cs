@@ -6,17 +6,19 @@ using System.IO;
 public class PlayerManager : MonoBehaviour
 {
     #region FIELDS
-    
+
     PhotonView PV;
     GameObject playerGameObject;
     SpawnPoint mySpawnPoint;
     int team;
     ExitGames.Client.Photon.Hashtable playerHashTable;
+
     #endregion
-    
+
     #region Unity Methods
     private void Awake()
     {
+
         PV = GetComponent<PhotonView>();
         if ((int)PV.Owner.CustomProperties["Team"] == 1)
             InGame.Instance.RedTeamEnter = true;
@@ -46,7 +48,7 @@ public class PlayerManager : MonoBehaviour
         spawn.IsSpawing = false;
         playerGameObject = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PlayerCharacter Main"), spawn.transform.position, spawn.transform.rotation);
         playerGameObject.GetComponent<CharacterBehaviour>().OnCharacterDie += CharacterDie;
-
+      
     }
     
     IEnumerator ReSpawn()
