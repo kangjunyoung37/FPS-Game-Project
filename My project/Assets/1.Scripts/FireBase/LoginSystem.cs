@@ -7,19 +7,25 @@ public class LoginSystem : MonoBehaviour
 {
     public TMP_InputField email;
     public TMP_InputField password;
-
-    public TMP_Text outputText;
+    private PlayerDataHandler playerDataHandler;
 
     private void Start()
     {
+        playerDataHandler = transform.GetComponent<PlayerDataHandler>();
         FireBaseAuthManager.Instance.Init();
         FireBaseAuthManager.Instance.LoginState = OnChangedState;
     }
 
     public void OnChangedState(bool sign)
     {
-        outputText.text = sign ? "로그인 : " : "로그아웃 : ";
-        outputText.text += FireBaseAuthManager.Instance.UserId;
+        if (sign)
+        {
+            playerDataHandler.LoadData();
+            MenuManager.Instance.OpenMenu("Title");
+        }
+            
+        else
+            MenuManager.Instance.OpenMenu("Login");
     }
 
     public void Create()
