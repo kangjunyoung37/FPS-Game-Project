@@ -40,37 +40,8 @@ public class PlayerDataHandler : MonoBehaviour
         if (userId == string.Empty)
             return;
 
-        string playerJson = playerData.ToJson();
-        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerDataPath).SetRawJsonValueAsync(playerJson).ContinueWith(task =>
-        {
-            if(task.IsCanceled)
-            {
-                Debug.Log("Save User data was canceled");
-                return;
-            }
-            if(task.IsFaulted)
-            {
-                Debug.LogError("Save user data encountered an error" + task.Exception);
-                return;
-            }
-            Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerJson);
-        });
-        string playerStorageJson = playerStorageData.ToJson();
-
-        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerStoragePath).SetRawJsonValueAsync(playerStorageJson).ContinueWith(task =>
-        {
-            if (task.IsCanceled)
-            {
-                Debug.Log("Save User data was canceled");
-                return;
-            }
-            if (task.IsFaulted)
-            {
-                Debug.LogError("Save user data encountered an error" + task.Exception);
-                return;
-            }
-            Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerStorageData);
-        });
+        SavePlayerData(userId);
+        SavePlayerStorageData(userId);
     }
 
     public void LoadData()
@@ -80,41 +51,9 @@ public class PlayerDataHandler : MonoBehaviour
         var userId = FireBaseAuthManager.Instance.UserId;
         if(userId == string.Empty)
             return;
-
-        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerUserDataPath).GetValueAsync().ContinueWith(task =>
-        {
-            if (task.IsCanceled)
-            {
-                Debug.Log("Load User data was canceled");
-                return;
-            }
-            if (task.IsFaulted)
-            {
-
-                Debug.LogError("Load user data encountered an error" + task.Exception);
-                return;
-            }
-            DataSnapshot snapshot = task.Result;
-            hassnapshot = snapshot.Exists;
-            if (!hassnapshot)
-            {
-                SaveUserdata();
-                return;
-            }
-            else
-            {
-                UserData newUserdata = JsonConvert.DeserializeObject<UserData>(snapshot.GetRawJsonValue());
-                if(newUserdata.deviceID != SystemInfo.deviceUniqueIdentifier)
-                {
-                    Debug.Log(newUserdata.deviceID + " ");
-                    SaveUserdata();
-                }
-            }
-           
-            Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
-        });
+        SaveUserDevicedata();
         
-        databaseRef.Child(UserDataPath).Child(PlayerUserDataPath).ValueChanged += LogoutFunction;
+        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerUserDataPath).ValueChanged += LogoutFunction;
         databaseRef.Child(UserDataPath).Child(userId).Child(PlayerDataPath).GetValueAsync().ContinueWith(task =>
         {
             if (task.IsCanceled)
@@ -164,7 +103,7 @@ public class PlayerDataHandler : MonoBehaviour
 
     }
 
-    public void SaveUserdata()
+    public void SaveUserDevicedata()
     {
         var userId = FireBaseAuthManager.Instance.UserId;
 
@@ -185,6 +124,47 @@ public class PlayerDataHandler : MonoBehaviour
             Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerUserDataJson);
         });
 
+    }
+
+
+    public void SavePlayerData(string userId)
+    {
+        string playerJson = playerData.ToJson();
+
+        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerDataPath).SetRawJsonValueAsync(playerJson).ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.Log("Save User data was canceled");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Save user data encountered an error" + task.Exception);
+                return;
+            }
+            Debug.LogFormat("Save Data Sucessfully");
+        });
+    }
+
+    public void SavePlayerStorageData(string userId)
+    {
+        string playerStorageJson = playerStorageData.ToJson();
+
+        databaseRef.Child(UserDataPath).Child(userId).Child(PlayerStoragePath).SetRawJsonValueAsync(playerStorageJson).ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.Log("Save User data was canceled");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Save user data encountered an error" + task.Exception);
+                return;
+            }
+            Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerStorageData);
+        });
 
     }
 
@@ -196,12 +176,13 @@ public class PlayerDataHandler : MonoBehaviour
             return;
         }
 
+        UserData newUserData = JsonConvert.DeserializeObject<UserData>(args.Snapshot.GetRawJsonValue());
         //device id와 받은 값이 다른 경우
-        if (SystemInfo.deviceUniqueIdentifier != (string)args.Snapshot.Value)
+        if (SystemInfo.deviceUniqueIdentifier != newUserData.deviceID)
         {
-            Debug.Log((string)args.Snapshot.Value);
-            //로그아웃 처리
-            Debug.Log("dd");
+            Debug.Log("중복 로그인");
+            FireBaseAuthManager.Instance.LogOut();
+
         }
     }
 
