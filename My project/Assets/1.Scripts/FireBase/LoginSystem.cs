@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -22,6 +23,7 @@ public class LoginSystem : MonoBehaviour
         {
             playerDataHandler.LoadData();
             MenuManager.Instance.OpenMenu("Title");
+            PhotonNetwork.ConnectUsingSettings();
         }
             
         else
