@@ -1,9 +1,5 @@
 using Firebase.Database;
 using Newtonsoft.Json;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using TMPro;
 using UnityEngine;
 
 public class UserData
@@ -32,7 +28,6 @@ public class PlayerDataHandler : MonoBehaviour
 
     public PlayerData playerData;
     public PlayerStorageData playerStorageData;
-    public TMP_InputField nickNameInputField;
     private UserData userData = new UserData();
     
     private void Start()
@@ -84,9 +79,12 @@ public class PlayerDataHandler : MonoBehaviour
                 SaveData();
                 return;
             }
-            playerData.FromJson(snapshot.GetRawJsonValue());
-            
-            Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
+            else
+            {
+                playerData.FromJson(snapshot.GetRawJsonValue());
+                Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
+            }
+           
         });
 
         databaseRef.Child(UserDataPath).Child(userId).Child(PlayerStoragePath).GetValueAsync().ContinueWith(task =>
@@ -196,42 +194,7 @@ public class PlayerDataHandler : MonoBehaviour
 
     public void SaveUserNickName(string userNickName, string userID)
     {
-   
-        Dictionary<string,object> childUpdates =new Dictionary<string,object>();
-        childUpdates["/users/" +userID + "/" +"username"] = userNickName;
-
-        databaseRef.UpdateChildrenAsync(childUpdates).ContinueWith(task =>
-        {
-            Debug.Log("Save");
-        });
-
-    }
-
-    public void NickNameCheck()
-    {
-        string userNickName = nickNameInputField.text;
-        if (userNickName == string.Empty)
-        {
-            Debug.Log("아이디 비어있음");
-        }    
-        databaseRef.Child(UserDataPath).OrderByChild("username").EqualTo(userNickName).GetValueAsync().ContinueWith(task =>
-        {
-            DataSnapshot snapshot = task.Result;
-
-            if(task.Result.ChildrenCount == 0)
-            {
-                SaveUserNickName(userNickName, FireBaseAuthManager.Instance.UserId);
-                MenuManager.Instance.OpenMenu("Title");
-                return;
-            }
-            else
-            {
-                Debug.Log("중복 아이디");
-                return;
-            }
-            
-        });
-
+        databaseRef.Child(UserDataPath).Child(userID).Child("username").SetValueAsync(userNickName);
     }
 
     private void LogoutFunction(object sender, ValueChangedEventArgs args)
@@ -252,10 +215,11 @@ public class PlayerDataHandler : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        databaseRef.Child(UserDataPath).Child(PlayerUserDataPath).ValueChanged -= LogoutFunction;
-    }
+    //private void OnDisable()
+    //{
+       
+    //    databaseRef.Child(UserDataPath).Child(PlayerUserDataPath).ValueChanged -= LogoutFunction;
+    //}
 
 }
 
