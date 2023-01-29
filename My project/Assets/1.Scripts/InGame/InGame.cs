@@ -1,3 +1,4 @@
+using Firebase.Database;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
@@ -8,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static RootMotion.FinalIK.HitReaction;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 public enum MapMode
 {
@@ -27,6 +29,11 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     #region SERIALZIED FIELDS
 
     [Title(label:"InGame Settings")]
+
+    [Header("Player Data")]
+
+    [SerializeField]
+    private PlayerData playerData;
 
     [Header("Map Mode")]
     
@@ -125,9 +132,7 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
     private List<PoolItem> poolItemList = new List<PoolItem>();
 
     //나중에 포톤룸 설정에서 받아올거   
-    [SerializeField]
     private int winPoint = 0;
-    [SerializeField]
     private float totalTime = 600.0f;
     private float curTime;
     private float startTime;
@@ -151,6 +156,8 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
    
     private DepthOfField DOF;
     private DepthOfField weaponDOF;
+
+    private DatabaseReference databaseReference;
 
     #endregion
 
@@ -196,12 +203,16 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    #endregion
 
+
+    #endregion
     #region UnityMethods
     
     private void Awake()
     {
+        databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+        winPoint = (int)PhotonNetwork.CurrentRoom.CustomProperties["point"];
+        totalTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["time"] * 60.0f;
         activeCount = 0;
         InstantiateObjects(30);
         indicatorSystem = GetComponentInChildren<DamageIndicatorSystem>();
@@ -369,6 +380,7 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
 
         leaderBoard.SetActive(true);
         CalculateScore();
+        UpdateUserData();
         yield return new WaitForSeconds(5f);
 
         if(PhotonNetwork.IsMasterClient)
@@ -508,6 +520,7 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
 
     public void ExitGame()
     {
+        UpdateUserData();
         DestroyObjects();
         PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
         PhotonNetwork.LeaveRoom();       
@@ -618,6 +631,30 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
         }
         weaponDOF.active = false;
     }
+
+
+    private void UpdateUserData()
+    {
+        string userId = FireBaseAuthManager.Instance.UserId;
+        playerData.Death += (int)PhotonNetwork.LocalPlayer.CustomProperties["Death"];
+        playerData.Kill += (int)PhotonNetwork.LocalPlayer.CustomProperties["Kill"];
+        string playerJson = playerData.ToJson();
+        databaseReference.Child("users").Child(userId).Child("imformation").SetRawJsonValueAsync(playerJson).ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.Log("Save User data was canceled");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Save user data encountered an error" + task.Exception);
+                return;
+            }
+            Debug.LogFormat("Save Data Sucessfully");
+        });
+    }
+
 
     #endregion
 
