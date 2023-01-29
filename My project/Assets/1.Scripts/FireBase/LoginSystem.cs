@@ -22,7 +22,7 @@ public class LoginSystem : MonoBehaviour
         if (sign)
         {
             playerDataHandler.LoadData();
-            MenuManager.Instance.OpenMenu("Title");
+            MenuManager.Instance.CloseMenu("Login");
             PhotonNetwork.ConnectUsingSettings();
         }
             
