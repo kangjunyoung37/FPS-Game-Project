@@ -5,6 +5,9 @@ using Firebase.Auth;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Threading.Tasks;
+
+
 
 public class FireBaseAuthManager
 {
@@ -24,7 +27,6 @@ public class FireBaseAuthManager
     }
     private FirebaseAuth auth;
     private FirebaseUser user;
-
     private Uri photoUrI;
 
     public Action<bool> LoginState;
@@ -33,7 +35,7 @@ public class FireBaseAuthManager
     {
         auth = FirebaseAuth.DefaultInstance;
 
-        if(auth.CurrentUser != null)
+        if (auth.CurrentUser != null)
         {
             LogOut();
         }
@@ -47,14 +49,14 @@ public class FireBaseAuthManager
             bool signed = (auth.CurrentUser != user && auth.CurrentUser != null);
             if(!signed && user != null)
             {
-                Debug.Log("로그아웃");
+                Debug.Log("LogOut");
                 LoginState?.Invoke(false);
             }
             user = auth.CurrentUser;
 
             if(signed)
             {
-                Debug.Log("로그인");
+                Debug.Log("Login");
                 LoginState?.Invoke(true);
             }
         }
@@ -62,23 +64,27 @@ public class FireBaseAuthManager
 
     public void Create(string email,string password)
     {
+
         auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task =>
         {
             if(task.IsCanceled)
             {
-                Debug.LogError("회원가입 취소");
+                Debug.LogError("Register Cancle");
                 return;
             }
             if(task.IsFaulted)
             {
-                Debug.LogError("회원가입 실패");
+                Debug.LogError("Register Failed");
                 return;
             }
 
             FirebaseUser newUser = task.Result;
-            Debug.Log("회원가입 완료");
-
+            Debug.Log("Register Success");
+            
         });
+
+        
+
     }
 
     public void Login(string email, string password)
@@ -87,29 +93,33 @@ public class FireBaseAuthManager
         {
             if (task.IsCanceled)
             {
-                Debug.LogError("로그인 취소");
+                Debug.LogError("Login Cancle");
                 return;
             }
             if (task.IsFaulted)
             {
-                Debug.LogError("로그인 실패");
+                Debug.LogError("Login Failed");
                 return;
             }
 
             FirebaseUser newUser = task.Result;
-            Debug.Log("로그인 완료");
+            Debug.Log("Login Success");
+           
 
         });
+        
     }
 
     public void LogOut()
     {
         auth.SignOut();
-        Debug.Log("로그아웃");
+        Debug.Log("LogOut");
 
     }
 
     public string UserId => user?.UserId ?? string.Empty;
 
     public Uri PhotonURI => photoUrI;
+
+    public FirebaseAuth Auth => auth;
 }
