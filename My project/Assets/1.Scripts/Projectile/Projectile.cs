@@ -91,15 +91,12 @@ public class Projectile : MonoBehaviour
         ////If destroy on impact is false, start 
         ////coroutine with random destroy timer
         if (!destroyOnImpact)
-        {
             StartCoroutine(DestroyTimer());
-        }
+
         //Otherwise, destroy bullet on impact
-        else
-        {
-           
+        else       
             InGame.Instance.DeactivatePoolItem(gameObject);
-        }
+
 
         //If bullet collides with "Blood" tag
         if (collision.transform.tag == "Blood")
