@@ -6,17 +6,30 @@ using TMPro;
 using Photon.Realtime;
 using System.Linq;
 using WebSocketSharp;
-using UnityEngine.UI;
-using System;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
-using Photon.Pun.UtilityScripts;
-using System.IO.IsolatedStorage;
-using UnityEngine.SceneManagement;
-using System.IO;
+using Firebase.Database;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
     #region SerializeField
+
+    [Header("Player Data")]
+    
+    public PlayerStorageData playerStorageData;
+
+    public PlayerData playerData;
+
+    [Header("Room ")]
+    
+    [SerializeField]
+    Transform roomListContent;
+
+    [SerializeField]
+    TMP_Text roomNameText;
+
+    [SerializeField]
+    GameObject roomListItemPrefab;
+
     [SerializeField] 
     TMP_InputField roomNameInputField;
 
@@ -24,17 +37,15 @@ public class Launcher : MonoBehaviourPunCallbacks
     TMP_InputField roomSizeInputField;
 
     [SerializeField]
-    TMP_Text errorText;
-    
-    [SerializeField]
-    TMP_Text roomNameText;
+    TMP_Dropdown mapdropdown;
 
     [SerializeField]
-    Transform roomListContent;
+    TMP_Dropdown timeDropDown;
 
     [SerializeField]
-    GameObject roomListItemPrefab;
+    TMP_Dropdown pointDropDown;
 
+    [Header("PlayerList")]
     [SerializeField]
     Transform playerRedListContent;
 
@@ -44,15 +55,26 @@ public class Launcher : MonoBehaviourPunCallbacks
     [SerializeField]
     GameObject PlayerListItemPrefab;
 
+    [Header("Start Button")]
+
     [SerializeField]
     GameObject startGameButton;
 
+    [Header("Warning Alert")]
+    
     [SerializeField]
     GameObject WaringAlert;
+    
+    [SerializeField]
+    TMP_Text errorText;
+
+    [Header("Player ID Set")]
 
     [SerializeField]
-    TMP_Dropdown dropdown;
-
+    TMP_InputField playerIDInputField;
+    
+    [Header("Debug Mode")]
+    
     [SerializeField]
     bool practiceMode = false;
 
@@ -65,37 +87,30 @@ public class Launcher : MonoBehaviourPunCallbacks
     private int redTeamCnt = 0;
     private int blueTeamCnt = 0;
     private MainCamManager mainCamManager;
+    private int roomTime;
+    private int winPoint;
     #endregion
 
     #region UNITYMETHODS
     void Awake()
     {
-
         Instance = this;
         PhotonNetwork.UseRpcMonoBehaviourCache = true;
         mainCamManager = GetComponent<MainCamManager>();
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        roomTime = 5;
+        winPoint = 5;
     }
     void Start()
     {
  
-        if (!PhotonNetwork.IsConnected)
+        if(FireBaseAuthManager.Instance.Auth == null)
         {
-            PhotonNetwork.ConnectUsingSettings();
-            Debug.Log("Connecting to Master");
+            MenuManager.Instance.OpenMenu("Login");
+            return;
         }
-        else
-        { 
-            if(PhotonNetwork.NetworkClientState != ClientState.ConnectingToMasterServer)
-            {
-                StartCoroutine(nameof(WaitAndJoinLobby));
-            }
-           
-        }
-
-        
-           
+                 
     }
 
     #endregion
@@ -200,27 +215,40 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Master");
-        PhotonNetwork.JoinLobby();
         PhotonNetwork.AutomaticallySyncScene = true;
-
         //처음 들어왔을때만 프로퍼티를 정의
         if (PhotonNetwork.LocalPlayer.CustomProperties["Team"] == null)
         {
+            int mainWeapon = playerData.MainWeapon;
+            int subWeapon = playerData.SubWeapon;
+
+            PlayerWeaponData mainWeaponData = playerStorageData.playerStorage.playerWeaponData[mainWeapon];
+            PlayerWeaponData subWEaponData = playerStorageData.playerStorage.playerWeaponData[subWeapon];
+
             PhotonNetwork.LocalPlayer.CustomProperties = new Hashtable {
             {"Team" ,0},
             {"IsDead", false },
-            {"MainWeapon" , 0 },
-            {"MainScope" , -1 },
-            {"MainMuzzle" , -1 },
-            {"MainLaser" , -1 },
-            {"MainGrip" , -1 },
-            {"SubWeapon" , 12 },
-            {"SubScope" , -1 },
-            {"SubMuzzle" , -1 },
-            {"SubLaser" , -1 },
+            {"MainWeapon" , mainWeapon},
+            {"MainScope" ,  mainWeaponData.scopeIndex},
+            {"MainMuzzle" , mainWeaponData.muzzleIndex },
+            {"MainLaser" , mainWeaponData.laserIndex },
+            {"MainGrip" , mainWeaponData.gripIndex },
+            {"SubWeapon" , subWeapon},
+            {"SubScope" , subWEaponData.scopeIndex },
+            {"SubMuzzle" ,subWEaponData.muzzleIndex },
+            {"SubLaser" , subWEaponData.laserIndex },
             {"Kill" , 0 },
             {"Death" , 0 }
         };
+        }
+        if(playerData.userName == string.Empty)
+        {
+            MenuManager.Instance.OpenMenu("SetPlayerName");
+        }
+        else
+        {
+           
+            PhotonNetwork.JoinLobby();
         }
 
 
@@ -228,6 +256,7 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
+        PhotonNetwork.LocalPlayer.NickName = playerData.userName;
         MenuManager.Instance.OpenMenu("Title");
         Debug.Log("Joined Lobby");
         Hashtable playerHash = PhotonNetwork.LocalPlayer.CustomProperties;
@@ -236,6 +265,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         playerHash["Kill"] = 0;
         playerHash["Death"] = 0;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerHash);
+        Debug.Log(PhotonNetwork.LocalPlayer.NickName);
  
     }
 
@@ -263,8 +293,6 @@ public class Launcher : MonoBehaviourPunCallbacks
     #endregion
 
     #region METHODS
-
-
 
     private Transform FindPlayer(Player player, Transform ListContent)
     {
@@ -440,18 +468,21 @@ public class Launcher : MonoBehaviourPunCallbacks
             return;
         RoomOptions roomoptions = new RoomOptions();
         roomoptions.MaxPlayers = byte.Parse(roomSizeInputField.text);
-
         roomoptions.CustomRoomProperties = new Hashtable
         {
-            { "map", dropdown.value },
+            { "map", mapdropdown.value },
             {"red",  0},
-            {"blue", 0}
+            {"blue", 0},
+            {"time" ,roomTime},
+            {"point",winPoint }
         };
 
-        string[] customProperties = new string[3];
+        string[] customProperties = new string[5];
         customProperties[0] = "map";
         customProperties[1] = "red";
         customProperties[2] = "blue";
+        customProperties[3] = "time";
+        customProperties[4] = "point";
         roomoptions.CustomRoomPropertiesForLobby = customProperties;
         PhotonNetwork.CreateRoom(roomNameInputField.text, roomoptions);
         MenuManager.Instance.OpenMenu("Loading");
@@ -484,6 +515,12 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinLobby();
     }
 
+    public void ChangeValueDropDown()
+    {
+        roomTime = int.Parse(timeDropDown.captionText.text);
+        winPoint = int.Parse(pointDropDown.captionText.text);
+
+    }
     #endregion
 
     #endregion
