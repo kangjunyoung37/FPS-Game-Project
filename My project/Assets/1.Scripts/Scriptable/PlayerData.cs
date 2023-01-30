@@ -21,6 +21,8 @@ public class PlayerData : ScriptableObject
     [JsonProperty]
     public PlayerInformationData playerImformationData = new PlayerInformationData();
 
+    public string userName = "";
+
     public int Kill
     {
         get  => playerImformationData.kill;
@@ -65,7 +67,7 @@ public class PlayerData : ScriptableObject
     public void Init()
     {
         playerImformationData = new PlayerInformationData();
-       
+        userName = string.Empty;
     }
 
 }
