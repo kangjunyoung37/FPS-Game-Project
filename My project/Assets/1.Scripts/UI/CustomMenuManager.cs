@@ -41,6 +41,11 @@ public class CustomMenuManager : MonoBehaviour
     [SerializeField]
     private Sprite[] muzzleSprites;
 
+    [Title(label: "Player Data Handler")]
+
+    [SerializeField]
+    private PlayerDataHandler playerDataHandler;
+
     private List<UIWeapon> uiWeapons = new List<UIWeapon>();
 
     private HashTable playerHashTable = new HashTable();
@@ -63,14 +68,16 @@ public class CustomMenuManager : MonoBehaviour
     private GameObject openButtonGroup;
 
     private List<AttachmentUIButton> attachMentButtonList = new List<AttachmentUIButton>();
-    [SerializeField]
+
     private bool isMainWeapon = false;
-    [SerializeField]
     private bool isSubWeapon = false;
+
+    private PlayerStorageData playerStorageData;
 
     #region Unity Methods
     private void Awake()
     {
+        playerStorageData = playerDataHandler.playerStorageData;
         gripButtonGroup = gripButton.GetChild(1);
         laserButtonGroup = laserButton.GetChild(1);
         muzzleButtonGroup = muzzleButton.GetChild(1);
@@ -187,6 +194,10 @@ public class CustomMenuManager : MonoBehaviour
         
     }
 
+    /// <summary>
+    /// 모든 부착물 버튼 업데이트 시키기
+    /// </summary>
+    /// <param name="isMainWeapon">MainWeapon인지 SubWeapon인지</param>
     private void UpdateAllAttachMentWepaon(bool isMainWeapon)
     {
         if (isMainWeapon)
@@ -216,6 +227,7 @@ public class CustomMenuManager : MonoBehaviour
         attchMentTransform.GetChild(index).gameObject.SetActive(true);
 
     }
+
     private void GetAttachMentList(Transform attchMentTransform)
     {
         foreach(Transform child in attchMentTransform)
@@ -267,7 +279,6 @@ public class CustomMenuManager : MonoBehaviour
         CloseButtonGrop();
         MenuManager.Instance.OpenMenu("Title");
         
-
     }
 
     public void MainWeaponButton()
@@ -323,62 +334,77 @@ public class CustomMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 부착물 버튼을 눌렀을때 실행되는 메소드
+    /// </summary>
+    /// <param name="attachmentUIButton"></param>
     public void ClickAttachMentButton(AttachmentUIButton attachmentUIButton)
     {
         if(isMainWeapon)
         {
+            int mainWeapon = (int)playerHashTable["MainWeapon"];
             switch(attachmentUIButton.type)
             {
                 case AttachmentType.Scope:
                     playerHashTable["MainScope"] = attachmentUIButton.index;
                     UpdateAttachMentButton(scopeImage, attachmentUIButton.index, scopeSprites);
                     UpdateAttachMentWeapon(equipMainWeapon.GetScopeTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[mainWeapon].scopeIndex = attachmentUIButton.index;
                     break;
                 case AttachmentType.Grip:
                     playerHashTable["MainGrip"] = attachmentUIButton.index;
                     UpdateAttachMentButton(gripImage, attachmentUIButton.index, gripSprites);
                     UpdateAttachMentWeapon(equipMainWeapon.GetGripTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[mainWeapon].gripIndex = attachmentUIButton.index;
                     break;
+                
                 case AttachmentType.Muzzle:
                     playerHashTable["MainMuzzle"] = attachmentUIButton.index;
                     UpdateAttachMentButton(muzzleImage, attachmentUIButton.index, muzzleSprites);
                     UpdateAttachMentWeapon(equipMainWeapon.GetMuzzleTransform, attachmentUIButton.index);
-
+                    playerStorageData.playerStorage.playerWeaponData[mainWeapon].muzzleIndex = attachmentUIButton.index;
                     break;
+               
                 case AttachmentType.LaserSight:
                     playerHashTable["MainLaser"] = attachmentUIButton.index;
                     UpdateAttachMentButton(laserImage, attachmentUIButton.index, laserSprites);
                     UpdateAttachMentWeapon(equipMainWeapon.GetLaserTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[mainWeapon].laserIndex = attachmentUIButton.index;
                     break;
 
             }
         }
         else
         {
+            int subWeapon = (int)playerHashTable["SubWeapon"];
             switch (attachmentUIButton.type)
             {
                 case AttachmentType.Scope:
                     playerHashTable["SubScope"] = attachmentUIButton.index;
                     UpdateAttachMentButton(scopeImage, attachmentUIButton.index, scopeSprites);
                     UpdateAttachMentWeapon(equipSubWeapon.GetScopeTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[subWeapon].scopeIndex = attachmentUIButton.index;
                     break;
 
                 case AttachmentType.Muzzle:
                     playerHashTable["SubMuzzle"] = attachmentUIButton.index;
                     UpdateAttachMentButton(muzzleImage, attachmentUIButton.index, muzzleSprites);
                     UpdateAttachMentWeapon(equipSubWeapon.GetMuzzleTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[subWeapon].muzzleIndex = attachmentUIButton.index;
 
                     break;
                 case AttachmentType.LaserSight:
                     playerHashTable["SubLaser"] = attachmentUIButton.index;
                     UpdateAttachMentButton(laserImage, attachmentUIButton.index, laserSprites);
                     UpdateAttachMentWeapon(equipSubWeapon.GetLaserTransform, attachmentUIButton.index);
+                    playerStorageData.playerStorage.playerWeaponData[subWeapon].laserIndex = attachmentUIButton.index;
                     break;
 
             }
         }
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerHashTable);
+        playerDataHandler.SavePlayerStorageData(FireBaseAuthManager.Instance.UserId);
     }
 
     #endregion
