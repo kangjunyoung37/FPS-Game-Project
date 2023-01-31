@@ -110,6 +110,12 @@ public class Launcher : MonoBehaviourPunCallbacks
             MenuManager.Instance.OpenMenu("Login");
             return;
         }
+        if (PhotonNetwork.CurrentLobby != null)
+        {
+            if(PhotonNetwork.NetworkClientState != ClientState.ConnectingToMasterServer)
+                PhotonNetwork.JoinLobby();
+        }
+           
                  
     }
 
@@ -155,7 +161,7 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     // 사용자가 방에서 나갈 때 호출
     public override void OnLeftRoom()
-    {   
+    {
         MenuManager.Instance.OpenMenu("Title");
     }
 
@@ -242,14 +248,11 @@ public class Launcher : MonoBehaviourPunCallbacks
         };
         }
         if(playerData.userName == string.Empty)
-        {
             MenuManager.Instance.OpenMenu("SetPlayerName");
-        }
+        
         else
-        {
-           
             PhotonNetwork.JoinLobby();
-        }
+        
 
 
     }
@@ -265,7 +268,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         playerHash["Kill"] = 0;
         playerHash["Death"] = 0;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerHash);
-        Debug.Log(PhotonNetwork.LocalPlayer.NickName);
  
     }
 
@@ -319,6 +321,8 @@ public class Launcher : MonoBehaviourPunCallbacks
             Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().SetUp(myroomlist[i]);
         }
     }
+
+
 
     /// <summary>
     /// 값이 바뀔 때마다 호출
