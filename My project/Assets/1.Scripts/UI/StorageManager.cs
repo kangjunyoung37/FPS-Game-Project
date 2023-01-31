@@ -7,6 +7,7 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public class StorageManager : MonoBehaviour
 {
 
+    [Title(label:"UI Transform")]
     // content트랜스폼
     [SerializeField]
     private Transform contentTrnasform;
@@ -25,11 +26,22 @@ public class StorageManager : MonoBehaviour
     //MyWeapon SubWeaponUI Transform
     [SerializeField]
     private Transform subWeaponUITransform;
+   
+    [SerializeField]
+    private Transform explaintion;
+
+    [SerializeField]
+    private Transform weaponTypeButton;
+
+    [Title(label:"UI Image")]
 
     [SerializeField]
     private Image mainWeaponUIImage;
+
     [SerializeField]
     private Image subWeaponUIImage;
+
+    [Title(label: "Sprites")]
 
     [SerializeField]
     private Sprite gradationSprite;
@@ -38,8 +50,7 @@ public class StorageManager : MonoBehaviour
     [SerializeField]
     private Sprite[] weaponSprites;
 
-    [SerializeField]
-    private Transform weaponTypeButton;
+    [Title(label:"Weapon Information")]
 
     [SerializeField]
     private Image DamageBarGage;
@@ -56,8 +67,10 @@ public class StorageManager : MonoBehaviour
     [SerializeField]
     private TMP_Text magazine;
 
+    [Title(label:"Player Data Handler")]
+
     [SerializeField]
-    private Transform explaintion;
+    private PlayerDataHandler playerDataHandler; 
 
     private List<UIWeaponButton> mainWeaponList = new();
     private List<UIWeaponButton> subWeaponList = new();
@@ -71,6 +84,9 @@ public class StorageManager : MonoBehaviour
     private bool isMainWeapon = false;
     private bool isSubWeapon = false;
 
+    private PlayerData playerData;
+    private PlayerStorageData playerStorageData;
+
     #region Unity Methods
 
     private void Awake()
@@ -78,8 +94,10 @@ public class StorageManager : MonoBehaviour
         //캐싱
         mainWeaponText = mainWeaponUITransform.GetComponentInChildren<TMP_Text>();
         subWeaponText = subWeaponUITransform.GetComponentInChildren<TMP_Text>();
-        audioSource = GetComponent<AudioSource>();  
-        foreach(Transform child in storageWeapon)
+        audioSource = GetComponent<AudioSource>();
+        playerData = playerDataHandler.playerData;
+        playerStorageData = playerDataHandler.playerStorageData;
+        foreach (Transform child in storageWeapon)
         {
             uIWeapons.Add(child);  
         }
@@ -102,6 +120,27 @@ public class StorageManager : MonoBehaviour
         SetActiveMainWeapon();
         UpdateMyWeapon(true);
         UpdateMyWeapon(false);
+    }
+
+    private void OnDisable()
+    {
+        //Player의 CustomProperties를 업데이트하기 위해 PlayerStorage의 WeaponData를 가져옵니다.
+        PlayerWeaponData playerMainWeaponData = playerStorageData.playerStorage.playerWeaponData[(int)playerHashTable["MainWeapon"]];
+        PlayerWeaponData playerSubWeaponData = playerStorageData.playerStorage.playerWeaponData[(int)playerHashTable["SubWeapon"]];
+        
+        //Player의 CustomProperites를 업데이트
+        playerHashTable["MainScope"] = playerMainWeaponData.scopeIndex;
+        playerHashTable["MainGrip"] = playerMainWeaponData.gripIndex;
+        playerHashTable["MainLaser"] = playerMainWeaponData.laserIndex;
+        playerHashTable["MainMuzzle"] = playerMainWeaponData.muzzleIndex;
+
+        //Player의 SubWeapon CustomProperties를 업데이트
+        playerHashTable["SubScope"] = playerSubWeaponData.scopeIndex;
+        playerHashTable["SubLaser"] = playerSubWeaponData.laserIndex;
+        playerHashTable["SubMuzzle"] = playerSubWeaponData.muzzleIndex;
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerHashTable);
+
     }
 
     #endregion
@@ -219,15 +258,20 @@ public class StorageManager : MonoBehaviour
         if (uIWeaponButton.GetWeaponType() != WeaponType.HG)
         {
             playerHashTable["MainWeapon"] = uIWeaponButton.Index;
+            playerData.MainWeapon = uIWeaponButton.Index;
+            
             UpdateMyWeapon(true);
         }
         else
         {
             playerHashTable["SubWeapon"] = uIWeaponButton.Index;
+            playerData.SubWeapon = uIWeaponButton.Index;
+
             UpdateMyWeapon(false);
         }
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerHashTable);
+        playerDataHandler.SavePlayerData(FireBaseAuthManager.Instance.UserId);
     }
 
     public void ButtonClickImageActive(bool active)
