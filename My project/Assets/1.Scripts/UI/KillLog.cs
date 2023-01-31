@@ -20,6 +20,9 @@ public class KillLog : MonoBehaviour
     private Sprite grenadeImage;
 
     [SerializeField]
+    private Sprite knifeImage;
+
+    [SerializeField]
     private Sprite[] weaponImagegroup;
 
     private float destroyTimer = 3.0f;
@@ -35,20 +38,19 @@ public class KillLog : MonoBehaviour
         this.deadTeam = deadTeam;
         TextColorChange(killerTeam, this.killID);
         TextColorChange(deadTeam, this.deadID);
-        if (index < 0)
+        if (index == -1)
             weaponImage.sprite = grenadeImage;
+        else if (index == -2)
+            weaponImage.sprite = knifeImage;
         else
-        {
             weaponImage.sprite = weaponImagegroup[index];
-        }
+
         destroyTimer = 3.0f;
 
     }
 
     IEnumerator StartAndDestroy()
     {
-
-
         yield return new WaitForSeconds(2.0f);
 
         while(destroyTimer >0f)
