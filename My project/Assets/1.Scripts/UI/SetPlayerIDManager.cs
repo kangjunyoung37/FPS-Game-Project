@@ -55,7 +55,6 @@ public class SetPlayerIDManager : MonoBehaviour
         databaseRef.Child("users").OrderByChild("username").EqualTo(userNickName).GetValueAsync().ContinueWith(task =>
         {
             DataSnapshot snapshot = task.Result;
-            Debug.Log(task.Result.ChildrenCount);
             if (task.Result.ChildrenCount == 0)
             {
                 goTitle = true;
