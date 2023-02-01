@@ -82,7 +82,7 @@ public class PlayerDataHandler : MonoBehaviour
             else
             {
                 playerData.FromJson(snapshot.GetRawJsonValue());
-                Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
+                //Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
             }
            
         });
@@ -102,13 +102,13 @@ public class PlayerDataHandler : MonoBehaviour
             }
             DataSnapshot snapshot = task.Result;
             playerStorageData.FromJson(snapshot.GetRawJsonValue());
-                 
-            Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
+
+            //Debug.LogFormat("Load user Data in successfully {0} {1}", userId, snapshot.GetRawJsonValue());
         });
 
         databaseRef.Child(UserDataPath).Child(userId).Child("username").GetValueAsync().ContinueWith(task =>
         {
-            DataSnapshot snapshot = task.Result;
+
 
             if (task.IsCanceled)
             {
@@ -121,11 +121,18 @@ public class PlayerDataHandler : MonoBehaviour
                 Debug.LogError("Load user data encountered an error" + task.Exception);
                 return;
             }
-            playerData.userName = JsonConvert.DeserializeObject<string>(snapshot.GetRawJsonValue());
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                string userName = snapshot.GetRawJsonValue();
+                playerData.userName = JsonConvert.DeserializeObject<string>(userName);
+            }
+
 
         });
 
     }
+
 
     public void SaveUserDevicedata()
     {
@@ -145,7 +152,7 @@ public class PlayerDataHandler : MonoBehaviour
                 Debug.LogError("Save user data encountered an error" + task.Exception);
                 return;
             }
-            Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerUserDataJson);
+            //Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerUserDataJson);
         });
 
     }
@@ -167,7 +174,7 @@ public class PlayerDataHandler : MonoBehaviour
                 Debug.LogError("Save user data encountered an error" + task.Exception);
                 return;
             }
-            Debug.LogFormat("Save Data Sucessfully");
+            //Debug.LogFormat("Save Data Sucessfully");
         });
     }
 
@@ -187,7 +194,7 @@ public class PlayerDataHandler : MonoBehaviour
                 Debug.LogError("Save user data encountered an error" + task.Exception);
                 return;
             }
-            Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerStorageData);
+            //Debug.LogFormat("Save user data in successfully {0} {1}", userId, playerStorageData);
         });
 
     }
@@ -215,11 +222,6 @@ public class PlayerDataHandler : MonoBehaviour
         }
     }
 
-    //private void OnDisable()
-    //{
-       
-    //    databaseRef.Child(UserDataPath).Child(PlayerUserDataPath).ValueChanged -= LogoutFunction;
-    //}
 
 }
 
