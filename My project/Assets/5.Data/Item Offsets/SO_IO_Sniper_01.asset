@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   standingLocation: {x: 0, y: 0, z: 0}
   standingRotation: {x: 0, y: -3, z: 0}
-  aimingLocation: {x: 0, y: 0, z: 0}
+  aimingLocation: {x: 0, y: 0.13, z: 0}
   aimingRotation: {x: 0, y: 0, z: 0}
   runningLocation: {x: 0, y: 0, z: 0}
   runningRotation: {x: 0, y: 0, z: 0}
