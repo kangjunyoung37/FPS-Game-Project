@@ -20,7 +20,7 @@ namespace RootMotion {
 		/// [DEPRECATED] Use "enabled = false" instead.
 		/// </summary>
 		public void Disable() {
-			Debug.Log("IK.Disable() is deprecated. Use enabled = false instead", transform);
+			//Debug.Log("IK.Disable() is deprecated. Use enabled = false instead", transform);
 
 			enabled = false;
 		}
