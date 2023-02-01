@@ -215,7 +215,6 @@ public class Character : CharacterBehaviour, IDamageable
     /// <summary>
     /// 캐릭터가 죽었는지
     /// </summary>
-    [SerializeField]
     private bool isDead;
 
     /// <summary>
