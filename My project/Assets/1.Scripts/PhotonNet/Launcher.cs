@@ -220,7 +220,7 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("Connected to Master");
+        //Debug.Log("Connected to Master");
         PhotonNetwork.AutomaticallySyncScene = true;
         //처음 들어왔을때만 프로퍼티를 정의
         if (PhotonNetwork.LocalPlayer.CustomProperties["Team"] == null)
@@ -261,7 +261,6 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.LocalPlayer.NickName = playerData.userName;
         MenuManager.Instance.OpenMenu("Title");
-        Debug.Log("Joined Lobby");
         Hashtable playerHash = PhotonNetwork.LocalPlayer.CustomProperties;
         playerHash["Team"] = 0;
         playerHash["IsDead"] = false;
