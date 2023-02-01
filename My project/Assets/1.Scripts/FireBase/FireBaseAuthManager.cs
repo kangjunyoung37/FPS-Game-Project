@@ -49,14 +49,14 @@ public class FireBaseAuthManager
             bool signed = (auth.CurrentUser != user && auth.CurrentUser != null);
             if(!signed && user != null)
             {
-                Debug.Log("LogOut");
+                //Debug.Log("LogOut");
                 LoginState?.Invoke(false);
             }
             user = auth.CurrentUser;
 
             if(signed)
             {
-                Debug.Log("Login");
+                //Debug.Log("Login");
                 LoginState?.Invoke(true);
             }
         }
@@ -79,7 +79,7 @@ public class FireBaseAuthManager
             }
 
             FirebaseUser newUser = task.Result;
-            Debug.Log("Register Success");
+            //Debug.Log("Register Success");
             
         });
 
@@ -103,7 +103,7 @@ public class FireBaseAuthManager
             }
 
             FirebaseUser newUser = task.Result;
-            Debug.Log("Login Success");
+            //Debug.Log("Login Success");
            
 
         });
@@ -113,7 +113,7 @@ public class FireBaseAuthManager
     public void LogOut()
     {
         auth.SignOut();
-        Debug.Log("LogOut");
+        //Debug.Log("LogOut");
 
     }
 
