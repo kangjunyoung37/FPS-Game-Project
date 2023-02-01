@@ -76,7 +76,7 @@ public class SetPlayerIDManager : MonoBehaviour
         playerData.userName = userNickName;
         databaseRef.UpdateChildrenAsync(childUpdates).ContinueWith(task =>
         {
-            Debug.Log("Save");
+            //Debug.Log("Save");
         });
 
     }
