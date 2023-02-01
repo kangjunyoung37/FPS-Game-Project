@@ -26,6 +26,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: eb9b3c2ff34772c47b5bafff7b530212, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Cubemap:
+        m_Texture: {fileID: 8900000, guid: 05279d4a58a8039479777249c5885a9d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -58,12 +62,41 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _concrete:
+        m_Texture: {fileID: 2800000, guid: b95196db378bec44c9aba8dfc6372dbd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _concrete2:
+        m_Texture: {fileID: 2800000, guid: 3e5801af273360e409f8aa6ef02c89b2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _concretedirt:
+        m_Texture: {fileID: 2800000, guid: b893b08474b159a4baa4cc32b27874b3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _concretemask:
+        m_Texture: {fileID: 2800000, guid: 9e2677997077c0c4a8ae70d4b32aa44b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _puddlemask:
+        m_Texture: {fileID: 2800000, guid: b42435d08453a3241959e23e23a0937f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _puddletexture:
+        m_Texture: {fileID: 2800000, guid: 60a84529908d17c468b4ce2e3c322914, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1.29
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _Fresnelintensity: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
@@ -76,7 +109,12 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - __dirty: 1
+    - _concretetile: 1
+    - _cubemapblurriness: 0
     m_Colors:
+    - _Albedocolor: {r: 1, g: 1, b: 1, a: 0}
     - _Color: {r: 0.803, g: 0.803, b: 0.803, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _cubemapcolor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
