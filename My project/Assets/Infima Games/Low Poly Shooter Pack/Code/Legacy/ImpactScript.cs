@@ -22,12 +22,15 @@ namespace InfimaGames.LowPolyShooterPack.Legacy
 		{
 			// Start the despawn timer
 			StartCoroutine(DespawnTimer());
-
-			//Get a random impact sound from the array
-			audioSource.clip = impactSounds
-				[Random.Range(0, impactSounds.Length)];
-			//Play the random impact sound
-			audioSource.Play();
+			if(audioSource != null)
+			{
+                //Get a random impact sound from the array
+                audioSource.clip = impactSounds
+                    [Random.Range(0, impactSounds.Length)];
+                //Play the random impact sound
+                audioSource.Play();
+            }
+			
 		}
 
 		private IEnumerator DespawnTimer()
