@@ -30,7 +30,7 @@ public class UIWeaponButton : MonoBehaviour , IPointerEnterHandler,IPointerExitH
     private Sprite defaultSprite;
     private Color defalutColor;
 
-    
+ 
     private int index;
 
     private void Awake()
@@ -38,7 +38,8 @@ public class UIWeaponButton : MonoBehaviour , IPointerEnterHandler,IPointerExitH
         backGroundImage = GetComponent<Image>();
         defaultSprite = GetComponent<Sprite>();
         defalutColor = backGroundImage.color;
-        
+        transform.root.GetComponent<Launcher>();
+
     }
     #region Getters
 
