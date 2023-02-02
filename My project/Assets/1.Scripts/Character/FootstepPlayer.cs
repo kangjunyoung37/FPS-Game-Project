@@ -130,5 +130,6 @@ public class FootstepPlayer : MonoBehaviour
             audioSource.maxDistance = 15;
         }
     }
+
     #endregion
 }
