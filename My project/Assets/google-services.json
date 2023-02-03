@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1058650681293",
+    "firebase_url": "https://fps-game-project-55e40-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fps-game-project-55e40",
+    "storage_bucket": "fps-game-project-55e40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058650681293:android:c7c74d5149fbccd0aede84",
+        "android_client_info": {
+          "package_name": "com.firebase.fpsgame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1058650681293-ir1g1ngdhvrhnd73hjh5t39t4rd339da.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVnH07i5FE1DULv43bK25QbGwgl24MkVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1058650681293-ir1g1ngdhvrhnd73hjh5t39t4rd339da.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
