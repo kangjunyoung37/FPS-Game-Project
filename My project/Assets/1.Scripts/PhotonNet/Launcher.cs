@@ -7,7 +7,7 @@ using Photon.Realtime;
 using System.Linq;
 using WebSocketSharp;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
-using Firebase.Database;
+using UnityEngine.SceneManagement;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -251,7 +251,10 @@ public class Launcher : MonoBehaviourPunCallbacks
             MenuManager.Instance.OpenMenu("SetPlayerName");
         
         else
-            PhotonNetwork.JoinLobby();
+        {
+             PhotonNetwork.JoinLobby();
+        }
+            
         
 
 
@@ -524,6 +527,49 @@ public class Launcher : MonoBehaviourPunCallbacks
         winPoint = int.Parse(pointDropDown.captionText.text);
 
     }
+
+    public void EnterPracticeRoom()
+    {
+        RoomOptions roomoptions = new RoomOptions();
+        roomoptions.MaxPlayers = 1;
+        roomoptions.IsOpen = false;
+        roomoptions.IsVisible = false;
+        roomoptions.CustomRoomProperties = new Hashtable
+        {
+            { "map", 2 },
+            {"red",  0},
+            {"blue", 0},
+            {"time" ,10},
+            {"point",10}
+        };
+
+        string[] customProperties = new string[5];
+        customProperties[0] = "map";
+        customProperties[1] = "red";
+        customProperties[2] = "blue";
+        customProperties[3] = "time";
+        customProperties[4] = "point";
+        roomoptions.CustomRoomPropertiesForLobby = customProperties;
+        PhotonNetwork.CreateRoom("", roomoptions);
+        
+    }
+
+    IEnumerator DisconnectedServerAndOffline()
+    {
+        while(true)
+        {
+            if(PhotonNetwork.NetworkClientState == ClientState.Disconnected)
+            {
+                PhotonNetwork.OfflineMode = true;
+                break;
+            }
+
+            yield return null;
+        }
+
+    }
+
+
     #endregion
 
     #endregion
