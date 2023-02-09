@@ -169,6 +169,11 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Room room = PhotonNetwork.CurrentRoom;
+        if ((bool)room.CustomProperties["practice"] == true)
+        {
+            PhotonNetwork.LoadLevel("LoadingScene");
+            return;
+        }
         Hashtable hashtable = room.CustomProperties;
         int temp;
         if ((int)PhotonNetwork.LocalPlayer.CustomProperties["Team"] == 1)
@@ -480,15 +485,17 @@ public class Launcher : MonoBehaviourPunCallbacks
             {"red",  0},
             {"blue", 0},
             {"time" ,roomTime},
-            {"point",winPoint }
+            {"point",winPoint },
+            {"practice" ,false }
         };
 
-        string[] customProperties = new string[5];
+        string[] customProperties = new string[6];
         customProperties[0] = "map";
         customProperties[1] = "red";
         customProperties[2] = "blue";
         customProperties[3] = "time";
         customProperties[4] = "point";
+        customProperties[5] = "practice";
         roomoptions.CustomRoomPropertiesForLobby = customProperties;
         PhotonNetwork.CreateRoom(roomNameInputField.text, roomoptions);
         MenuManager.Instance.OpenMenu("Loading");
@@ -530,28 +537,32 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void EnterPracticeRoom()
     {
+        MenuManager.Instance.OpenMenu("Loading");
         RoomOptions roomoptions = new RoomOptions();
         roomoptions.MaxPlayers = 1;
         roomoptions.IsOpen = false;
         roomoptions.IsVisible = false;
         roomoptions.CustomRoomProperties = new Hashtable
         {
-            { "map", 2 },
+            {"map", 2 },
             {"red",  0},
             {"blue", 0},
             {"time" ,10},
-            {"point",10}
+            {"point",10},
+            {"practice",true }
         };
 
-        string[] customProperties = new string[5];
+        string[] customProperties = new string[6];
         customProperties[0] = "map";
         customProperties[1] = "red";
         customProperties[2] = "blue";
         customProperties[3] = "time";
         customProperties[4] = "point";
+        customProperties[5] = "practice";
         roomoptions.CustomRoomPropertiesForLobby = customProperties;
         PhotonNetwork.CreateRoom("", roomoptions);
-        
+       
+
     }
 
     IEnumerator DisconnectedServerAndOffline()
