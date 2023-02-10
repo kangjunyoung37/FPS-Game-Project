@@ -530,7 +530,7 @@ public class Character : CharacterBehaviour, IDamageable
         cursorLocked = true;
         UpdateCursorState();
         #endregion
-        //Ä³½Ì       
+        //Ä³½Ì
         PV = transform.GetComponent<PhotonView>();
         playerHasTable = PV.Owner.CustomProperties;
         team =  (int)playerHasTable["Team"];
