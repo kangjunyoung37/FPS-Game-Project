@@ -213,13 +213,13 @@ public class InGame : MonoBehaviourPunCallbacks, IPunObservable
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         winPoint = (int)PhotonNetwork.CurrentRoom.CustomProperties["point"];
         totalTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["time"] * 60.0f;
+        roomPlayerCnt = PhotonNetwork.CurrentRoom.PlayerCount;
+        currentRoom = PhotonNetwork.CurrentRoom;
         activeCount = 0;
         InstantiateObjects(30);
         indicatorSystem = GetComponentInChildren<DamageIndicatorSystem>();
         PPV.profile.TryGetSettings(out DOF);
         weaponPPV.profile.TryGetSettings(out weaponDOF);
-        roomPlayerCnt = PhotonNetwork.CurrentRoom.PlayerCount;
-        currentRoom = PhotonNetwork.CurrentRoom;
         instance = this;
         PV = GetComponent<PhotonView>();
         toalScoreText.text = winPoint.ToString();
